@@ -1,0 +1,13 @@
+diff --git a/drivers/net/phy/ac300-phy.c b/drivers/net/phy/ac300-phy.c
+--- a/drivers/net/phy/ac300-phy.c
++++ b/drivers/net/phy/ac300-phy.c
+@@ -314,8 +314,7 @@ static int ac300_phy_soft_reset(struct phy_device *phydev)
+ 	return genphy_soft_reset(phydev);
+ }
+ 
+-static int ac300_phy_match_phy_device(struct phy_device *phydev,
+-				      const struct phy_driver *phydrv)
++static int ac300_phy_match_phy_device(struct phy_device *phydev)
+ {
+ 	/* Bind only if the device tree node specifically declares the AC300 compatible string */
+ 	if (phydev->mdio.dev.of_node &&

@@ -1,0 +1,66 @@
+# Private, forensische und maschinenbezogene Daten niemals veröffentlichen.
+Archiv/
+backups/
+captures/
+evidence/
+build/keys/
+build/work/
+build/sources/
+build/artifacts/
+artifacts/
+images/*.img
+images/*.img.xz
+images/*.sha
+images/*
+*.img
+*.img.xz
+*.img.zst
+release-assets/
+lilygo_uart_monitor/
+.agents/
+.codex/
+T95_Armbian.txt
+
+# Lokale Werkzeuge und temporäre Dateien.
+tools/__pycache__/
+lilygo_uart_monitor/__pycache__/
+*.raw
+*.log
+*.tmp
+*.partial
+
+# Niemals persönliche Zugangsdaten oder Schlüssel versionieren.
+*.pem
+*.key
+*.pub
+.env
+
+# Ein öffentliches Repository verwendet nur die explizit freigegebenen
+# Release-Unterlagen und Werkzeuge; das vollständige Labor bleibt lokal.
+AGENTS.md
+docs/*
+!docs/RELEASE.md
+!docs/PUBLISHING.md
+!docs/VALIDATION.md
+!docs/GITHUB_RELEASE_NOTES.md
+!docs/images/
+!docs/images/**
+build/*
+!build/README.md
+!build/prepare-t95-tanix-6.18-source.sh
+!build/create-t95-release-asset.sh
+!build/harden-t95-release-image.sh
+!build/audit-t95-generic-release-image.sh
+!build/build-t95-ac300-ext4boot.sh
+!build/build-t95-tanix-6.18-dtb.sh
+!build/assemble-t95-tanix-6.18-ext4-image.sh
+!build/patches/
+!build/patches/**
+tools/*
+!tools/write-t95-release-image-to-sd.sh
+!tools/provision-t95-release-image.sh
+!tools/write-t95-provisioned-image-to-sd.sh
+
+# Lokale, mit einem individuellen Root-Passwort personalisierte Images sind
+# nie Release-Assets und bleiben außerhalb von Git.
+*.t95-provisioned-manifest

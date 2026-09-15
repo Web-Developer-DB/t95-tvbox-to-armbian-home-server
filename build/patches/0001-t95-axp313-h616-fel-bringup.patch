@@ -1,0 +1,289 @@
+From: Local T95 bring-up <local@example.invalid>
+Subject: [PATCH] sunxi: h616: add T95 AXP313 bring-up configurations
+
+Derived from the 2024 T95 AXP313 U-Boot proposal.  This local bring-up
+configuration uses the observed 600 MHz DRAM clock from the factory SBOOT
+log.  It deliberately provides two separate profiles:
+
+* t95_axp313_fel_defconfig produces an eGON image for `sunxi-fel uboot`.
+  Its only automatic action is a UART diagnostic message; it neither boots
+  external media nor stores an environment.
+* t95_axp313_defconfig remains a TOC0 candidate for a future, separately
+  authorised SD experiment.  It is not a FEL upload artifact.
+
+---
+ arch/arm/dts/Makefile                       |   3 +-
+ arch/arm/dts/sun50i-h616-t95-axp313.dts     | 146 ++++++++++++++++++
+ configs/t95_axp313_defconfig                |  34 +++++
+ configs/t95_axp313_fel_defconfig            |  36 +++++
+ 4 files changed, 218 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index b102ffb5f6..144daf6c48 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -839,7 +839,8 @@ dtb-$(CONFIG_MACH_SUN50I_H616) += \
+ 	sun50i-h616-orangepi-zero2.dtb \
+ 	sun50i-h618-orangepi-zero2w.dtb \
+ 	sun50i-h618-orangepi-zero3.dtb \
+ 	sun50i-h618-transpeed-8k618-t.dtb \
+-	sun50i-h616-x96-mate.dtb
++	sun50i-h616-x96-mate.dtb \
++	sun50i-h616-t95-axp313.dtb
+ dtb-$(CONFIG_MACH_SUN50I) += \
+ 	sun50i-a64-amarula-relic.dtb \
+ 	sun50i-a64-bananapi-m64.dtb
+diff --git a/arch/arm/dts/sun50i-h616-t95-axp313.dts b/arch/arm/dts/sun50i-h616-t95-axp313.dts
+new file mode 100644
+index 0000000000..1a4bca97d9
+--- /dev/null
++++ b/arch/arm/dts/sun50i-h616-t95-axp313.dts
+@@ -0,0 +1,146 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * T95 H616 TV box with AXP313A PMIC.
++ * Local bring-up configuration; derived from the 2024 T95 proposal.
++ */
++
++/dts-v1/;
++
++#include "sun50i-h616.dtsi"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/arm-gic.h>
++
++/ {
++	model = "T95 (AXP313)";
++	compatible = "mbox,t95-axp313", "allwinner,sun50i-h616";
++
++	aliases {
++		serial0 = &uart0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	reg_vcc5v: vcc5v {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc-5v";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++	};
++};
++
++&ehci0 {
++	status = "okay";
++};
++
++&ehci2 {
++	status = "okay";
++};
++
++&ir {
++	status = "okay";
++};
++
++&mmc0 {
++	cd-gpios = <&pio 8 16 GPIO_ACTIVE_LOW>;
++	vmmc-supply = <&reg_dldo1>;
++	status = "okay";
++};
++
++&mmc2 {
++	vmmc-supply = <&reg_dldo1>;
++	vqmmc-supply = <&reg_aldo1>;
++	bus-width = <8>;
++	non-removable;
++	cap-mmc-hw-reset;
++	mmc-ddr-1_8v;
++	mmc-hs200-1_8v;
++	status = "okay";
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&ohci2 {
++	status = "okay";
++};
++
++&r_i2c {
++	status = "okay";
++
++	axp313: pmic@36 {
++		compatible = "x-powers,axp313a";
++		reg = <0x36>;
++		#interrupt-cells = <1>;
++		interrupt-controller;
++		interrupt-parent = <&pio>;
++		interrupts = <2 9 IRQ_TYPE_LEVEL_LOW>;
++
++		vin1-supply = <&reg_vcc5v>;
++		vin2-supply = <&reg_vcc5v>;
++		vin3-supply = <&reg_vcc5v>;
++
++		regulators {
++			reg_aldo1: aldo1 {
++				regulator-always-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-name = "vcc1v8";
++			};
++
++			reg_dldo1: dldo1 {
++				regulator-always-on;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-name = "vcc3v3";
++			};
++
++			reg_dcdc1: dcdc1 {
++				regulator-always-on;
++				regulator-min-microvolt = <810000>;
++				regulator-max-microvolt = <990000>;
++				regulator-name = "vdd-gpu-sys";
++			};
++
++			reg_dcdc2: dcdc2 {
++				regulator-always-on;
++				regulator-min-microvolt = <810000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-name = "vdd-cpu";
++			};
++
++			reg_dcdc3: dcdc3 {
++				regulator-always-on;
++				regulator-min-microvolt = <1360000>;
++				regulator-max-microvolt = <1360000>;
++				regulator-name = "vdd-dram";
++			};
++		};
++	};
++};
++
++&pio {
++	vcc-pc-supply = <&reg_aldo1>;
++	vcc-pg-supply = <&reg_dldo1>;
++	vcc-ph-supply = <&reg_dldo1>;
++	vcc-pi-supply = <&reg_dldo1>;
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_ph_pins>;
++	status = "okay";
++};
++
++&usbotg {
++	dr_mode = "host";
++	status = "okay";
++};
++
++&usbphy {
++	status = "okay";
++};
+diff --git a/configs/t95_axp313_defconfig b/configs/t95_axp313_defconfig
+new file mode 100644
+index 0000000000..0a7d582c34
+--- /dev/null
++++ b/configs/t95_axp313_defconfig
+@@ -0,0 +1,34 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_DEFAULT_DEVICE_TREE="sun50i-h616-t95-axp313"
++CONFIG_SPL=y
++CONFIG_MACH_SUN50I_H616=y
++CONFIG_DRAM_CLK=600
++CONFIG_DRAM_SUN50I_H616_ODT_EN=0x1
++CONFIG_DRAM_SUN50I_H616_DX_ODT=0x03030303
++CONFIG_DRAM_SUN50I_H616_DX_DRI=0x0e0e0e0e
++CONFIG_DRAM_SUN50I_H616_CA_DRI=0x1c1c
++CONFIG_DRAM_SUN50I_H616_TPR10=0x2f0006
++CONFIG_DRAM_SUN50I_H616_TPR11=0xffffdddd
++CONFIG_DRAM_SUN50I_H616_TPR12=0xfedf7657
++CONFIG_SUNXI_DRAM_H616_DDR3_1333=y
++CONFIG_R_I2C_ENABLE=y
++CONFIG_SPL_I2C=y
++CONFIG_SPL_SYS_I2C_LEGACY=y
++CONFIG_SYS_I2C_MVTWSI=y
++CONFIG_SYS_I2C_SLAVE=0x7f
++CONFIG_SYS_I2C_SPEED=400000
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_AXP313_POWER=y
++CONFIG_AXP_DCDC3_VOLT=1360
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_SUN8I_EMAC=y
++CONFIG_SPL_IMAGE_TYPE_SUNXI_TOC0=y
++CONFIG_ENV_IS_NOWHERE=y
++# CONFIG_ENV_IS_IN_FAT is not set
++# CONFIG_MMC_WRITE is not set
++CONFIG_BOOTDELAY=10
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_BOOTCOMMAND="echo T95 SD diagnostic complete; echo No boot medium is started - reset or power-cycle target"
++CONFIG_IDENT_STRING=" T95-AXP313-TOC0-CANDIDATE"
+diff --git a/configs/t95_axp313_fel_defconfig b/configs/t95_axp313_fel_defconfig
+new file mode 100644
+index 0000000000..87767e1efb
+--- /dev/null
++++ b/configs/t95_axp313_fel_defconfig
+@@ -0,0 +1,33 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_DEFAULT_DEVICE_TREE="sun50i-h616-t95-axp313"
++CONFIG_SPL=y
++CONFIG_MACH_SUN50I_H616=y
++CONFIG_DRAM_CLK=600
++CONFIG_DRAM_SUN50I_H616_ODT_EN=0x1
++CONFIG_DRAM_SUN50I_H616_DX_ODT=0x03030303
++CONFIG_DRAM_SUN50I_H616_DX_DRI=0x0e0e0e0e
++CONFIG_DRAM_SUN50I_H616_CA_DRI=0x1c1c
++CONFIG_DRAM_SUN50I_H616_TPR10=0x2f0006
++CONFIG_DRAM_SUN50I_H616_TPR11=0xffffdddd
++CONFIG_DRAM_SUN50I_H616_TPR12=0xfedf7657
++CONFIG_SUNXI_DRAM_H616_DDR3_1333=y
++CONFIG_R_I2C_ENABLE=y
++CONFIG_SPL_I2C=y
++CONFIG_SPL_SYS_I2C_LEGACY=y
++CONFIG_SYS_I2C_MVTWSI=y
++CONFIG_SYS_I2C_SLAVE=0x7f
++CONFIG_SYS_I2C_SPEED=400000
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_AXP313_POWER=y
++CONFIG_AXP_DCDC3_VOLT=1360
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_SPL_IMAGE_TYPE_SUNXI_EGON=y
++CONFIG_ENV_IS_NOWHERE=y
++# CONFIG_ENV_IS_IN_FAT is not set
++# CONFIG_MMC_WRITE is not set
++CONFIG_BOOTDELAY=3
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_BOOTCOMMAND="echo T95 FEL diagnostic complete; echo No boot medium is started - reset or power-cycle target"
++CONFIG_IDENT_STRING=" T95-AXP313-FEL-DIAG"
+diff --git a/scripts/dtc/pylibfdt/libfdt.i_shipped b/scripts/dtc/pylibfdt/libfdt.i_shipped
+index 56cc5d48f4..e4659489a9 100644
+--- a/scripts/dtc/pylibfdt/libfdt.i_shipped
++++ b/scripts/dtc/pylibfdt/libfdt.i_shipped
+@@ -1038,5 +1038,5 @@ typedef uint32_t fdt32_t;
+ 		buff = PyByteArray_FromStringAndSize(
+ 			(const char *)($1 + 1), fdt32_to_cpu($1->len));
+-		resultobj = SWIG_Python_AppendOutput(resultobj, buff);
++		resultobj = SWIG_AppendOutput(resultobj, buff);
+ 	}
+ }
+@@ -1078,3 +1078,3 @@ typedef uint32_t fdt32_t;
+         PyObject *val = Py_BuildValue("i", *arg$argnum);
+-        resultobj = SWIG_Python_AppendOutput(resultobj, val);
++        resultobj = SWIG_AppendOutput(resultobj, val);
+ }
+@@ -1093,5 +1093,5 @@ typedef uint32_t fdt32_t;
+               resultobj = val;
+            else
+-              resultobj = SWIG_Python_AppendOutput(resultobj, val);
++              resultobj = SWIG_AppendOutput(resultobj, val);
+         }
+ }

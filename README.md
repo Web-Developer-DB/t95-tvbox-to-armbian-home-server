@@ -105,6 +105,30 @@ wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
 > enthält keine privaten SSH-Hostschlüssel. Vor dem Schreiben wird lokal eine
 > persönliche Kopie mit eigenem Passwort erzeugt.
 
+### Ausführungsumgebung: Linux oder WSL2
+
+Alle Befehle und Bash-Skripte in diesem Repository sind für eine **Linux-
+Shell** geschrieben. Empfohlen wird ein aktuelles Ubuntu- oder Debian-System
+mit `bash`, `sudo`, `xz`, `sha256sum`, `lsblk` und den üblichen Dateisystem-
+Werkzeugen.
+
+Unter Windows kann alternativ **WSL2** mit Ubuntu oder Debian verwendet werden.
+Dabei gelten wichtige Einschränkungen:
+
+- PowerShell und die klassische Windows-Eingabeaufforderung sind für diese
+  Befehle nicht geeignet.
+- Für UART-, FEL- und USB-Tests muss das Gerät per USB-Passthrough (z. B.
+  `usbipd-win`) in WSL sichtbar sein.
+- Für direkte SD-Schreibzugriffe muss die Karte in WSL als Linux-Blockgerät
+  `/dev/sdX` erscheinen und mit den erforderlichen Rechten erreichbar sein.
+- Ist USB- oder Blockgeräte-Passthrough nicht zuverlässig eingerichtet, sollte
+  der jeweilige Hardware-Schritt auf einem nativen Linux-System ausgeführt
+  werden. Besonders wichtig ist die Kontrolle von `lsblk`, bevor ein
+  Schreibwerkzeug gestartet wird.
+
+Die folgenden Beispiele verwenden deshalb bewusst Linux-Pfade, `sudo` und
+Bash-Syntax. Windows-Pfade wie `C:\\...` werden nicht direkt eingesetzt.
+
 ### 1. Release-Dateien prüfen
 
 Aus dem GitHub-Release herunterladen und im Download-Verzeichnis prüfen:

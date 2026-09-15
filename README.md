@@ -129,6 +129,22 @@ Dabei gelten wichtige Einschränkungen:
 Die folgenden Beispiele verwenden deshalb bewusst Linux-Pfade, `sudo` und
 Bash-Syntax. Windows-Pfade wie `C:\\...` werden nicht direkt eingesetzt.
 
+### Empfohlener Windows-Ablauf
+
+| Aufgabe | Empfohlene Umgebung |
+| --- | --- |
+| Repository-Checks, `sha256sum`, Build- und Image-Skripte | WSL2 (Ubuntu/Debian) |
+| RP2040-Zero-UART-Konsole und Live-Ausgabe | Windows PowerShell bzw. ein Windows-Seriellmonitor am COM-Port |
+| Direkter SD-Schreibzugriff | bevorzugt natives Linux; unter WSL2 nur mit funktionierendem Blockgeräte-Passthrough |
+
+Der RP2040-Zero wird unter Windows normalerweise als COM-Port erkannt. Für die
+UART-Konsole kann daher ein separates PowerShell-Fenster oder ein kompatibler
+Windows-Seriellmonitor mit **115200 Baud, 8N1 und ohne Flow-Control** verwendet
+werden. WSL2 übernimmt diesen COM-Port nicht automatisch. Soll die UART-
+Aufzeichnung stattdessen mit dem Linux-Skript erfolgen, muss der USB-/COM-Port
+explizit an WSL2 durchgereicht werden; beide Programme dürfen den Port nicht
+gleichzeitig öffnen.
+
 ### 1. Release-Dateien prüfen
 
 Aus dem GitHub-Release herunterladen und im Download-Verzeichnis prüfen:

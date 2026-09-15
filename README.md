@@ -1,97 +1,223 @@
-# T95 H616 / AXP313A als kleiner Linux-Server
+# T95 TV-Box → Armbian Linux Home Server
 
-Dieses Projekt hält einen auf echter Hardware geprüften, **SD-basierten**
-Linux-Start für genau diese Platine fest:
+![Status: experimentell](https://img.shields.io/badge/Status-experimentell-orange)
+![Board: H616](https://img.shields.io/badge/Board-Allwinner%20H616-blue)
+![OS: Armbian](https://img.shields.io/badge/OS-Armbian%2026.8.4-18a303)
+![Kernel: 6.18](https://img.shields.io/badge/Kernel-6.18.48-purple)
+![Boot: SD](https://img.shields.io/badge/Boot-microSD-informational)
 
-```text
-H616-T95MAX-AXP313A-V3.0
-Allwinner H616 · AXP313A · AC300-Ethernet-PHY · 2 GiB RAM
+Ein reproduzierbarer Umbauversuch, der eine **T95-TV-Box mit Allwinner H616**
+in einen kleinen, stromsparenden **Armbian-Linux-Home-Server** verwandelt.
+Der Schwerpunkt liegt auf nachvollziehbarem Boot- und Hardware-Bring-up,
+Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
+
+> [!WARNING]
+> Dieses Projekt ist für genau die geprüfte Platine gedacht:
+> `H616-T95MAX-AXP313A-V3.0`. Der Aufdruck „T95“ beschreibt keine
+> einheitliche Hardware. Eine ähnlich aussehende Box darf das Image erst nach
+> eigener Platinen-, UART- und Bootprüfung verwenden.
+
+## Inhaltsübersicht
+
+- [Projektziel](#projektziel)
+- [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
+- [Nachgewiesener Stand](#nachgewiesener-stand)
+- [Hardware-Fotos](#hardware-fotos)
+- [Schnellstart](#schnellstart)
+- [UART-Diagnose mit RP2040-Zero](#uart-diagnose-mit-rp2040-zero)
+- [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz)
+- [Sicherheitsgrenzen](#sicherheitsgrenzen)
+- [Projektstruktur](#projektstruktur)
+- [Reproduzierbarer Build und Release](#reproduzierbarer-build-und-release)
+- [Offene Arbeiten](#offene-arbeiten)
+- [Lizenz](#lizenz)
+
+## Projektziel
+
+```mermaid
+flowchart LR
+    A["T95 TV-Box<br/>H616 / AXP313A"] --> B["TOC0 / U-Boot<br/>von microSD"]
+    B --> C["Armbian Linux<br/>Kernel 6.18"]
+    C --> D["AC300 Ethernet<br/>end0 / DHCP"]
+    D --> E["SSH · Dateien ·<br/>kleiner Home-Server"]
+    U["RP2040-Zero<br/>UART-Adapter"] -. Diagnose .-> B
 ```
 
-Es ist ein experimenteller Release für diese eine Board-Revision. „T95“ ist
-keine eindeutige Hardwarebezeichnung: Eine optisch ähnliche Box darf dieses
-Image nicht ohne eigene UART-/Platinenprüfung verwenden.
+Das Repository dokumentiert nicht nur ein fertiges Image, sondern die Schritte,
+mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 
-## Fotos der geprüften Hardware
+1. Platine identifizieren und UART anschließen.
+2. T95-spezifischen TOC0-/U-Boot-Loader auf microSD testen.
+3. Armbian mit passendem DTB und AC300-Ethernet starten.
+4. Erststart, Netzwerk und Stabilität prüfen.
+5. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
 
-Die folgenden Fotos zeigen das konkrete Gehäuse und die Platine der
-untersuchten `H616-T95MAX-AXP313A-V3.0`. Sie dienen der visuellen Zuordnung und
-ersetzen keine elektrische oder UART-Prüfung. Die Bilddateien liegen unter
-[`docs/images/`](docs/images/); die EXIF-Metadaten wurden für die
-Veröffentlichung entfernt. Auf dem Unterseitenfoto ist der individuelle
-MAC-/Barcode-Aufkleber absichtlich abgedeckt.
+## Geprüfte Hardware und Software
 
-<p>
-  <img src="docs/images/t95-box-top.jpg" alt="Oberseite des T95-Gehäuses" width="260">
-  <img src="docs/images/t95-case-bottom-redacted.jpg" alt="Unterseite des T95-Gehäuses, individueller Aufkleber abgedeckt" width="260">
-</p>
-<p>
-  <img src="docs/images/t95-board-memory.jpg" alt="T95-Platine mit H616 und Speicherbausteinen" width="260">
-  <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="260">
-</p>
+| Bereich | Nachgewiesene Konfiguration |
+| --- | --- |
+| Platine | `H616-T95MAX-AXP313A-V3.0` |
+| SoC | Allwinner H616, 4 × Cortex-A53 |
+| PMIC | AXP313A |
+| Arbeitsspeicher | 2 GiB DRAM |
+| Ethernet | Allwinner AC300 EPHY, RMII, 100 Mbit/s Full Duplex |
+| Systemmedium | 128-GB-microSD (`/dev/mmcblk0`) |
+| Interner Speicher | ca. 32-GB-eMMC (`/dev/mmcblk2`), in diesem SD-Release nicht beschrieben |
+| Distribution | Armbian 26.8.4, Debian 13 Trixie |
+| Kernel | `6.18.48-current-sunxi64` |
+| DTB | `sun50i-h616-t95-axp313-tanix-6.18.dtb` |
+| Bootmedium | microSD, TOC0-Loader ab Byte 8192 |
 
 ## Nachgewiesener Stand
 
-- eigener TOC0-/U-Boot-Start von microSD, ohne Änderung der internen eMMC;
-- Armbian 26.8.4 Trixie mit Linux `6.18.48-current-sunxi64`;
-- 2 GiB DRAM, AC300-Ethernet, `end0`, 100 Mbit/s Vollduplex und DHCP;
-- SSH-Anmeldung und die Armbian-Ersteinrichtung auf der Ausgangskonfiguration
-  erfolgreich;
-- Root-Dateisystem wird beim ersten Start auf die Karte erweitert.
+| Test | Ergebnis | Hinweis |
+| --- | :---: | --- |
+| SD-Boot mit eigenem TOC0-/U-Boot | ✅ | eMMC bleibt dabei unverändert |
+| DRAM-Initialisierung | ✅ | 2 GiB erkannt |
+| Ethernet / DHCP / SSH | ✅ | `end0`, 100 Mbit/s, IPv4/IPv6 und DNS getestet |
+| CPU-Dauerlast | ✅ | 4 Worker, 10 Minuten, ca. 62 °C maximal |
+| microSD-I/O | ✅ | etwa 22–23 MB/s Lesen und 21,5 MB/s Schreiben |
+| eMMC-Gesundheit | ✅ | Life Time A/B und Pre-EOL jeweils `0x01` |
+| WLAN / Bluetooth / GPU / Audio | ⚠️ | für den headless Server nicht erforderlich bzw. unvollständig |
+| SMB, USB-Platte, VLC-Wiedergabe | ⏳ | Folgearbeiten, noch keine Release-Zusage |
 
-Der Release ist für einen kleinen, stromsparenden Dateiserver gedacht. SMB,
-eine extern versorgte USB-Platte, mehrere Kaltstarts und Langzeitstabilität
-sind bewusst **Folgearbeiten** und keine Zusage dieses ersten Releases.
+Der erreichte Stand eignet sich als Basis für einen kleinen Dateiserver. Die
+Langzeitstabilität und die endgültige Home-Server-Abnahme müssen separat
+geprüft werden.
 
-## UART-Adapter für die Diagnose
+## Hardware-Fotos
 
-Für die Bootaufzeichnungen wurde ein **RP2040-Zero** als externer USB-zu-
-TTL-UART-Adapter eingesetzt. Er ist kein Teil des SoC-Bootpfads und verändert
-weder die T95 noch deren eMMC. Das zugehörige, separate Projekt mit Firmware,
-Verdrahtung und Capture-Werkzeugen ist hier dokumentiert:
+Die Fotos zeigen die tatsächlich geprüfte Platine und das Gehäuse. Sie dienen
+der visuellen Zuordnung und ersetzen keine elektrische Prüfung. EXIF-/GPS-Daten
+wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
+
+<p>
+  <img src="docs/images/t95-box-top.jpg" alt="Oberseite des T95-Gehäuses" width="240">
+  <img src="docs/images/t95-case-bottom-redacted.jpg" alt="Unterseite des T95-Gehäuses mit abgedecktem Aufkleber" width="240">
+  <img src="docs/images/t95-board-memory.jpg" alt="T95-Platine mit H616 und Speicherbausteinen" width="240">
+  <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="240">
+</p>
+
+## Schnellstart
+
+> [!IMPORTANT]
+> Das öffentliche Image ist absichtlich generisch: Root ist gesperrt und es
+> enthält keine privaten SSH-Hostschlüssel. Vor dem Schreiben wird lokal eine
+> persönliche Kopie mit eigenem Passwort erzeugt.
+
+### 1. Release-Dateien prüfen
+
+Aus dem GitHub-Release herunterladen und im Download-Verzeichnis prüfen:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+Das Release-Image heißt:
+
+```text
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz
+```
+
+### 2. Lokale Image-Kopie personalisieren
+
+Das folgende Werkzeug läuft auf dem Linux-PC und schreibt nur eine lokale
+Kopie. Das Passwort wird nicht in einem Manifest oder im Repository abgelegt.
+
+```bash
+export REPO=/pfad/zum/t95-tvbox-to-armbian-home-server
+export DOWNLOAD=/pfad/zum/GitHub-Release-Download
+mkdir -p "$HOME/t95-private"
+
+xz -dk --keep \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
+
+bash "$REPO/tools/provision-t95-release-image.sh" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
+  "$HOME/t95-private/t95-personal.img" \
+  PROVISION-T95-ROOT-PASSWORD
+```
+
+Die persönliche `.img`-Datei und die zugehörige
+`.t95-provisioned-manifest`-Datei bleiben außerhalb von GitHub.
+
+### 3. SD-Karte eindeutig bestimmen
+
+Nach jedem Einstecken den Gerätenamen neu prüfen. Niemals blind `/dev/sda`
+verwenden:
+
+```bash
+lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
+```
+
+Das Ziel muss eine entbehrliche, wechselbare microSD-Karte (`RM=1`) sein.
+
+### 4. Persönliches Image schreiben
+
+Das Werkzeug prüft Gerätekennung, Manifest, Image-Hash und liest die Karte
+nach dem Schreiben zurück. Die interne eMMC wird nicht angesprochen.
+
+```bash
+bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
+  /dev/sdX \
+  "$HOME/t95-private/t95-personal.img" \
+  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
+  WRITE-T95-PROVISIONED-TO-SDX
+```
+
+### 5. Kaltstart und Ersteinrichtung
+
+1. SD-Karte nur bei ausgeschalteter T95 einsetzen.
+2. Ethernet mit dem Router verbinden.
+3. T95 einschalten und die DHCP-Lease im Router ablesen.
+4. Per SSH anmelden und den Armbian-Ersteinrichtungsdialog abschließen.
+
+Es gibt kein veröffentlichtes Standardpasswort. Beim ersten Start werden
+eigene SSH-Hostschlüssel erzeugt, bevor `sshd` Verbindungen annimmt.
+
+## UART-Diagnose mit RP2040-Zero
+
+Für Bootaufzeichnungen wurde ein **RP2040-Zero** als externer USB-zu-TTL-
+UART-Adapter verwendet. Das separate Firmware- und Verdrahtungsprojekt steht
+hier:
 
 [Web-Developer-DB/rp2040-zero-uart-adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 
-Für diese T95-Verbindung gelten 3,3-V-TTL und 115200 Baud, 8N1. Die übliche
-Kreuzverdrahtung lautet: RP2040 `GP0` (TX) an T95-RX, RP2040 `GP1` (RX) an
-T95-TX und gemeinsame Masse. 5-V-TTL und echtes RS-232 dürfen nicht direkt
-angeschlossen werden. Für reine Bootaufzeichnung kann die TX-Leitung des
-Adapters getrennt bleiben, damit ausschließlich die T95 sendet.
+Elektrische Eckdaten:
 
-## Sicherheitsgrenzen
+| RP2040-Zero | T95 |
+| --- | --- |
+| `GP0` (TX) | T95-RX |
+| `GP1` (RX) | T95-TX |
+| `GND` | gemeinsame Masse |
 
-- Das Image startet von microSD. Es liest oder beschreibt während des normalen
-  Bootvorgangs nicht die Android-eMMC.
-- Die alte Android-Firmware, einschließlich eines möglichen BADBOX-Befunds,
-  wird weder übernommen noch als Vertrauensquelle verwendet. Die eMMC wird
-  durch dieses Projekt aber auch nicht bereinigt.
-- `clk_ignore_unused nohz=off` sind vorläufige Diagnoseparameter. Kernel- und
-  Bootloader-Aktualisierungen nicht blind übernehmen.
-- Nur bei ausgeschalteter Box Karte einsetzen oder entnehmen.
+* 3,3-V-TTL, 115200 Baud, 8N1 verwenden.
+* 5-V-TTL und echtes RS-232 niemals direkt anschließen.
+* Für reine Bootaufzeichnung kann die TX-Leitung des Adapters getrennt bleiben.
+* Capture-Dateien gehören ins lokale Labor und werden nicht veröffentlicht.
 
-## Kernel- und DTB-Updates einfrieren
+Beispiel für eine Aufzeichnung:
 
-Die geprüfte Kombination aus H616-Kernel, DTB und AC300-Netzwerktreiber soll
-nach der Ersteinrichtung nicht durch ein automatisches Paketupdate ersetzt
-werden. Auf der laufenden T95 werden deshalb die beiden Armbian-Metapakete
-gehalten:
+```bash
+python3 tools/capture_uart.py /dev/ttyACM1 \
+  --baud 115200 \
+  --duration 240 \
+  --prefix captures/d95-coldboot
+```
+
+## Kernel- und DTB-Schutz
+
+Die geprüfte Kernel-/DTB-Kombination sollte nach der Ersteinrichtung nicht
+ungefragt durch ein Paketupdate ersetzt werden:
 
 ```bash
 sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
 apt-mark showhold
-```
-
-Die Ausgabe von `apt-mark showhold` muss beide Paketnamen enthalten. Zusätzlich
-kann der installierte Stand dokumentiert werden:
-
-```bash
 uname -r
-dpkg-query -W -f='${binary:Package}\t${Version}\t${Status}\n' \\
-  linux-image-current-sunxi64 linux-dtb-current-sunxi64
 ```
 
-Vor einer späteren bewussten Kernel-/DTB-Aktualisierung zuerst ein vollständiges
-Backup erstellen, UART bereithalten und die Sperre gezielt aufheben:
+Vor einem bewusst geplanten Update zuerst ein vollständiges Backup erstellen,
+UART bereithalten und die Sperre gezielt aufheben:
 
 ```bash
 sudo apt-mark unhold linux-image-current-sunxi64 linux-dtb-current-sunxi64
@@ -99,96 +225,72 @@ sudo apt update
 sudo apt full-upgrade
 ```
 
-Nach jedem solchen Update muss die T95-spezifische DTB, der Ethernet-Treiber,
-ein Kaltstart und die Netzwerkverbindung erneut geprüft werden. Die Sperre ist
-eine Schutzmaßnahme für den nachgewiesenen Stand, kein Ersatz für Backups oder
-Sicherheitsupdates.
+Danach DTB, AC300-Ethernet, Kaltstart und Netzwerk erneut prüfen. Die Sperre ist
+eine Schutzmaßnahme für den nachgewiesenen Stand, kein Ersatz für
+Sicherheitsupdates oder Backups.
 
-## Sicherer Schnellstart mit dem Release-Asset
+## Sicherheitsgrenzen
 
-Das öffentliche Release enthält absichtlich **kein verwendbares
-Root-Passwort und keine SSH-Hostschlüssel**. Das Rootkonto ist im generischen
-Download gesperrt. Vor dem Schreiben erzeugt der Anwender daher eine lokale,
-nicht zu veröffentlichende Kopie mit einem eigenen Passwort. Bei ihrem ersten
-SSH-Start generiert die T95 anschließend eigene Hostschlüssel, bevor `sshd`
-Verbindungen annimmt.
+> [!CAUTION]
+> Dieses Projekt entfernt oder bereinigt die Android-eMMC nicht automatisch.
+> Ein möglicher BADBOX-Befund der alten Firmware wird weder übernommen noch
+> als Vertrauensquelle verwendet.
 
-1. Aus dem GitHub-Release alle sieben Dateien herunterladen, insbesondere das
-   Image `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz`,
-   `RELEASE-MANIFEST.txt`, `HARDENING-METADATA.txt` und `SHA256SUMS`.
-2. Die Prüfsummen im Download-Ordner prüfen:
-
-   ```bash
-   sha256sum -c SHA256SUMS
-   ```
-
-3. Das generische Image entpacken und **außerhalb** des Repositorys eine
-   lokale Kopie personalisieren. Das Werkzeug fragt zweimal verdeckt nach
-   einem eigenen Passwort (mindestens 12 Zeichen) und speichert den Hash nur
-   in dieser lokalen Image-Kopie:
-
-   ```bash
-   export REPO=/pfad/zum/t95-h616-axp313a-projekt
-   export DOWNLOAD=/pfad/zum/GitHub-Release-Download
-   mkdir -p "$HOME/t95-private"
-   xz -dk --keep \
-     "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
-   bash "$REPO/tools/provision-t95-release-image.sh" \
-     "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
-     "$HOME/t95-private/t95-personal.img" \
-     PROVISION-T95-ROOT-PASSWORD
-   ```
-
-   `t95-personal.img` und die gleichnamige Datei mit Endung
-   `.t95-provisioned-manifest` sind privat. Sie gehören weder in Git noch in
-   einen GitHub-Release.
-
-4. Das Zielgerät jedes Mal neu bestimmen. Es muss eine entbehrliche,
-   wechselbare microSD-Karte sein, zum Beispiel `/dev/sdX`:
-
-   ```bash
-   lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
-   ```
-
-5. Das geprüfte Schreibwerkzeug verwenden. Es akzeptiert nur ein wechselbares
-   `/dev/sdX`, verlangt ein explizites Token, prüft die lokale Manifest- und
-   Image-Hashsumme und überschreibt ausschließlich die ausgewählte Karte:
-
-   ```bash
-   bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
-     /dev/sdX \
-     "$HOME/t95-private/t95-personal.img" \
-     "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
-     WRITE-T95-PROVISIONED-TO-SDX
-   ```
-
-6. Karte in die ausgeschaltete T95 einsetzen, Ethernet mit dem Router
-   verbinden und einschalten. Die DHCP-Adresse steht im Router oder lässt sich
-   im lokalen Netz ermitteln. Die erste Anmeldung erfolgt über SSH; Armbian
-   führt durch die Ersteinrichtung. Dabei wird das bei Schritt 3 gewählte
-   Passwort verwendet – es existiert kein veröffentlichtes Standardpasswort.
-
-Die Härtung des generischen Images wurde offline geprüft. Ein Kaltstart des
-neuen Release-Assets nach dieser reinen Zugangsdaten-Härtung ist noch als
-eigener, dokumentierter Abnahmetest offen.
-
-Ausführliche Schritte, die Buildkette, Wiederherstellung und die Grenzen
-stehen in [docs/RELEASE.md](docs/RELEASE.md). Hinweise für eine spätere
-GitHub-Veröffentlichung stehen in [docs/PUBLISHING.md](docs/PUBLISHING.md).
+- Der normale Release-Weg startet von microSD und beschreibt die eMMC nicht.
+- Vor jedem SD-Schreibvorgang Gerät, Größe, Seriennummer und `RM=1` prüfen.
+- Loader, DTB und Root-Dateisystem nur mit dokumentierten Werkzeugen ändern.
+- Backups, UART-Captures, Artefakte, private Schlüssel und persönliche Images
+  bleiben lokal und sind durch `.gitignore` ausgeschlossen.
+- `clk_ignore_unused nohz=off` sind vorläufige Diagnoseparameter, keine
+  endgültige Serverkonfiguration.
 
 ## Projektstruktur
 
-- [docs/RELEASE.md](docs/RELEASE.md) – geprüfter Releaseweg und Buildgrenzen.
-- [docs/VALIDATION.md](docs/VALIDATION.md) – öffentliche Testmatrix und Hash-Nachweise.
-- [build/README.md](build/README.md) – hostseitige Buildkette.
-- [tools/provision-t95-release-image.sh](tools/provision-t95-release-image.sh) –
-  lokale, nicht öffentliche Passwort-Initialisierung.
-- [tools/write-t95-provisioned-image-to-sd.sh](tools/write-t95-provisioned-image-to-sd.sh) –
-  verifizierter SD-Schreiber für die persönliche Kopie.
+| Pfad | Zweck |
+| --- | --- |
+| [`docs/RELEASE.md`](docs/RELEASE.md) | geprüfter Releaseweg und Grenzen |
+| [`docs/VALIDATION.md`](docs/VALIDATION.md) | öffentliche Testmatrix und Hash-Nachweise |
+| [`docs/PUBLISHING.md`](docs/PUBLISHING.md) | Veröffentlichungs- und Geheimnisprüfung |
+| [`docs/GITHUB_RELEASE_NOTES.md`](docs/GITHUB_RELEASE_NOTES.md) | Textbausteine für ein GitHub-Release |
+| [`build/README.md`](build/README.md) | hostseitige Buildkette |
+| [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
+| [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |
+| [`tools/write-t95-provisioned-image-to-sd.sh`](tools/write-t95-provisioned-image-to-sd.sh) | verifizierter SD-Schreiber |
+| [`docs/images/`](docs/images/) | bereinigte Hardware-Fotos |
 
-## Lizenz und Veröffentlichung
+## Reproduzierbarer Build und Release
 
-Für dieses Repository ist absichtlich noch keine Lizenz festgelegt. Vor einer
-Veröffentlichung muss der Maintainer eine Lizenz auswählen und die Lizenzen
-aller übernommenen Upstream-Bestandteile prüfen. Das große Image gehört als
-Release-Asset zu GitHub, nicht in das Repository.
+Die Buildkette wird auf dem Linux-PC ausgeführt. Eine Übersicht steht in
+[`build/README.md`](build/README.md). Der sichere Ablauf ist:
+
+```text
+Quelle vorbereiten → DTB/Rootfs bauen → Image härten →
+Image auditieren → Release-Manifest erzeugen → lokal personalisieren → SD schreiben
+```
+
+Das generische Release-Image wird offline auf folgende Eigenschaften geprüft:
+
+- Rootkonto gesperrt;
+- keine privaten SSH-Hostschlüssel im Image;
+- Hostschlüssel-Erzeugung vor dem Start von `sshd`;
+- leere `machine-id`;
+- bereinigte freie ext4-Blöcke;
+- SHA-256-Prüfsummen für Image, Loader und DTB.
+
+Das große Image gehört als Release-Asset zu GitHub, nicht in den Git-Verlauf.
+
+## Offene Arbeiten
+
+- ⏳ Kaltstart-Abnahme des gehärteten, lokal personalisierten Release-Images
+- ⏳ USB-Platte und SMB2/SMB3-Freigabe
+- ⏳ VLC-Wiedergabe aus dem lokalen Netz
+- ⏳ mehrere Kaltstarts und längere Stabilitätsmessung
+- ⏳ Entscheidung über eine endgültige Kernel-/Timer-Konfiguration
+
+Bis diese Punkte abgeschlossen sind, bleibt der Status **experimentell**.
+
+## Lizenz
+
+Für dieses Repository ist derzeit absichtlich noch keine Lizenz festgelegt.
+Vor einer Weiterveröffentlichung müssen die Lizenz des Projekts und die
+Lizenzen aller übernommenen Upstream-Bestandteile geprüft werden.

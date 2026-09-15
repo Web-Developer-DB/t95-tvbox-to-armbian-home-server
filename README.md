@@ -129,7 +129,28 @@ Dabei gelten wichtige Einschränkungen:
 Die folgenden Beispiele verwenden deshalb bewusst Linux-Pfade, `sudo` und
 Bash-Syntax. Windows-Pfade wie `C:\\...` werden nicht direkt eingesetzt.
 
-### Empfohlener Windows-Ablauf
+> [!TIP]
+> **Native Linux-Installation wird empfohlen.** Sie vermeidet die zusätzliche
+> Geräte- und Rechte-Schicht von Windows/WSL2 und ist für SD-, FEL- und UART-
+> Tests am zuverlässigsten.
+
+### Warum natives Linux bevorzugt wird
+
+| Aufgabe | Native Linux | Windows / WSL2 |
+| --- | --- | --- |
+| Bash-Skripte | direkt ausführbar | nur innerhalb WSL2 |
+| SD-Karte | `/dev/sdX` mit `lsblk` direkt sichtbar | Blockgerät muss eigens durchgereicht werden |
+| Image schreiben | `dd`, `sync` und Rücklesen direkt möglich | Windows-Mounts und Laufwerksmapping können stören |
+| UART mit RP2040-Zero | `/dev/ttyACM*` direkt verfügbar | meist als COM-Port sichtbar, WSL übernimmt ihn nicht automatisch |
+| FEL / `sunxi-tools` | USB-Gerät direkt verfügbar | USB-Passthrough, z. B. `usbipd-win`, notwendig |
+| `udev` / `sudo` | nativ unterstützt | in WSL2 teilweise eingeschränkt |
+| Fehlerrisiko beim SD-Schreiben | gut kontrollierbar | höher durch wechselnde Laufwerkszuordnung |
+
+Die Windows-Variante ist möglich, aber nicht gleichwertig: Ein falsch
+zugeordnetes Blockgerät kann zum Schreiben auf die falsche Festplatte führen.
+Deshalb muss `lsblk` unmittelbar vor jedem SD-Schreibvorgang geprüft werden.
+
+### Wenn Windows trotzdem verwendet wird
 
 | Aufgabe | Empfohlene Umgebung |
 | --- | --- |

@@ -1,0 +1,11 @@
+# Keine lokalen Geheimnisse oder Systemdaten committen
+*.img
+*.img.zst
+*.key
+*.pem
+*.p12
+*.pfx
+passdb.tdb
+secrets.tdb
+*.log
+.DS_Store

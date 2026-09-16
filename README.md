@@ -317,6 +317,7 @@ Sicherheitsupdates oder Backups.
 | [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
 | [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |
 | [`tools/write-t95-provisioned-image-to-sd.sh`](tools/write-t95-provisioned-image-to-sd.sh) | verifizierter SD-Schreiber |
+| [`server/samba-usb/`](server/samba-usb/) | Samba- und USB-Automount für den Home-Server |
 | [`docs/images/`](docs/images/) | bereinigte Hardware-Fotos |
 
 ## Reproduzierbarer Build und Release

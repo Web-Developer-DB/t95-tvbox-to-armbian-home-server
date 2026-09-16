@@ -1,0 +1,15 @@
+{
+  "program_options": {
+    "automount": true,
+    "notify": false,
+    "file_manager": "",
+    "event_hook": [
+      "/usr/local/bin/t95-usb-share",
+      "{event}",
+      "{device_file}",
+      "{mount_path}",
+      "{id_label}",
+      "{id_uuid}"
+    ]
+  }
+}

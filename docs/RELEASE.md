@@ -18,6 +18,12 @@ dem Unterseitenfoto sind redigiert.
 | DRAM / Ethernet | 2 GiB / AC300 EPHY (`end0`, 100 Mbit/s) |
 | eMMC im Releaseweg | kein Lese- oder Schreibzugriff |
 
+Die eMMC funktioniert als interner Blockspeicher und kann außerhalb des
+öffentlichen SD-Releasewegs als ext4-Datenlaufwerk eingebunden werden. Ein
+Armbian-Installations- und Bootversuch von eMMC war nicht erfolgreich; der
+nachgewiesene und unterstützte Bootweg dieses Releases ist deshalb weiterhin
+die microSD-Karte.
+
 Das gehärtete generische Rohimage hat die SHA-256
 `e2c1fad50f6bc138332de8ef944b9e83462a882414cc736e9537450de759df4c`
 und ist 1.535.115.264 Byte groß. Es enthält kein verwendbares Root-Passwort,

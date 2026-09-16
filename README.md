@@ -24,6 +24,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [Hardware-Fotos](#hardware-fotos)
 - [Schnellstart](#schnellstart)
+- [SD-Backup und Wiederherstellung](#sd-backup-und-wiederherstellung)
 - [Samba- und USB-Dateiserver](#samba--und-usb-dateiserver)
 - [UART-Diagnose mit RP2040-Zero](#uart-diagnose-mit-rp2040-zero)
 - [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz)
@@ -65,7 +66,7 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 | Arbeitsspeicher | 2 GiB DRAM |
 | Ethernet | Allwinner AC300 EPHY, RMII, 100 Mbit/s Full Duplex |
 | Systemmedium | 128-GB-microSD (`/dev/mmcblk0`) |
-| Interner Speicher | ca. 32-GB-eMMC (`/dev/mmcblk2`), in diesem SD-Release nicht beschrieben |
+| Interner Speicher | ca. 32-GB-eMMC (`/dev/mmcblk2`), Lesen/Schreiben geprüft; als ext4-Datenlaufwerk nutzbar |
 | Distribution | Armbian 26.8.4, Debian 13 Trixie |
 | Kernel | `6.18.48-current-sunxi64` |
 | DTB | `sun50i-h616-t95-axp313-tanix-6.18.dtb` |
@@ -78,6 +79,8 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 | SD-Boot mit eigenem TOC0-/U-Boot | ✅ | eMMC bleibt dabei unverändert |
 | DRAM-Initialisierung | ✅ | 2 GiB erkannt |
 | Ethernet / DHCP / SSH | ✅ | `end0`, 100 Mbit/s, IPv4/IPv6 und DNS getestet |
+| eMMC als ext4-Datenlaufwerk | ✅ | interner Speicher funktioniert als Datenmedium; Einbindung ist installationsabhängig |
+| Armbian-Boot von eMMC | ❌ | Installations-/Bootversuch fehlgeschlagen; microSD bleibt der unterstützte Bootweg |
 | CPU-Dauerlast | ✅ | 4 Worker, 10 Minuten, ca. 62 °C maximal |
 | microSD-I/O | ✅ | etwa 22–23 MB/s Lesen und 21,5 MB/s Schreiben |
 | eMMC-Gesundheit | ✅ | Life Time A/B und Pre-EOL jeweils `0x01` |
@@ -102,6 +105,22 @@ wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
   <img src="docs/images/t95-board-memory.jpg" alt="T95-Platine mit H616 und Speicherbausteinen" width="240">
   <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="240">
 </p>
+
+### SSH-Statusansicht
+
+Die folgende anonymisierte Sitzung zeigt den erfolgreichen Armbian-Start und
+die verfügbaren Systeminformationen nach der SSH-Anmeldung. Netzwerkadressen,
+der letzte Login-Absender und der lokale Hostname wurden durch
+Dokumentationswerte ersetzt.
+
+![Anonymisierte SSH-Statusansicht der T95 unter Armbian](docs/images/t95-ssh-status-redacted.png)
+
+> [!NOTE]
+> **Datenschutz-Hinweis:** Das Bild basiert auf einer echten SSH-Sitzung des
+> getesteten Systems, ist für die Veröffentlichung aber sichtbar bereinigt.
+> LAN-/WAN-Adressen, IPv6-Adressen, der letzte Login-Absender und der lokale
+> Hostname wurden durch neutrale Dokumentationswerte ersetzt. Es handelt sich
+> daher nicht um eine unveränderte Live-Aufnahme.
 
 ## Schnellstart
 
@@ -241,6 +260,32 @@ bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
 Es gibt kein veröffentlichtes Standardpasswort. Beim ersten Start werden
 eigene SSH-Hostschlüssel erzeugt, bevor `sshd` Verbindungen annimmt.
 
+## SD-Backup und Wiederherstellung
+
+Vor Kernel-, DTB- oder Serveränderungen sollte ein vollständiges Abbild der
+laufenden SD-Karte erstellt werden. Die Anleitung in
+[`docs/BACKUP.md`](docs/BACKUP.md) liest das komplette wechselbare Gerät,
+prüft das komprimierte Archiv per zstd und SHA-256 und beschreibt die
+Wiederherstellung auf eine gleich große Ersatzkarte.
+
+> [!CAUTION]
+> Ein Vollbackup enthält Konten, SSH-/Samba-Konfiguration und möglicherweise
+> weitere persönliche Daten. Es bleibt lokal oder auf einem geschützten
+> Zweitdatenträger und wird nicht als GitHub-Release veröffentlicht.
+
+Kurzablauf:
+
+```text
+Box sauber herunterfahren → SD-Gerät mit lsblk prüfen → Partitionen aushängen
+→ vollständiges /dev/sdX-Image lesen → zstd- und SHA-256-Prüfung
+→ bei Bedarf nur auf eine geprüfte Ersatz-SD zurückschreiben
+```
+
+Die interne Android-eMMC wird durch den SD-Backup-Weg weder gelesen noch
+beschrieben. Für die aktuelle Labor-Konfiguration kann die eMMC separat als
+ext4-Datenlaufwerk eingebunden werden; sie ist dadurch nicht automatisch ein
+bootfähiges Armbian-System.
+
 ## Samba- und USB-Dateiserver
 
 Die T95 kann nach dem Armbian-Erststart als kleiner, stromsparender Datei- und
@@ -369,6 +414,7 @@ Sicherheitsupdates oder Backups.
 | [`docs/VALIDATION.md`](docs/VALIDATION.md) | öffentliche Testmatrix und Hash-Nachweise |
 | [`docs/PUBLISHING.md`](docs/PUBLISHING.md) | Veröffentlichungs- und Geheimnisprüfung |
 | [`docs/GITHUB_RELEASE_NOTES.md`](docs/GITHUB_RELEASE_NOTES.md) | Textbausteine für ein GitHub-Release |
+| [`docs/BACKUP.md`](docs/BACKUP.md) | vollständiges SD-Backup und Wiederherstellung |
 | [`build/README.md`](build/README.md) | hostseitige Buildkette |
 | [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
 | [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |

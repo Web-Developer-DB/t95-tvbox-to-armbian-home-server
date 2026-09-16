@@ -10,6 +10,8 @@ In ein neues, sauberes Repository gehören:
 - `README.md`, `.gitignore`, die freigegebenen Dateien unter `docs/`,
   `build/` und `tools/` einschließlich der Härtungs- und
   Personalisierungsskripte;
+- die allgemeine SD-Backup-Anleitung `docs/BACKUP.md` (ohne ein persönliches
+  Backup-Abbild);
 - die vier bereinigten Fotos unter `docs/images/`;
 - eine vom Maintainer gewählte `LICENSE`;
 - die sieben Dateien eines frisch erzeugten

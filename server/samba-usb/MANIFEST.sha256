@@ -1,6 +1,6 @@
 e9500fdb8a091ae223f3ce6bc35b2dbdcef64fbdef0bd17cca59fa3229e6f4c4  ./.gitignore
-3a687d5d5902a5b6268c50a1d4986dd72278a879a35f934c6daf1ab850a79960  ./CHANGELOG.md
-a99a36c01e7d2e4299da75a70e909054e42cd2b0e6a915d4c5899699e5ae964b  ./README.md
+3e6faa0de397bedc6fc0d7eeded200d450bb284b457e8b954a67ba6ab6e4e44f  ./CHANGELOG.md
+b17bdf4e87b57dcb36fc71b7fee36a69647808eacc3b4125539ad1dc9691d9f6  ./README.md
 142fda918ab8b1452c7761fabde5e73d259c3b421293c1e6690874db791e96ac  ./config/polkit/50-t95-udisks.rules
 dd1d510824690fa158f4d43f1a81804085c36ea411af9130d39351936e960259  ./config/samba/smb.conf.fragment
 08fe3a3f4c75c8a1cd55e3170d2aa14d78bbf452409c843d321e7135e97e3850  ./config/systemd-user/udiskie.service

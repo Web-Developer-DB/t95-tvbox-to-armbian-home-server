@@ -20,6 +20,8 @@ bleiben außerhalb des öffentlichen Repositorys.
 | Samba `T95-DATA` | bestanden | authentifizierte SMB2/SMB3-Freigabe auf der T95 |
 | USB-Automount/Usershares | bestanden | dynamische Shares, sicherer Auswurf und Wiedereinstecken |
 | VLC über SMB | bestanden | lokale Netzwerk-Wiedergabe geprüft |
+| eMMC als ext4-Datenlaufwerk | bestanden | interner Speicher als Datenmedium nutzbar |
+| Armbian-Boot von eMMC | fehlgeschlagen | SD bleibt der nachgewiesene Bootweg |
 | Android-eMMC | unverändert | kein Lese- oder Schreibvorgang im Releaseweg |
 
 Die UART-Aufzeichnung erfolgte mit einem externen

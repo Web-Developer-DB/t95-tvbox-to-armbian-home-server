@@ -46,7 +46,11 @@ Projektabnahme nicht automatisch bestätigt.
 
 Vor der Installation:
 
-- T95 ist vollständig von microSD oder eMMC gestartet und per SSH erreichbar.
+- T95 ist vollständig von der funktionierenden microSD gestartet und per SSH
+  erreichbar. Der eMMC-Boot ist in diesem Projekt nicht der unterstützte Weg.
+- Die interne eMMC kann optional als ext4-Datenlaufwerk eingebunden werden.
+  Der Mount muss vor dem Samba-Zugriff vorhanden sein; das Restore-Skript
+  formatiert oder partitioniert die eMMC nicht.
 - Ein normaler Linux-Benutzer existiert bereits, zum Beispiel `serveruser`.
 - Dieser Benutzer darf `sudo` verwenden; das Skript selbst läuft als root.
 - Die Box hat während der Paketinstallation Internetzugang.
@@ -115,6 +119,11 @@ sudo T95_USER=serveruser \
 
 Das Skript verwendet daraus abgeleitet `/media/<T95_USER>` als Mountbasis und
 `~/.local/state/t95-usb-shares` für die dynamischen Zuordnungen.
+
+Wenn `DATA_PATH` auf ein Verzeichnis der internen eMMC zeigen soll, muss diese
+Partition vorher manuell und dauerhaft (zum Beispiel über `/etc/fstab`)
+eingebunden und mit `findmnt` geprüft werden. Die eMMC ist damit ein internes
+Datenmedium, aber kein automatisch funktionierendes Armbian-Bootmedium.
 
 ## Nach der Installation prüfen
 

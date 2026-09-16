@@ -4,6 +4,8 @@
 
 - README für den integrierten Home-Server-Pfad mit Installations-, Prüf-,
   Client-, VLC- und Rückbauanleitung vollständig überarbeitet.
+- eMMC-Nutzung als internes ext4-Datenlaufwerk und der nicht erfolgreiche
+  eMMC-Bootversuch in den Projektunterlagen klargestellt.
 - Hauptprojekt-README um den bestätigten Samba-/USB-/VLC-Abnahmestatus ergänzt.
 - GitHub-Veröffentlichungshinweise auf den tatsächlichen Modulpfad angepasst.
 - Bevorzugten Client-Zugriff auf Samba-Serverwurzel `smb://SERVER-IP/` festgelegt.

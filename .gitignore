@@ -43,6 +43,7 @@ docs/*
 !docs/PUBLISHING.md
 !docs/VALIDATION.md
 !docs/GITHUB_RELEASE_NOTES.md
+!docs/BACKUP.md
 !docs/images/
 !docs/images/**
 build/*

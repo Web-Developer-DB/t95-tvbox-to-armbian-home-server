@@ -1,0 +1,13 @@
+[Unit]
+Description=udiskie USB Automounter
+After=default.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/local/bin/t95-usb-share startup
+ExecStart=/usr/bin/udiskie --no-notify
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

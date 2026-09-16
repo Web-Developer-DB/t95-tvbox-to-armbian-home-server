@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+USER_NAME="${T95_USER:-${SUDO_USER:-}}"
+if [[ -z "$USER_NAME" ]]; then
+    echo "FEHLER: T95_USER muss gesetzt sein (oder das Skript per sudo aufrufen)."
+    exit 1
+fi
+
+USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6)"
+if [[ -z "$USER_HOME" ]]; then
+    echo "FEHLER: Linux-Benutzer '$USER_NAME' existiert nicht."
+    exit 1
+fi
+
+BASE="${T95_MOUNT_BASE:-/media/$USER_NAME}"
+STATE_DIR="${T95_STATE_DIR:-$USER_HOME/.local/state/t95-usb-shares}"
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "FEHLER: Bitte als root bzw. mit sudo ausführen."
+    exit 1
+fi
+
+if [[ $# -ne 1 ]]; then
+    echo "Verwendung:"
+    echo "  usb-eject <Freigabename>"
+    echo
+    echo "Aktuelle USB-Freigaben:"
+    sudo -u "$USER_NAME" net usershare list 2>/dev/null || true
+    exit 1
+fi
+
+NAME="$1"
+UID_COMP="$(id -u "$USER_NAME")"
+RUNTIME_DIR="/run/user/$UID_COMP"
+
+# Mountpunkt zuerst aus der dynamischen Samba-Freigabe ermitteln.
+MOUNTPOINT="$(
+    sudo -u "$USER_NAME" net usershare info "$NAME" 2>/dev/null |
+    sed -n 's/^path=//p' |
+    head -n 1
+)"
+
+# Falls Samba-Eintrag fehlt, State-Dateien durchsuchen.
+if [[ -z "$MOUNTPOINT" ]]; then
+    shopt -s nullglob
+
+    for STATE_FILE in "$STATE_DIR"/*.map; do
+        IFS=$'\t' read -r SAVED_SHARE SAVED_PATH SAVED_DEV SAVED_UUID \
+            < "$STATE_FILE" || true
+
+        if [[ "${SAVED_SHARE:-}" == "$NAME" ]]; then
+            MOUNTPOINT="$SAVED_PATH"
+            break
+        fi
+    done
+fi
+
+# Fallback: Mount-Verzeichnis trägt denselben Namen wie die Freigabe.
+if [[ -z "$MOUNTPOINT" ]] && \
+   findmnt -rn -M "$BASE/$NAME" >/dev/null 2>&1; then
+    MOUNTPOINT="$BASE/$NAME"
+fi
+
+if [[ -z "$MOUNTPOINT" ]]; then
+    echo "FEHLER: Keine gemountete Freigabe '$NAME' gefunden."
+    exit 1
+fi
+
+case "$MOUNTPOINT" in
+    "$BASE"/*) ;;
+    *)
+        echo "FEHLER: Ungültiger Mountpunkt:"
+        echo "$MOUNTPOINT"
+        exit 1
+        ;;
+esac
+
+SOURCE="$(findmnt -rn -M "$MOUNTPOINT" -o SOURCE 2>/dev/null || true)"
+
+if [[ -z "$SOURCE" ]]; then
+    echo "FEHLER: $MOUNTPOINT ist nicht gemountet."
+    exit 1
+fi
+
+case "$SOURCE" in
+    /dev/sd*) ;;
+    *)
+        echo "FEHLER: $SOURCE ist kein externes USB-Laufwerk."
+        exit 1
+        ;;
+esac
+
+PARENT="$(lsblk -ndo PKNAME "$SOURCE" | head -n 1)"
+
+if [[ -n "$PARENT" ]]; then
+    DISK="/dev/$PARENT"
+else
+    DISK="$SOURCE"
+fi
+
+echo "USB-Datenträger:"
+echo "  Freigabe: $NAME"
+echo "  Mount:    $MOUNTPOINT"
+echo "  Quelle:   $SOURCE"
+echo "  Gerät:    $DISK"
+echo
+
+echo "Stoppe USB-Automounter kurzzeitig ..."
+
+sudo -u "$USER_NAME" \
+    XDG_RUNTIME_DIR="$RUNTIME_DIR" \
+    systemctl --user stop udiskie.service
+
+UDISKIE_STOPPED=1
+
+restart_udiskie() {
+    if [[ "${UDISKIE_STOPPED:-0}" -eq 1 ]]; then
+        sudo -u "$USER_NAME" \
+            XDG_RUNTIME_DIR="$RUNTIME_DIR" \
+            systemctl --user start udiskie.service \
+            >/dev/null 2>&1 || true
+    fi
+}
+
+trap restart_udiskie EXIT
+
+# Samba-Clientverbindungen zur Freigabe lösen, damit smbd den Mount nicht
+# blockiert. Andere Shares bleiben unberührt.
+echo "Trenne aktive Samba-Verbindungen ..."
+smbcontrol smbd close-share "$NAME" >/dev/null 2>&1 || true
+
+echo "Schreibe gepufferte Daten ..."
+sync
+
+# Alle gemounteten Partitionen des physischen USB-Geräts aushängen.
+mapfile -t NODES < <(lsblk -nrpo NAME "$DISK" | tac)
+
+for NODE in "${NODES[@]}"; do
+    if findmnt -rn -S "$NODE" >/dev/null 2>&1; then
+        echo "Hänge $NODE aus ..."
+
+        if ! udisksctl unmount -b "$NODE"; then
+            echo
+            echo "FEHLER: $NODE konnte nicht ausgehängt werden."
+            echo "Möglicherweise wird noch eine Datei verwendet."
+            echo
+            echo "Samba-Freigabe und Statusdaten bleiben erhalten."
+            echo "USB-Datenträger NICHT herausziehen."
+            exit 1
+        fi
+    fi
+done
+
+# Erst nach erfolgreichem Unmount Freigabe und State-Dateien löschen.
+echo "Entferne Samba-Freigabe ..."
+sudo -u "$USER_NAME" net usershare delete "$NAME" >/dev/null 2>&1 || true
+
+shopt -s nullglob
+for STATE_FILE in "$STATE_DIR"/*.map; do
+    IFS=$'\t' read -r SAVED_SHARE SAVED_PATH SAVED_DEV SAVED_UUID \
+        < "$STATE_FILE" || true
+
+    if [[ "${SAVED_SHARE:-}" == "$NAME" ]]; then
+        rm -f "$STATE_FILE"
+    fi
+done
+
+sync
+
+echo "Schalte USB-Gerät ab ..."
+
+if udisksctl power-off -b "$DISK"; then
+    echo
+    echo "======================================"
+    echo " USB-Datenträger kann entfernt werden."
+    echo "======================================"
+else
+    echo
+    echo "Dateisystem wurde sicher ausgehängt."
+    echo "USB-Power-Off wurde nicht unterstützt."
+    echo "Der Datenträger kann entfernt werden."
+fi
+
+restart_udiskie
+UDISKIE_STOPPED=0
+trap - EXIT

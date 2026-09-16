@@ -1,0 +1,14 @@
+e9500fdb8a091ae223f3ce6bc35b2dbdcef64fbdef0bd17cca59fa3229e6f4c4  ./.gitignore
+6a8e6fa1efcd116d6b707d4d521b97c617847cc6913c46687bdfffe60ab071f1  ./CHANGELOG.md
+09af69e7966d292b04738a1b78246c567e4303a3d423e906aed14ba9dce137bf  ./README.md
+142fda918ab8b1452c7761fabde5e73d259c3b421293c1e6690874db791e96ac  ./config/polkit/50-t95-udisks.rules
+dd1d510824690fa158f4d43f1a81804085c36ea411af9130d39351936e960259  ./config/samba/smb.conf.fragment
+08fe3a3f4c75c8a1cd55e3170d2aa14d78bbf452409c843d321e7135e97e3850  ./config/systemd-user/udiskie.service
+023d01c818830470eee9c07e4876dce6642e2e2b03378f9d07bb6ef1577e0611  ./config/udiskie/config.json
+67640a139dd568e324b1d81810b06cfbffc8e63797f804e2dcefbafc9c7a35de  ./docs/GITHUB-PUBLISH.md
+fb36f32296251ca43b86365d809831da231613ef6ae83b4f80d06aa7b6f7ce28  ./docs/RESTORE-CHECKLIST.md
+a52e941df4e961c2b8129568bc7e14510f4bc838e924f6c7d6bb09c0effc30fa  ./docs/SAMBA-USB-SETUP.md
+38349d6cc01d383b39a2d656967171fcbd5f9ce10d1f78b127d9c694ce143832  ./docs/TROUBLESHOOTING.md
+31945b321dff15835c34d9309e3531aa0c71591514a03ef58d4c7ca8f112a405  ./scripts/restore-samba-usb-setup.sh
+da3f81e50b8389acc3742aa1a8d8d1fc8770a0e9998d82b3e351cbc7862b4263  ./scripts/t95-usb-share
+4a4c0cf920399b54dfda6d7475aea0c81d5b778a1bd9dc8ad8d7e86986c434ab  ./scripts/usb-eject

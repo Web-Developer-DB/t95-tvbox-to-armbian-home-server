@@ -1,0 +1,23 @@
+# In /etc/samba/smb.conf in [global] ergänzen:
+[global]
+    netbios name = T95-SERVER
+    server min protocol = SMB2
+
+    usershare path = /var/lib/samba/usershares
+    usershare max shares = 20
+    usershare owner only = no
+    usershare allow guests = no
+    usershare prefix allow list = __T95_MOUNT_BASE__
+
+# Feste eMMC-Datenfreigabe:
+[T95-DATA]
+    path = /srv/T95-DATA/Share
+    browseable = yes
+    read only = no
+    guest ok = no
+    valid users = __T95_USER__
+    create mask = 0660
+    directory mask = 0770
+
+# WICHTIG: Keine statische [USB]-Freigabe auf __T95_MOUNT_BASE__ anlegen.
+# USB/SSD-Laufwerke werden dynamisch als Samba usershares veröffentlicht.

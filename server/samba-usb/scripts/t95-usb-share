@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+set -u
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+EVENT="${1:-}"
+DEVICE="${2:-}"
+MOUNT_PATH="${3:-}"
+LABEL="${4:-}"
+UUID="${5:-}"
+
+T95_USER="${T95_USER:-$(id -un)}"
+BASE="${T95_MOUNT_BASE:-/media/$T95_USER}"
+STATE_DIR="${T95_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/t95-usb-shares}"
+
+mkdir -p "$STATE_DIR"
+
+normalize() {
+    case "$1" in
+        ""|"None"|"none"|"null")
+            printf ''
+            ;;
+        *)
+            printf '%s' "$1"
+            ;;
+    esac
+}
+
+DEVICE="$(normalize "$DEVICE")"
+MOUNT_PATH="$(normalize "$MOUNT_PATH")"
+LABEL="$(normalize "$LABEL")"
+UUID="$(normalize "$UUID")"
+
+cleanup_stale() {
+    local FILE SHARE SAVED_PATH DEV SAVED_UUID
+
+    shopt -s nullglob
+
+    for FILE in "$STATE_DIR"/*.map; do
+        IFS=$'\t' read -r SHARE SAVED_PATH DEV SAVED_UUID < "$FILE" || true
+
+        if [[ -z "${SHARE:-}" || -z "${SAVED_PATH:-}" ]]; then
+            rm -f "$FILE"
+            continue
+        fi
+
+        if ! findmnt -rn -M "$SAVED_PATH" >/dev/null 2>&1; then
+            net usershare delete "$SHARE" >/dev/null 2>&1 || true
+            rm -f "$FILE"
+            logger -t T95-USB-SHARE "Freigabe entfernt: $SHARE"
+        fi
+    done
+}
+
+cleanup_stale
+
+[[ "$EVENT" == "device_mounted" ]] || exit 0
+[[ "$MOUNT_PATH" == "$BASE/"* ]] || exit 0
+[[ "$DEVICE" == /dev/sd* ]] || exit 0
+findmnt -rn -M "$MOUNT_PATH" >/dev/null 2>&1 || exit 0
+
+sanitize_name() {
+    printf '%s' "$1" |
+        sed 's/[^[:alnum:]_.-]/-/g; s/--*/-/g; s/^-//; s/-$//'
+}
+
+usershare_exists() {
+    net usershare info "$1" 2>/dev/null |
+        grep -Fxq -- "[$1]"
+}
+
+usershare_path() {
+    net usershare info "$1" 2>/dev/null |
+        sed -n 's/^path=//p' |
+        head -n 1
+}
+
+# Wenn derselbe Mountpunkt bereits freigegeben ist, keinen zweiten Usershare
+# erzeugen. Das macht den Hook idempotent, falls udiskie dasselbe Ereignis
+# mehrfach meldet.
+existing_share_for_path() {
+    local SHARE EXISTING_PATH
+
+    while IFS= read -r SHARE; do
+        [[ -n "$SHARE" ]] || continue
+
+        # Defensive Bereinigung: gelegentlich kann eine Listenanzeige mit #
+        # erscheinen; das Zeichen gehört nicht zum tatsächlichen Freigabenamen.
+        SHARE="${SHARE#\#}"
+
+        EXISTING_PATH="$(usershare_path "$SHARE")"
+
+        if [[ "$EXISTING_PATH" == "$MOUNT_PATH" ]]; then
+            printf '%s\n' "$SHARE"
+            return 0
+        fi
+    done < <(net usershare list 2>/dev/null)
+
+    return 1
+}
+
+EXISTING_SHARE="$(existing_share_for_path || true)"
+
+if [[ -n "$EXISTING_SHARE" ]]; then
+    STATE_FILE="$STATE_DIR/$(basename "$DEVICE").map"
+
+    printf '%s\t%s\t%s\t%s\n' \
+        "$EXISTING_SHARE" "$MOUNT_PATH" "$DEVICE" "$UUID" > "$STATE_FILE"
+
+    logger -t T95-USB-SHARE \
+        "Freigabe bereits vorhanden: $EXISTING_SHARE -> $MOUNT_PATH"
+
+    exit 0
+fi
+
+if [[ -n "$LABEL" ]]; then
+    BASE_NAME="$(sanitize_name "$LABEL")"
+    [[ -n "$BASE_NAME" ]] || BASE_NAME="Extern-USB"
+
+    SHARE="$BASE_NAME"
+
+    if usershare_exists "$SHARE"; then
+        EXISTING_PATH="$(usershare_path "$SHARE")"
+
+        if [[ "$EXISTING_PATH" != "$MOUNT_PATH" ]]; then
+            N=2
+            while usershare_exists "${BASE_NAME}-${N}"; do
+                N=$((N + 1))
+            done
+            SHARE="${BASE_NAME}-${N}"
+        fi
+    fi
+else
+    N=1
+    while usershare_exists "Extern-USB-${N}"; do
+        N=$((N + 1))
+    done
+    SHARE="Extern-USB-${N}"
+fi
+
+if net usershare add \
+    "$SHARE" \
+    "$MOUNT_PATH" \
+    "T95 USB automatisch" \
+    "${T95_USER}:F" \
+    guest_ok=n
+then
+    STATE_FILE="$STATE_DIR/$(basename "$DEVICE").map"
+
+    printf '%s\t%s\t%s\t%s\n' \
+        "$SHARE" "$MOUNT_PATH" "$DEVICE" "$UUID" > "$STATE_FILE"
+
+    logger -t T95-USB-SHARE \
+        "Freigabe erstellt: $SHARE -> $MOUNT_PATH"
+else
+    logger -t T95-USB-SHARE \
+        "FEHLER beim Erstellen der Freigabe für $MOUNT_PATH"
+    exit 1
+fi

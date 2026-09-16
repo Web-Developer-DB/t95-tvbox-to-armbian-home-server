@@ -22,6 +22,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 - [Projektziel](#projektziel)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
 - [Nachgewiesener Stand](#nachgewiesener-stand)
+- [eMMC als internes Datenlaufwerk](#emmc-als-internes-datenlaufwerk)
 - [Hardware-Fotos](#hardware-fotos)
 - [Schnellstart](#schnellstart)
 - [SD-Backup und Wiederherstellung](#sd-backup-und-wiederherstellung)
@@ -92,6 +93,84 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 Die Samba-/USB-Ausbaustufe ist damit funktionsfähig. Langzeitstabilität,
 mehrere Kaltstarts und eine endgültige Kernel-/Timer-Konfiguration müssen
 weiterhin separat geprüft werden.
+
+## eMMC als internes Datenlaufwerk
+
+Die T95 besitzt neben dem microSD-Steckplatz einen internen eMMC-Speicher. Unter
+Armbian wird er als `/dev/mmcblk2` mit einer nutzbaren Kapazität von etwa
+29,1 GiB erkannt (entspricht nominell 32 GB). Die vom eMMC-Standard
+bereitgestellten Bootbereiche sind ebenfalls vorhanden:
+
+```text
+/dev/mmcblk2boot0   4 MiB
+/dev/mmcblk2boot1   4 MiB
+```
+
+Für den Serverbetrieb wurde der Nutzbereich als eigene ext4-Datenpartition
+eingerichtet:
+
+```text
+/dev/mmcblk2p1   ext4   Label: T95-DATA   Mountpoint: /srv/T95-DATA
+```
+
+Die konkrete UUID wird absichtlich nicht dokumentiert. Sie gehört zur jeweils
+verwendeten eMMC-Partition und muss bei einer eigenen Einrichtung mit
+`blkid` bzw. `findmnt` ermittelt werden.
+
+### Leistung und Verschleiß
+
+Die protokollierten sequenziellen Lesetests ergaben:
+
+| Medium / Test | Ergebnis |
+| --- | ---: |
+| eMMC, direkter Lesetest | ca. 77,4 MB/s |
+| eMMC, `hdparm` | ca. 63,8 MB/s |
+| microSD, Lesen | ca. 23,4 MB/s |
+| microSD, Schreiben | ca. 21,5 MB/s |
+
+Damit liest die eMMC ungefähr drei Mal schneller als die verwendete microSD.
+Ein belastbarer eMMC-Schreibwert liegt für diesen Versuchsstand nicht vor und
+wird deshalb nicht angegeben.
+
+Die eMMC-Health-Register wurden mit `mmc-utils` geprüft:
+
+```text
+DEVICE_LIFE_TIME_EST_TYP_A = 0x01
+DEVICE_LIFE_TIME_EST_TYP_B = 0x01
+PRE_EOL_INFO               = 0x01
+```
+
+`0x01` steht bei den beiden Lifetime-Feldern für etwa 0–10 % der
+spezifizierten Lebensdauer und beim Pre-EOL-Feld für einen normalen Zustand.
+Die getestete eMMC zeigte somit keinen nennenswerten Verschleiß. Diese
+Hersteller-Schätzwerte ersetzen keine Backups und sind keine Garantie für die
+zukünftige Lebensdauer.
+
+### Bootstrategie
+
+Ein vollständiger Armbian-Start von der eMMC wurde versucht, war mit dem
+generischen eMMC-Bootloader auf dieser konkreten H616-/AXP313A-Platine jedoch
+nicht zuverlässig möglich. Das Problem lag im Bootpfad, nicht an der
+Dateisystem- oder eMMC-Gesundheit. Der reproduzierbare Stand verwendet daher:
+
+```text
+microSD  → TOC0-/U-Boot und Armbian-System
+eMMC     → dauerhaftes ext4-Datenlaufwerk (T95-DATA)
+```
+
+Diese Aufteilung verändert die Android-eMMC nicht automatisch und macht sie
+nicht bootfähig. Sie bietet trotzdem eine schnelle interne Ablage für Backups,
+Samba-Dateien und andere Serverdaten.
+
+Im öffentlichen SD-Release wird die interne eMMC nicht beschrieben. Wer sie
+wie im Laborversuch als Datenlaufwerk verwenden möchte, muss Partitionierung,
+Formatierung und Einbindung bewusst selbst durchführen und vorher ein eigenes
+Backup anlegen.
+
+Das integrierte Ethernet ist auf 100 Mbit/s begrenzt; gemessen wurden etwa
+94,5 Mbit/s beziehungsweise ungefähr 11–12 MB/s Nutzdaten pro Sekunde. Bei
+Samba-Zugriffen ist daher das Netzwerk und nicht die eMMC der limitierende
+Faktor.
 
 ## Hardware-Fotos
 

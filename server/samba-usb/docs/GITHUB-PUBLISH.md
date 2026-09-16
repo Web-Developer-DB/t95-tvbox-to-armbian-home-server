@@ -1,39 +1,32 @@
 # Veröffentlichung auf GitHub
 
-Das Archiv ist so aufgebaut, dass der komplette Ordner direkt als Git-Repository verwendet oder in ein bestehendes T95-Projekt kopiert werden kann.
+Das Modul liegt im Hauptrepository unter `server/samba-usb/`. Es kann dort
+gemeinsam mit dem T95-Armbian-Projekt veröffentlicht werden; die technische
+Dokumentation und die Skripte bleiben über diesen Pfad reproduzierbar.
 
-## Neues Repository lokal vorbereiten
+## Hauptrepository veröffentlichen
 
 ```bash
-cd T95-Samba-USB-Setup
-git init
-git add .
-git commit -m "Document Samba and dynamic USB share setup"
-git branch -M main
-git remote add origin git@github.com:USER/REPOSITORY.git
-git push -u origin main
+cd /pfad/zum/t95-tvbox-to-armbian-home-server
+git add README.md server/samba-usb
+git commit -m "Document Samba and dynamic USB home-server setup"
+git push
 ```
 
-## In ein bestehendes Projekt übernehmen
+## Eigenständiges Repository (optional)
 
-Empfohlener Zielordner, z. B.:
-
-```text
-docs/t95-samba-usb/
-```
-
-oder als eigener Infrastruktur-Ordner:
+Nur wenn das Modul bewusst separat gepflegt werden soll:
 
 ```text
-server/samba-usb/
+T95-Samba-USB-Setup/
 ```
 
 Anschließend:
 
 ```bash
-git add docs/t95-samba-usb
-git commit -m "Add T95 Samba USB automount documentation"
-git push
+git init
+git add .
+git commit -m "Document Samba and dynamic USB share setup"
 ```
 
 ## Vor dem Push prüfen
@@ -43,4 +36,12 @@ git status
 git diff --cached
 ```
 
-Keine Passwörter, `passdb.tdb`, privaten Schlüssel oder System-Images committen. Die bereitgestellte `.gitignore` deckt typische problematische Dateien ab, ersetzt aber keine manuelle Kontrolle.
+Keine Passwörter, `passdb.tdb`, privaten Schlüssel oder System-Images committen.
+Die `.gitignore` deckt typische problematische Dateien ab, ersetzt aber keine
+manuelle Kontrolle. Nach Änderungen am Modul muss `MANIFEST.sha256` mit den
+neuen Datei-Hashes aktualisiert und anschließend erneut geprüft werden:
+
+```bash
+cd server/samba-usb
+sha256sum -c MANIFEST.sha256
+```

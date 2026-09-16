@@ -17,6 +17,9 @@ bleiben außerhalb des öffentlichen Repositorys.
 | Linux-Userspace | bestanden | systemd und multi-user target erreicht |
 | Ethernet | bestanden | `end0`, 100 Mbit/s Full Duplex |
 | DHCP und SSH | bestanden | Lease und Armbian-Ersteinrichtung auf Ausgangsimage |
+| Samba `T95-DATA` | bestanden | authentifizierte SMB2/SMB3-Freigabe auf der T95 |
+| USB-Automount/Usershares | bestanden | dynamische Shares, sicherer Auswurf und Wiedereinstecken |
+| VLC über SMB | bestanden | lokale Netzwerk-Wiedergabe geprüft |
 | Android-eMMC | unverändert | kein Lese- oder Schreibvorgang im Releaseweg |
 
 Die UART-Aufzeichnung erfolgte mit einem externen
@@ -56,7 +59,7 @@ werden über `SHA256SUMS` geprüft.
 ## Noch offene Punkte
 
 - Kaltstart des gehärteten und lokal personalisierten Release-Assets;
-- USB-Speicher, SMB, VLC-Wiedergabe, mehrere Kaltstarts und Langzeitstabilität;
+- USB-/SMB-Dauerlast, mehrere Kaltstarts und Langzeitstabilität;
 - WLAN, HDMI, Audio und Fernbedienung;
 - dauerhafter Ersatz für `clk_ignore_unused nohz=off`;
 - Kernel- oder Bootloader-Aktualisierungen.

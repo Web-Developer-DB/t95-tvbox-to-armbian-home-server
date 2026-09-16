@@ -2,6 +2,10 @@
 
 ## 2026-09-16
 
+- README für den integrierten Home-Server-Pfad mit Installations-, Prüf-,
+  Client-, VLC- und Rückbauanleitung vollständig überarbeitet.
+- Hauptprojekt-README um den bestätigten Samba-/USB-/VLC-Abnahmestatus ergänzt.
+- GitHub-Veröffentlichungshinweise auf den tatsächlichen Modulpfad angepasst.
 - Bevorzugten Client-Zugriff auf Samba-Serverwurzel `smb://SERVER-IP/` festgelegt.
 - Statische `[USB]`-Sammelfreigabe entfernt.
 - Dynamische Samba-Usershares pro USB-/SSD-Dateisystem eingeführt.

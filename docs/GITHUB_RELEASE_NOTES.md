@@ -46,7 +46,8 @@ Vollständige Anleitung: [RELEASE.md](RELEASE.md).
   SoCs, RAM, PMICs oder Netzwerkhardware besitzen.
 - `clk_ignore_unused nohz=off` bleibt eine Diagnosekonfiguration.
 - WLAN, Audio, Fernbedienung, USB-/SMB-Dauerlast und Langzeitbetrieb sind
-  nicht Teil der Freigabe.
+  nicht Teil der Freigabe. Die grundlegende Samba-/USB-/VLC-Funktion wurde
+  separat auf der T95 geprüft.
 - Kernel- und Bootloader-Updates nur nach Backup und erneuter UART-/Netzwerk-
   Validierung durchführen.
 - Der gehärtete Asset-Aufbau wurde offline geprüft; ein eigener Kaltstarttest

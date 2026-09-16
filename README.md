@@ -24,6 +24,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [Hardware-Fotos](#hardware-fotos)
 - [Schnellstart](#schnellstart)
+- [Samba- und USB-Dateiserver](#samba--und-usb-dateiserver)
 - [UART-Diagnose mit RP2040-Zero](#uart-diagnose-mit-rp2040-zero)
 - [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz)
 - [Sicherheitsgrenzen](#sicherheitsgrenzen)
@@ -39,7 +40,8 @@ flowchart LR
     A["T95 TV-Box<br/>H616 / AXP313A"] --> B["TOC0 / U-Boot<br/>von microSD"]
     B --> C["Armbian Linux<br/>Kernel 6.18"]
     C --> D["AC300 Ethernet<br/>end0 / DHCP"]
-    D --> E["SSH · Dateien ·<br/>kleiner Home-Server"]
+    D --> E["Samba · SSH · Dateien<br/>kleiner Home-Server"]
+    E --> F["PC · Android · VLC"]
     U["RP2040-Zero<br/>UART-Adapter"] -. Diagnose .-> B
 ```
 
@@ -50,7 +52,8 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 2. T95-spezifischen TOC0-/U-Boot-Loader auf microSD testen.
 3. Armbian mit passendem DTB und AC300-Ethernet starten.
 4. Erststart, Netzwerk und Stabilität prüfen.
-5. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
+5. Samba-/USB-Dateiserver reproduzierbar einrichten.
+6. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
 
 ## Geprüfte Hardware und Software
 
@@ -79,11 +82,13 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 | microSD-I/O | ✅ | etwa 22–23 MB/s Lesen und 21,5 MB/s Schreiben |
 | eMMC-Gesundheit | ✅ | Life Time A/B und Pre-EOL jeweils `0x01` |
 | WLAN / Bluetooth / GPU / Audio | ⚠️ | für den headless Server nicht erforderlich bzw. unvollständig |
-| SMB, USB-Platte, VLC-Wiedergabe | ⏳ | Folgearbeiten, noch keine Release-Zusage |
+| Samba `T95-DATA` | ✅ | authentifizierte SMB2/SMB3-Freigabe getestet |
+| USB-Automount und dynamische Usershares | ✅ | Label-/Fallback-Namen, Auswurf und Wiedereinstecken getestet |
+| VLC-Wiedergabe über SMB | ✅ | lokale Netzwerk-Wiedergabe erfolgreich geprüft |
 
-Der erreichte Stand eignet sich als Basis für einen kleinen Dateiserver. Die
-Langzeitstabilität und die endgültige Home-Server-Abnahme müssen separat
-geprüft werden.
+Die Samba-/USB-Ausbaustufe ist damit funktionsfähig. Langzeitstabilität,
+mehrere Kaltstarts und eine endgültige Kernel-/Timer-Konfiguration müssen
+weiterhin separat geprüft werden.
 
 ## Hardware-Fotos
 
@@ -236,6 +241,57 @@ bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
 Es gibt kein veröffentlichtes Standardpasswort. Beim ersten Start werden
 eigene SSH-Hostschlüssel erzeugt, bevor `sshd` Verbindungen annimmt.
 
+## Samba- und USB-Dateiserver
+
+Die T95 kann nach dem Armbian-Erststart als kleiner, stromsparender Datei- und
+Medienserver betrieben werden. Das Modul in
+[`server/samba-usb/`](server/samba-usb/) richtet eine feste interne Freigabe
+`T95-DATA` und automatisch je eine eigene Freigabe für jedes eingesteckte
+USB-Laufwerk ein.
+
+```mermaid
+flowchart LR
+    A["Armbian-T95<br/>end0 / DHCP"] --> B["restore-samba-usb-setup.sh"]
+    B --> C["T95-DATA<br/>feste Freigabe"]
+    B --> D["udiskie + t95-usb-share<br/>dynamische USB-Shares"]
+    C --> E["smb://&lt;SERVER-IP&gt;/"]
+    D --> E
+    E --> F["Dateimanager · VLC · Android"]
+```
+
+> [!IMPORTANT]
+> Die Installation wird auf der laufenden T95-Armbian-Box ausgeführt, nicht
+> auf dem Build-PC. Ein bestehender Linux-Benutzer wird als `T95_USER`
+> übergeben; das Samba-Passwort wird interaktiv gesetzt und nicht im
+> Repository gespeichert.
+
+Schnellpfad nach der SSH-Anmeldung:
+
+```bash
+cd /pfad/zum/checkout/server/samba-usb
+sha256sum -c MANIFEST.sha256
+sudo T95_USER=serveruser ./scripts/restore-samba-usb-setup.sh
+```
+
+Danach USB-Datenträger einstecken und die Freigaben prüfen:
+
+```bash
+sudo -u serveruser net usershare list
+```
+
+Vom Client aus ist die Serverwurzel der bevorzugte Einstieg:
+`smb://<SERVER-IP>/` (unter Windows auch `\\<SERVER-IP>\\`). Eine
+ausführliche, reproduzierbare Anleitung mit Voraussetzungen, Erfolgskriterien,
+VLC-Beispiel, sicherem Auswurf und Fehlerdiagnose steht in
+[`server/samba-usb/README.md`](server/samba-usb/README.md).
+
+> [!CAUTION]
+> Das Restore-Skript sichert eine vorhandene `/etc/samba/smb.conf` mit
+> Zeitstempel und ersetzt sie anschließend durch die bekannte
+> Projektkonfiguration. Vor dem Einsatz auf einem produktiven Samba-Server
+> zuerst die Sicherung und die [technische Dokumentation](server/samba-usb/docs/SAMBA-USB-SETUP.md)
+> prüfen.
+
 ## UART-Diagnose mit RP2040-Zero
 
 Für Bootaufzeichnungen wurde ein **RP2040-Zero** als externer USB-zu-TTL-
@@ -344,8 +400,6 @@ Das große Image gehört als Release-Asset zu GitHub, nicht in den Git-Verlauf.
 ## Offene Arbeiten
 
 - ⏳ Kaltstart-Abnahme des gehärteten, lokal personalisierten Release-Images
-- ⏳ USB-Platte und SMB2/SMB3-Freigabe
-- ⏳ VLC-Wiedergabe aus dem lokalen Netz
 - ⏳ mehrere Kaltstarts und längere Stabilitätsmessung
 - ⏳ Entscheidung über eine endgültige Kernel-/Timer-Konfiguration
 

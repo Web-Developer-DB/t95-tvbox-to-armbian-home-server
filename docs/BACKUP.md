@@ -63,7 +63,7 @@ Das Quellgerät ist die komplette wechselbare SD-Karte, zum Beispiel
 Notiere den tatsächlich angezeigten Gerätenamen als `SD_DEVICE`, zum Beispiel:
 
 ```bash
-export SD_DEVICE=/dev/sdX
+export SD_DEVICE=/dev/sdX   # /dev/sdX durch den lsblk-Namen der eigenen SD ersetzen
 ```
 
 ## 3. Partitionen aushängen
@@ -141,7 +141,7 @@ Ersatzkarte einstecken und den Gerätenamen neu ermitteln:
 
 ```bash
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,FSTYPE,MOUNTPOINTS
-export SD_DEVICE=/dev/sdX
+export SD_DEVICE=/dev/sdX   # /dev/sdX durch den lsblk-Namen der eigenen SD ersetzen
 ```
 
 Vor dem Schreiben müssen `TYPE=disk`, `TRAN=usb`, `RM=1` und eine mindestens

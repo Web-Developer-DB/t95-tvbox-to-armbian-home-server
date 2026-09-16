@@ -308,6 +308,14 @@ Die persönliche `.img`-Datei und die zugehörige
 
 ### 3. SD-Karte eindeutig bestimmen
 
+> [!CAUTION]
+> In allen folgenden Befehlen ist `/dev/sdX` nur ein Platzhalter. `X` muss
+> durch den **tatsächlichen Gerätenamen deiner SD-Karte** ersetzt werden, zum
+> Beispiel `/dev/sda` oder `/dev/sdb`. Diesen Namen unmittelbar vorher mit
+> `lsblk` ermitteln. Die Kennzeichnung `SDX` in einem Bestätigungstoken wie
+> `WRITE-T95-PROVISIONED-TO-SDX` bleibt dagegen unverändert, sofern das
+> Skript sie genau so verlangt.
+
 Nach jedem Einstecken den Gerätenamen neu prüfen. Niemals blind `/dev/sda`
 verwenden:
 

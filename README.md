@@ -84,6 +84,7 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 | Armbian-Boot von eMMC | ❌ | Installations-/Bootversuch fehlgeschlagen; microSD bleibt der unterstützte Bootweg |
 | CPU-Dauerlast | ✅ | 4 Worker, 10 Minuten, ca. 62 °C maximal |
 | microSD-I/O | ✅ | etwa 22–23 MB/s Lesen und 21,5 MB/s Schreiben |
+| eMMC-I/O | ✅ | ca. 63,8–77,4 MB/s Lesen; Schreiben für diesen Stand nicht belastbar gemessen |
 | eMMC-Gesundheit | ✅ | Life Time A/B und Pre-EOL jeweils `0x01` |
 | WLAN / Bluetooth / GPU / Audio | ⚠️ | für den headless Server nicht erforderlich bzw. unvollständig |
 | Samba `T95-DATA` | ✅ | authentifizierte SMB2/SMB3-Freigabe getestet |

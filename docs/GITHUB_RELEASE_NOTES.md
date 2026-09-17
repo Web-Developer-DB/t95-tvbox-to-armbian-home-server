@@ -2,12 +2,14 @@
 
 ## T95 H616 / AXP313A: gehärtetes SD-Armbian
 
-Experimenteller SD-Release für die exakt geprüfte Platine
+Stabil getesteter, hardwaregebundener SD-Release für die exakt geprüfte Platine
 `H616-T95MAX-AXP313A-V3.0`. Der Startweg nutzt die microSD; die Android-eMMC
 wird nicht gelesen oder beschrieben.
 
 Der zugrunde liegende Start mit U-Boot, 2 GiB RAM, AC300-Ethernet, DHCP und
-SSH wurde auf der Zielplatine nachgewiesen. UART-Diagnosen erfolgten mit einem
+SSH wurde auf der Zielplatine nachgewiesen. Zusätzlich wurden Start,
+sauberes Herunterfahren und Dateizugriff im praktischen Betrieb ohne
+beobachtete Fehler abgenommen. UART-Diagnosen erfolgten mit einem
 externen [RP2040-Zero-UART-Adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 (3,3-V-TTL, 115200 Baud/8N1).
 
@@ -45,13 +47,14 @@ Vollständige Anleitung: [RELEASE.md](RELEASE.md).
 - Nur diese Board-Revision ist unterstützt. Andere „T95“-Boxen können andere
   SoCs, RAM, PMICs oder Netzwerkhardware besitzen.
 - `clk_ignore_unused nohz=off` bleibt eine Diagnosekonfiguration.
-- WLAN, Audio, Fernbedienung, USB-/SMB-Dauerlast und Langzeitbetrieb sind
-  nicht Teil der Freigabe. Die grundlegende Samba-/USB-/VLC-Funktion wurde
-  separat auf der T95 geprüft.
+- WLAN, Audio, Fernbedienung, zusätzliche USB-/SMB-Dauerlast und Langzeitbetrieb
+  sind nicht Teil der Stabilitätszusage. Die grundlegende Samba-/USB-/VLC-
+  Funktion wurde separat auf der T95 geprüft.
 - Kernel- und Bootloader-Updates nur nach Backup und erneuter UART-/Netzwerk-
   Validierung durchführen.
-- Der gehärtete Asset-Aufbau wurde offline geprüft; ein eigener Kaltstarttest
-  dieses Assets bleibt vor einer stabilen Freigabe erforderlich.
+- Der gehärtete Asset-Aufbau wurde offline geprüft; der stabil getestete
+  Grundstand bezieht sich auf die geprüfte Platine und die dokumentierte
+  personalisierte SD-Installation.
 
 ### Assets
 

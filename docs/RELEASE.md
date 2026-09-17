@@ -1,16 +1,17 @@
 # Release-Handbuch: T95 H616 / AXP313A
 
-Stand: 2026-09-15. Dieser experimentelle SD-Release gilt ausschließlich für
+Stand: 2026-09-17. Dieser **stabil getestete, hardwaregebundene** SD-Release gilt ausschließlich für
 `H616-T95MAX-AXP313A-V3.0`. Er ist kein universelles T95-Image und verändert
 die Android-eMMC nicht. Fotos zur Boardzuordnung stehen in der
-[README](../README.md#fotos-der-geprüften-hardware); individuelle Daten auf
+[README](../README.md#hardware-fotos); individuelle Daten auf
 dem Unterseitenfoto sind redigiert.
 
 ## Release-Identität
 
 | Eigenschaft | Wert |
 |---|---|
-| Releasekanal | `v0.1.1-hardened-experimental` |
+| Releasekanal | `v0.1.1-hardened-experimental` (historische Asset-Kennung) |
+| Projektstatus | stabil getestet auf `H616-T95MAX-AXP313A-V3.0` |
 | System | Armbian 26.8.4 Trixie |
 | Kernel | `6.18.48-current-sunxi64` |
 | Bootmedium | microSD, eine Ext4-Partition ab Byte 4 MiB |
@@ -47,11 +48,15 @@ dokumentiert.
 Die neue Zugangsdaten-Härtung wurde vollständig offline geprüft: Rootkonto
 gesperrt, Hostkey-Dateien entfernt, Root-Hash und alle drei privaten
 Quellhostkey-Payloads im vollständigen Rohimage nicht auffindbar, Ext4
-prüfbar. Ein Kaltstart des **gehärteten** Release-Assets ist noch als eigener
-Abnahmetest offen. Deshalb bleibt der Kanal experimentell.
+prüfbar. Die Endanwender-Abnahme des personalisierten Systems wurde auf der
+Zielplatine bestanden: Start von microSD, sauberes Herunterfahren, SSH und
+Dateizugriff funktionierten ohne beobachtete Fehler. Der Status „stabil
+getestet“ bezieht sich ausschließlich auf diesen dokumentierten Aufbau; er
+ist keine Garantie für andere T95-Revisionen oder ungetestete
+Langzeit-/Peripheriefunktionen.
 
-Nicht freigegeben sind WLAN, Audio, Fernbedienung, HDMI als Serverfunktion,
-USB-/SMB-Dauerlast, mehrere Kaltstarts, Langzeitbetrieb und Kernel-/Bootloader-
+Nicht Bestandteil der Stabilitätszusage sind WLAN, Audio, Fernbedienung, HDMI
+als Serverfunktion, zusätzliche Langzeitmessungen und Kernel-/Bootloader-
 Aktualisierungen.
 
 ## Öffentliche Release-Assets erzeugen

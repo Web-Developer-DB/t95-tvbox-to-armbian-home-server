@@ -68,15 +68,16 @@ Prüfung von `git status --ignored`.
    ```
 
 3. In der Releasebeschreibung deutlich nennen: exakte Boardrevision,
-   SD-only, experimenteller Status, eMMC unverändert, lokale verpflichtende
+   SD-only, stabil getesteter hardwaregebundener Status, eMMC unverändert, lokale verpflichtende
    Passwort-Personalisierung, neue SSH-Fingerprint-Prüfung und die offenen
    Tests. [GITHUB_RELEASE_NOTES.md](GITHUB_RELEASE_NOTES.md) ist der
    Textentwurf.
 
-4. Vor endgültiger Veröffentlichung einen Kaltstart mit dem gehärteten Asset
-   und einer lokal personalisierten SD durchführen und im privaten Journal
-   festhalten. Bis zu diesem Test darf der Kanal nicht als stabil bezeichnet
-   werden.
+4. Die Endanwender-Abnahme (Start, sauberes Herunterfahren, SSH und
+   Dateizugriff) mit einer lokal personalisierten SD im privaten Journal
+   festhalten. Zusätzliche Langzeit- und Peripherietests bleiben optionale
+   Weiterentwicklung und sind keine Voraussetzung für den stabil getesteten
+   Grundstand.
 
 ## Lizenz- und Upstream-Prüfung
 

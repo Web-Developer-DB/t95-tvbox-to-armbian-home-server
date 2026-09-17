@@ -20,6 +20,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 ## Inhaltsübersicht
 
 - [Projektziel](#projektziel)
+- [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [eMMC als internes Datenlaufwerk](#emmc-als-internes-datenlaufwerk)
@@ -56,6 +57,48 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 4. Erststart, Netzwerk und Stabilität prüfen.
 5. Samba-/USB-Dateiserver reproduzierbar einrichten.
 6. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
+
+## Armbian-Standard und T95-Anpassungen
+
+Als Ausgangspunkt dient ein offizielles Armbian-Image für die verwandte
+Tanix-TX6s-/AXP313-Plattform: Armbian 26.8.4, Debian 13 Trixie und Kernel
+`6.18.48-current-sunxi64`. Kernel, Initramfs und das Debian-Root-Dateisystem
+werden im nachgewiesenen T95-6.18-Aufbau weitgehend unverändert übernommen.
+Die Bootfähigkeit entsteht durch eine zusätzliche, hardware­spezifische
+Bootkette:
+
+| Bestandteil | Armbian-Ausgangsstand | T95-Projektänderung | Bei anderer Box zuerst prüfen |
+| --- | --- | --- | --- |
+| Kernel und Rootfs | vorhanden, funktionierender Standard | kein Kernel-Neubau im finalen 6.18-Aufbau | Kernelversion und Treiberbestand beibehalten |
+| U-Boot / TOC0 | generischer Board-Bootpfad | eigener T95-Loader, SD-Laden von `mmc 0:1`, TOC0 bei Byte 8192 | SoC, DRAM, PMIC und Boot-ROM-Vertrag |
+| TF-A / BL31 | passend zum Ausgangsboard | mit dem T95-U-Boot gepaarte TF-A-Version | SoC-/Boardvariante und BL31-Kompatibilität |
+| DTB | Tanix-TX6s-/AXP313-DTB | T95-kompatibler Name und AC300-/RMII-Beschreibung | tatsächliche Platine, PHY-Adresse, MDIO und Taktpfad |
+| `armbianEnv.txt` | generische DTB-/Bootauswahl | T95-DTB, serielle Konsole, ext4-Root und Diagnoseparameter | nur die wirklich belegten Gerätewerte ändern |
+| AC300-Ethernet | nicht für jede T95-Revision garantiert | DTB-/U-Boot-Vorinitialisierung für `end0` | PHY, Reset, Clock, MAC und Link separat messen |
+| `clk_ignore_unused nohz=off` | nicht erforderlich | vorläufige Diagnose-/Stabilitätshilfe | nach erfolgreichem Boot wieder unabhängig testen |
+| Sicherheits-Härtung | nicht Teil des Rohimages | Root sperren, Hostkeys entfernen, neue Hostkeys vor `sshd` erzeugen | Zugangsdaten immer lokal personalisieren |
+| Samba und USB-Shares | nicht Teil des Minimalimages | separates Modul unter `server/samba-usb/` | erst nach stabilem Linux- und Netzwerkstart |
+
+Für diese Platine ist daher **nur das Austauschen des DTB nicht ausreichend**:
+Ein ungeeigneter U-Boot-/TOC0-Loader kann bereits vor dem Kernel hängen bleiben.
+Umgekehrt muss für einen reinen Kernel- oder Userspace-Fehler nicht sofort die
+gesamte Armbian-Basis geändert werden. Die bewährte Reihenfolge ist:
+
+1. **Kein U-Boot-Banner:** zuerst Loader, TOC0-Offset, SD-Layout und UART prüfen.
+2. **U-Boot startet, DRAM/PMIC scheitert:** nur DRAM-, AXP313- oder Boardparameter
+   des Loaders untersuchen.
+3. **Kernel startet, aber bleibt früh hängen:** DTB, Kernelversion und
+   `armbianEnv.txt` vergleichen; Rootfs zunächst unverändert lassen.
+4. **Linux läuft, Ethernet fehlt:** AC300-/PHY-Knoten, RMII, Reset und Clock
+   prüfen; Samba oder eMMC sind dafür nicht relevant.
+5. **Linux und Netzwerk laufen:** erst dann optionale Schichten wie Samba,
+   USB-Automount und eMMC-Datenablage einrichten.
+
+Diese Trennung erleichtert Portierungen: Ein Entwickler übernimmt zunächst
+Kernel und Rootfs aus dem passenden Armbian-Image und passt nur die nachweislich
+boardabhängigen Teile an. Änderungen am Kernel oder am Rootfs sind erst dann
+gerechtfertigt, wenn UART-Log und DTB-Prüfung zeigen, dass die Bootkette bereits
+funktioniert.
 
 ## Geprüfte Hardware und Software
 

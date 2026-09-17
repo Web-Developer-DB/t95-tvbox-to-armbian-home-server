@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Write a verified public T95 release asset to one removable USB SD card.
 # The script deliberately has no eMMC, FEL or Android path.
+# CHANGE-ID: RELEASE
+# T95-CHANGE: write and read back only the selected removable SD device.
+# PORTING-NOTE: replace /dev/sdX with the device identified immediately before use.
 set -euo pipefail
 umask 022
 

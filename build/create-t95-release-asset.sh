@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Package an already audited, hardened generic image as GitHub release assets.
 # This is host-only: it never opens a block device or the T95 eMMC.
+# CHANGE-ID: RELEASE HARDEN
+# T95-CHANGE: publish only manifest-backed, audited release assets.
+# PORTING-NOTE: keep asset naming, release IDs and hashes synchronized.
 set -euo pipefail
 umask 022
 

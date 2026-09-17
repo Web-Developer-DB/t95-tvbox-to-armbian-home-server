@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Read-only audit of a hardened generic T95 release artifact.  No block device
 # is opened and no input image is changed.
+# CHANGE-ID: HARDEN
+# T95-CHANGE: verify locked root, absent hostkeys and pre-SSH key generation.
+# PORTING-NOTE: extend the audit when the base image changes its first-run units.
 set -euo pipefail
 umask 077
 

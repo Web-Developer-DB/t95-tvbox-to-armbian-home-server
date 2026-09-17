@@ -9,6 +9,6 @@ dd1d510824690fa158f4d43f1a81804085c36ea411af9130d39351936e960259  ./config/samba
 fb36f32296251ca43b86365d809831da231613ef6ae83b4f80d06aa7b6f7ce28  ./docs/RESTORE-CHECKLIST.md
 a52e941df4e961c2b8129568bc7e14510f4bc838e924f6c7d6bb09c0effc30fa  ./docs/SAMBA-USB-SETUP.md
 38349d6cc01d383b39a2d656967171fcbd5f9ce10d1f78b127d9c694ce143832  ./docs/TROUBLESHOOTING.md
-31945b321dff15835c34d9309e3531aa0c71591514a03ef58d4c7ca8f112a405  ./scripts/restore-samba-usb-setup.sh
-da3f81e50b8389acc3742aa1a8d8d1fc8770a0e9998d82b3e351cbc7862b4263  ./scripts/t95-usb-share
-4a4c0cf920399b54dfda6d7475aea0c81d5b778a1bd9dc8ad8d7e86986c434ab  ./scripts/usb-eject
+e626ac590b5688cdb0c32ead3db1802f67ced5b25b933f0f3625c34d3f5a93b6  ./scripts/restore-samba-usb-setup.sh
+c5b21230ab4521a81dbdbdb7e3190ba31f3f06d10f9071d4af8636a8e709c8fa  ./scripts/t95-usb-share
+b1fe3a8b820af9ffeea54a1cf96c9aeda021110f6ce1e44e2ef7926d3772fec3  ./scripts/usb-eject

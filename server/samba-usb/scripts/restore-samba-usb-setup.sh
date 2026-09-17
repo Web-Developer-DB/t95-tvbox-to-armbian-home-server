@@ -3,6 +3,9 @@
 # Für eine frische Debian-/Armbian-Installation gedacht.
 # ACHTUNG: Dieses Skript installiert Pakete, aktiviert Dienste und ersetzt
 # /etc/samba/smb.conf nach einer Sicherung durch eine minimale Konfiguration.
+# CHANGE-ID: SAMBA
+# T95-CHANGE: adds the optional post-boot Samba/USB server layer.
+# PORTING-NOTE: verify package names, service units and mount policy on another distro.
 
 set -Eeuo pipefail
 

@@ -44,6 +44,7 @@ docs/*
 !docs/VALIDATION.md
 !docs/GITHUB_RELEASE_NOTES.md
 !docs/BACKUP.md
+!docs/CHANGES_FROM_ARMBIAN.md
 !docs/images/
 !docs/images/**
 build/*

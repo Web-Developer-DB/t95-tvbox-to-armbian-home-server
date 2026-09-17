@@ -2,6 +2,9 @@
 # Create a public, generic T95 release image from a private pre-first-boot
 # artifact.  All writes target regular files below build/artifacts and
 # build/work; this script never opens a block device, FEL or the T95 eMMC.
+# CHANGE-ID: HARDEN
+# T95-CHANGE: remove machine-specific credentials and enforce first-boot key setup.
+# PORTING-NOTE: repeat the read-only audit after every rootfs or init-system change.
 set -euo pipefail
 umask 077
 

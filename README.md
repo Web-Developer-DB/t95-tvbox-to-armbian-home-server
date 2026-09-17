@@ -21,6 +21,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 
 - [Projektziel](#projektziel)
 - [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
+- [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [eMMC als internes Datenlaufwerk](#emmc-als-internes-datenlaufwerk)
@@ -99,6 +100,12 @@ Kernel und Rootfs aus dem passenden Armbian-Image und passt nur die nachweislich
 boardabhängigen Teile an. Änderungen am Kernel oder am Rootfs sind erst dann
 gerechtfertigt, wenn UART-Log und DTB-Prüfung zeigen, dass die Bootkette bereits
 funktioniert.
+
+Die vollständige Zuordnung von Armbian-Ausgangspunkt, Patch, Build-Skript,
+Resultat, Portierungsprüfung und Nachweis steht im
+[Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md). Dort sind auch die bewusst
+unveränderten Bestandteile und die Pflegeanforderungen für neue Armbian-Releases
+festgehalten.
 
 ## Geprüfte Hardware und Software
 
@@ -546,6 +553,7 @@ Sicherheitsupdates oder Backups.
 | [`docs/PUBLISHING.md`](docs/PUBLISHING.md) | Veröffentlichungs- und Geheimnisprüfung |
 | [`docs/GITHUB_RELEASE_NOTES.md`](docs/GITHUB_RELEASE_NOTES.md) | Textbausteine für ein GitHub-Release |
 | [`docs/BACKUP.md`](docs/BACKUP.md) | vollständiges SD-Backup und Wiederherstellung |
+| [`docs/CHANGES_FROM_ARMBIAN.md`](docs/CHANGES_FROM_ARMBIAN.md) | Datei-/Patch-Inventar gegenüber dem Armbian-Ausgangsstand |
 | [`build/README.md`](build/README.md) | hostseitige Buildkette |
 | [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
 | [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |

@@ -1,12 +1,12 @@
 # T95 TV-Box → Armbian Linux Home Server
 
-![Status: experimentell](https://img.shields.io/badge/Status-experimentell-orange)
+![Status: stabil getestet](https://img.shields.io/badge/Status-stabil%20getestet-brightgreen)
 ![Board: H616](https://img.shields.io/badge/Board-Allwinner%20H616-blue)
 ![OS: Armbian](https://img.shields.io/badge/OS-Armbian%2026.8.4-18a303)
 ![Kernel: 6.18](https://img.shields.io/badge/Kernel-6.18.48-purple)
 ![Boot: SD](https://img.shields.io/badge/Boot-microSD-informational)
 
-Ein reproduzierbarer Umbauversuch, der eine **T95-TV-Box mit Allwinner H616**
+Ein reproduzierbarer Umbau, der eine **T95-TV-Box mit Allwinner H616**
 in einen kleinen, stromsparenden **Armbian-Linux-Home-Server** verwandelt.
 Der Schwerpunkt liegt auf nachvollziehbarem Boot- und Hardware-Bring-up,
 Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
@@ -17,16 +17,24 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 > einheitliche Hardware. Eine ähnlich aussehende Box darf das Image erst nach
 > eigener Platinen-, UART- und Bootprüfung verwenden.
 
+> [!NOTE]
+> **Projektstatus:** Der dokumentierte Stand ist auf der geprüften Platine
+> `H616-T95MAX-AXP313A-V3.0` stabil getestet. Boot, sauberes Herunterfahren,
+> SSH und Dateizugriff wurden im praktischen Betrieb ohne beobachtete Fehler
+> geprüft. Das ist keine Zusage für andere T95-Varianten oder für noch nicht
+> getestete Langzeit- und Peripheriefunktionen.
+
 ## Inhaltsübersicht
 
 - [Projektziel](#projektziel)
+- [Endanwender-Schnellstart](#endanwender-schnellstart)
 - [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
 - [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [eMMC als internes Datenlaufwerk](#emmc-als-internes-datenlaufwerk)
 - [Hardware-Fotos](#hardware-fotos)
-- [Schnellstart](#schnellstart)
+- [Technische Detailreferenz: Image-Personalisierung und SD-Schreiben](#technische-detailreferenz-image-personalisierung-und-sd-schreiben)
 - [SD-Backup und Wiederherstellung](#sd-backup-und-wiederherstellung)
 - [Samba- und USB-Dateiserver](#samba--und-usb-dateiserver)
 - [UART-Diagnose mit RP2040-Zero](#uart-diagnose-mit-rp2040-zero)
@@ -34,7 +42,7 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 - [Sicherheitsgrenzen](#sicherheitsgrenzen)
 - [Projektstruktur](#projektstruktur)
 - [Reproduzierbarer Build und Release](#reproduzierbarer-build-und-release)
-- [Offene Arbeiten](#offene-arbeiten)
+- [Optionale Weiterentwicklung](#optionale-weiterentwicklung)
 - [Lizenz](#lizenz)
 
 ## Projektziel
@@ -58,6 +66,115 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 4. Erststart, Netzwerk und Stabilität prüfen.
 5. Samba-/USB-Dateiserver reproduzierbar einrichten.
 6. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
+
+## Endanwender-Schnellstart
+
+> [!TIP]
+> **Dieser Abschnitt ist für Endanwender gedacht.** Du musst weder U-Boot
+> kompilieren noch ein Kernel- oder DTB-Image bauen. Lade das geprüfte
+> Release-Image herunter, personalisiere es lokal und schreibe es auf eine
+> microSD-Karte. Die Entwickler- und Portierungsdetails folgen weiter unten.
+
+### Voraussetzungen
+
+- eine T95 mit der geprüften Platine `H616-T95MAX-AXP313A-V3.0`;
+- eine entbehrliche microSD-Karte (mindestens so groß wie das Release-Image);
+- ein Linux-PC mit `bash`, `sudo`, `xz`, `sha256sum`, `lsblk`, `dd` und `e2fsck`;
+- alternativ Windows 10/11 mit WSL2 sowie funktionierendem USB-/Blockgeräte-
+  Passthrough. Für SD-Schreiben wird natives Linux ausdrücklich empfohlen;
+- ein Netzwerkkabel zum Router und optional eine USB-Festplatte für Dateien.
+
+> [!CAUTION]
+> Alle Schreibbefehle überschreiben die ausgewählte SD-Karte vollständig.
+> `/dev/sdX` ist **nur ein Platzhalter** und muss vor jedem Schreibvorgang
+> durch das aktuell mit `lsblk` ermittelte SD-Gerät ersetzt werden. Niemals
+> eine interne NVMe-, System- oder sonstige Festplatte auswählen.
+
+### 1. Release herunterladen und prüfen
+
+Lade aus dem [GitHub-Release](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases)
+das Image und `SHA256SUMS` in denselben Ordner. Prüfe dort:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+Nur bei einer erfolgreichen Prüfung fortfahren.
+
+### 2. Persönliche lokale Image-Kopie erzeugen
+
+Das öffentliche Image enthält absichtlich kein verwendbares Standardpasswort.
+Erzeuge deshalb eine lokale Kopie mit einem eigenen Passwort. Das Passwort
+bleibt außerhalb des Repositorys und wird nicht in GitHub veröffentlicht.
+
+```bash
+export REPO=/pfad/zum/t95-tvbox-to-armbian-home-server
+export DOWNLOAD=/pfad/zum/GitHub-Release-Download
+mkdir -p "$HOME/t95-private"
+
+xz -dk --keep \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
+
+bash "$REPO/tools/provision-t95-release-image.sh" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
+  "$HOME/t95-private/t95-personal.img" \
+  PROVISION-T95-ROOT-PASSWORD
+```
+
+### 3. SD-Karte ermitteln und Image schreiben
+
+SD-Karte einstecken und die Ausgabe unmittelbar vor dem Schreiben prüfen:
+
+```bash
+lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
+```
+
+Das Ziel muss eine wechselbare USB-Karte (`RM=1`) sein. Danach `/dev/sdX`
+im folgenden Befehl durch den **tatsächlichen** Gerätenamen ersetzen:
+
+```bash
+bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
+  /dev/sdX \
+  "$HOME/t95-private/t95-personal.img" \
+  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
+  WRITE-T95-PROVISIONED-TO-SDX
+```
+
+Das Werkzeug hängt die Partitionen aus, schreibt das Image, liest es zurück
+und prüft Hash, TOC0-Loader und ext4. Die Karte darf erst nach `ERFOLG`
+entfernt werden.
+
+### 4. T95 starten und per SSH anmelden
+
+1. T95 vollständig ausschalten.
+2. Die geprüfte microSD einsetzen und Ethernet mit dem Router verbinden.
+3. T95 einschalten und im Router die neue DHCP-Adresse ablesen.
+4. Per SSH verbinden, zum Beispiel `ssh root@<T95-IP>`.
+5. Den Armbian-Ersteinrichtungsdialog abschließen und ein starkes Passwort
+   verwenden.
+
+Die Box bootet im unterstützten Releaseweg von microSD. Die interne eMMC wird
+hierbei nicht verändert.
+
+### 5. Optional: Dateien über USB/Samba freigeben
+
+Nach erfolgreicher SSH-Anmeldung kann das optionale Modul
+[`server/samba-usb/`](server/samba-usb/) installiert werden. Es richtet Samba,
+USB-Automount und eine geschützte Dateifreigabe ein. Die vollständige
+Endanwender-Anleitung steht in
+[`server/samba-usb/README.md`](server/samba-usb/README.md).
+
+### 6. Backup erstellen
+
+Nach der Ersteinrichtung zuerst ein vollständiges SD-Backup auf dem PC anlegen.
+Die sichere Schrittfolge steht in [`docs/BACKUP.md`](docs/BACKUP.md). Backups
+enthalten persönliche Daten und gehören nicht in GitHub.
+
+> [!NOTE]
+> Wenn die Box nicht startet oder keine DHCP-Adresse erhält, nicht sofort ein
+> anderes Image schreiben. Zuerst [UART- und Entwicklerdiagnose](#uart-diagnose-mit-rp2040-zero)
+> sowie die [technische Detailreferenz](#technische-detailreferenz-image-personalisierung-und-sd-schreiben)
+> verwenden.
 
 ## Armbian-Standard und T95-Anpassungen
 
@@ -130,6 +247,9 @@ festgehalten.
 | SD-Boot mit eigenem TOC0-/U-Boot | ✅ | eMMC bleibt dabei unverändert |
 | DRAM-Initialisierung | ✅ | 2 GiB erkannt |
 | Ethernet / DHCP / SSH | ✅ | `end0`, 100 Mbit/s, IPv4/IPv6 und DNS getestet |
+| Endanwender-Start | ✅ | Start aus ausgeschaltetem Zustand von microSD geprüft |
+| Sauberes Herunterfahren | ✅ | kontrolliertes Herunterfahren im Betrieb geprüft |
+| Dateizugriff | ✅ | Dateien über den eingerichteten Serverpfad erreichbar |
 | eMMC als ext4-Datenlaufwerk | ✅ | interner Speicher funktioniert als Datenmedium; Einbindung ist installationsabhängig |
 | Armbian-Boot von eMMC | ❌ | Installations-/Bootversuch fehlgeschlagen; microSD bleibt der unterstützte Bootweg |
 | CPU-Dauerlast | ✅ | 4 Worker, 10 Minuten, ca. 62 °C maximal |
@@ -141,9 +261,11 @@ festgehalten.
 | USB-Automount und dynamische Usershares | ✅ | Label-/Fallback-Namen, Auswurf und Wiedereinstecken getestet |
 | VLC-Wiedergabe über SMB | ✅ | lokale Netzwerk-Wiedergabe erfolgreich geprüft |
 
-Die Samba-/USB-Ausbaustufe ist damit funktionsfähig. Langzeitstabilität,
-mehrere Kaltstarts und eine endgültige Kernel-/Timer-Konfiguration müssen
-weiterhin separat geprüft werden.
+Die Samba-/USB-Ausbaustufe sowie die Endanwender-Abnahme mit Start,
+Herunterfahren und Dateizugriff sind damit bestanden. Langzeitmessungen,
+weitere Peripherie und eine endgültige Kernel-/Timer-Konfiguration bleiben
+optionale Weiterentwicklungen und ändern den stabil getesteten Grundstand
+nicht.
 
 ## eMMC als internes Datenlaufwerk
 
@@ -252,7 +374,12 @@ Dokumentationswerte ersetzt.
 > Hostname wurden durch neutrale Dokumentationswerte ersetzt. Es handelt sich
 > daher nicht um eine unveränderte Live-Aufnahme.
 
-## Schnellstart
+## Technische Detailreferenz: Image-Personalisierung und SD-Schreiben
+
+> [!NOTE]
+> **Dieser Abschnitt richtet sich an Entwickler, Maintainer und erfahrene
+> Linux-Anwender.** Für die normale Installation bitte den
+> [Endanwender-Schnellstart](#endanwender-schnellstart) am Anfang verwenden.
 
 > [!IMPORTANT]
 > Das öffentliche Image ist absichtlich generisch: Root ist gesperrt und es
@@ -582,13 +709,13 @@ Das generische Release-Image wird offline auf folgende Eigenschaften geprüft:
 
 Das große Image gehört als Release-Asset zu GitHub, nicht in den Git-Verlauf.
 
-## Offene Arbeiten
+## Optionale Weiterentwicklung
 
-- ⏳ Kaltstart-Abnahme des gehärteten, lokal personalisierten Release-Images
-- ⏳ mehrere Kaltstarts und längere Stabilitätsmessung
+- ⏳ zusätzliche Langzeitmessungen und weitere Kaltstartserien
 - ⏳ Entscheidung über eine endgültige Kernel-/Timer-Konfiguration
+- ⏳ optionale Unterstützung für WLAN, Audio, HDMI und Fernbedienung
 
-Bis diese Punkte abgeschlossen sind, bleibt der Status **experimentell**.
+Diese Punkte sind nicht Voraussetzung für den dokumentierten Home-Server-Betrieb.
 
 ## Lizenz
 

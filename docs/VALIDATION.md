@@ -1,4 +1,7 @@
-# Öffentliche Testmatrix: v0.1.1-hardened-experimental
+# Öffentliche Testmatrix: stabil getesteter T95-Stand
+
+Die historische Asset-Kennung `v0.1.1-hardened-experimental` bleibt in
+Dateinamen und bestehenden Downloadpfaden unverändert.
 
 Diese Zusammenfassung enthält nur generische Prüfergebnisse. Rohe UART-Logs,
 lokale IP- und MAC-Adressen, Routerdaten, SD-Backups und die Android-Forensik
@@ -15,6 +18,9 @@ bleiben außerhalb des öffentlichen Repositorys.
 | AXP313/AC300 | bestanden | EPHY antwortet, Reset und Vorinitialisierung erfolgreich |
 | Ext4-Bootskript | bestanden | Kernel und Initramfs von SD geladen |
 | Linux-Userspace | bestanden | systemd und multi-user target erreicht |
+| Endanwender-Start | bestanden | T95 startet aus dem ausgeschalteten Zustand von microSD |
+| Sauberes Herunterfahren | bestanden | System kontrolliert beendet und erneut gestartet |
+| Dateizugriff | bestanden | Dateien über den eingerichteten Serverpfad erreichbar |
 | Ethernet | bestanden | `end0`, 100 Mbit/s Full Duplex |
 | DHCP und SSH | bestanden | Lease und Armbian-Ersteinrichtung auf Ausgangsimage |
 | Samba `T95-DATA` | bestanden | authentifizierte SMB2/SMB3-Freigabe auf der T95 |
@@ -58,13 +64,13 @@ Der Loader wurde bei Byte 8192 gegen die separate Loaderdatei verglichen. Das
 Release-Asset wurde mit `xz --check=sha256` komprimiert; seine sieben Dateien
 werden über `SHA256SUMS` geprüft.
 
-## Noch offene Punkte
+## Optionale Weiterentwicklung
 
-- Kaltstart des gehärteten und lokal personalisierten Release-Assets;
-- USB-/SMB-Dauerlast, mehrere Kaltstarts und Langzeitstabilität;
+- zusätzliche USB-/SMB-Dauerlast, weitere Kaltstarts und Langzeitstabilität;
 - WLAN, HDMI, Audio und Fernbedienung;
 - dauerhafter Ersatz für `clk_ignore_unused nohz=off`;
 - Kernel- oder Bootloader-Aktualisierungen.
 
-Bis zum ersten Punkt bleibt das Release experimentell und darf nicht als
-stabiler Home-Server-Release bezeichnet werden.
+Der dokumentierte Grundstand darf für die geprüfte Platine als **stabil
+getesteter Home-Server-Release** bezeichnet werden. Die offenen Punkte sind
+Erweiterungen und keine bekannten Fehler im abgenommenen Funktionsumfang.

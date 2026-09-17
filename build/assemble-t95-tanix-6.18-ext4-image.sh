@@ -2,6 +2,10 @@
 # Assemble a host-only T95/Tanix 6.18 SD candidate image.
 # Every dd destination below is a regular file inside build/artifacts.  This
 # script intentionally rejects block devices and does not access T95 eMMC.
+# CHANGE-ID: BOOT ENV DTB
+# T95-CHANGE: combine the verified TOC0 loader, T95 DTB and Armbian boot files.
+# ARMBIAN-BASE: the kernel and rootfs source remain the checked Armbian input.
+# PORTING-NOTE: verify loader offset, DTB path, root UUID and boot script.
 set -euo pipefail
 umask 022
 

@@ -2,6 +2,9 @@
 # Build a T95-only TOC0 loader that starts Armbian's ext4 boot script.
 # It operates exclusively below build/{work,artifacts}; it never opens a block
 # device and has no eMMC or SD write path.
+# CHANGE-ID: BOOT TFA AXP313 AC300
+# T95-CHANGE: apply the board-specific AXP313/DRAM and AC300 U-Boot patches.
+# PORTING-NOTE: match U-Boot/TF-A commits and DRAM/PMIC values to the board.
 set -euo pipefail
 umask 022
 

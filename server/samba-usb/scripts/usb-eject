@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# CHANGE-ID: SAMBA
+# T95-CHANGE: safely removes one dynamically created USB usershare.
+# PORTING-NOTE: verify the state directory and unmount behavior on another host.
+
 set -Eeuo pipefail
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

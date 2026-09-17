@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# CHANGE-ID: SAMBA
+# T95-CHANGE: creates the per-device usershare used by the optional USB layer.
+# PORTING-NOTE: verify the mount base, user identity and Samba usershare policy.
+
 set -u
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

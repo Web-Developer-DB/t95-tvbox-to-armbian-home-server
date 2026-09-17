@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Produce a labeled T95 candidate DTB from the verified Armbian 6.18 Tanix DTB.
 # This script is host-only and never opens an SD card or the T95 eMMC.
+# CHANGE-ID: DTB
+# T95-CHANGE: add explicit T95 identity while retaining verified H616/AC300 data.
+# PORTING-NOTE: re-check compatible strings, PHY address, reset and clocks.
 set -euo pipefail
 umask 022
 

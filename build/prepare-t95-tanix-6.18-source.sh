@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Prepare the exact, verified Armbian input as regular host files. It never
 # opens a block device and never accesses a T95/eMMC.
+# CHANGE-ID: BASE
+# ARMBIAN-BASE: Armbian image and rootfs are copied without board changes.
+# PORTING-NOTE: update the pinned input hashes and layout for a new release.
 set -euo pipefail
 umask 022
 

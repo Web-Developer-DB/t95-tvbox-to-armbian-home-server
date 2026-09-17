@@ -2,6 +2,9 @@
 # Create a local, non-public copy of a generic T95 image with a user-chosen
 # root password hash. It modifies regular image files only; no SD, FEL or
 # eMMC device is opened here.
+# CHANGE-ID: HARDEN
+# T95-CHANGE: personalize the locked generic image only in a local file.
+# PORTING-NOTE: never publish the resulting image or its password manifest.
 set -euo pipefail
 umask 077
 

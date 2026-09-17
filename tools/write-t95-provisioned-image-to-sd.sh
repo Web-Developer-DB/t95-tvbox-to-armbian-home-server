@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Write one locally provisioned T95 image to a removable USB SD card. The
 # selected card is the only block device opened; T95 eMMC and FEL are excluded.
+# CHANGE-ID: RELEASE HARDEN
+# T95-CHANGE: accept only a locally personalized, manifest-matched image.
+# PORTING-NOTE: replace /dev/sdX with the current removable SD device.
 set -euo pipefail
 umask 022
 

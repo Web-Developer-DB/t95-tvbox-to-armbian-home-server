@@ -51,8 +51,9 @@ Daten wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
 
 ## Vor der Portierung: UART ist erforderlich
 
-> [!IMPORTANT]
-> Wenn eine ähnliche H616-TV-Box nicht startet, kein Bild zeigt oder keine
+> [!CAUTION]
+> **UART-ADAPTER VOR DEM ERSTEN TEST BEREITSTELLEN:** Wenn eine ähnliche
+> H616-TV-Box nicht startet, kein Bild zeigt oder keine
 > Netzwerkadresse erhält, ist die serielle UART-Ausgabe der wichtigste Weg zur
 > Fehlerdiagnose. Ohne UART bleiben frühe Fehler in TOC0/U-Boot, DRAM/PMIC,
 > DTB oder Kernel weitgehend unsichtbar. Für Portierungsversuche deshalb vor
@@ -258,6 +259,17 @@ werden im nachgewiesenen T95-6.18-Aufbau weitgehend unverändert übernommen.
 Die Bootfähigkeit entsteht durch eine zusätzliche, hardware­spezifische
 Bootkette:
 
+> [!CAUTION]
+> **UART-ADAPTER VOR DER PORTIERUNG ANSCHLIESSEN:** Vor jeder Portierung
+> einer ähnlichen Platine einen **3,3-V-TTL-UART-
+> Adapter** anschließen und den Bootlog aufzeichnen. Nur damit lassen sich
+> Fehler in TOC0/U-Boot, DRAM/PMIC, DTB oder Kernel unterscheiden, bevor
+> Änderungen an der Armbian-Basis vorgenommen werden. Ein RP2040-Zero kann
+> mit der passenden Firmware als Adapter dienen: [RP2040-Zero-UART-
+> Adapterprojekt](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
+> Verwende 115200 Baud, 8N1 und gemeinsame Masse; 5-V-TTL und echtes RS-232
+> dürfen nicht direkt an der Platine angeschlossen werden.
+
 | Bestandteil | Armbian-Ausgangsstand | T95-Projektänderung | Bei anderer Box zuerst prüfen |
 | --- | --- | --- | --- |
 | Kernel und Rootfs | vorhanden, funktionierender Standard | kein Kernel-Neubau im finalen 6.18-Aufbau | Kernelversion und Treiberbestand beibehalten |
@@ -290,16 +302,6 @@ zunächst Kernel und Rootfs aus dem passenden Armbian-Image übernommen und nur
 die nachweislich boardabhängigen Teile angepasst. Änderungen am Kernel oder am
 Rootfs sind erst dann gerechtfertigt, wenn UART-Log und DTB-Prüfung zeigen,
 dass die Bootkette bereits funktioniert.
-
-Für eine Portierung sollte ein **3,3-V-TTL-UART-Adapter** als Pflichtwerkzeug
-eingeplant werden. Die serielle Ausgabe zeigt, ob der Fehler im TOC0-/U-Boot-
-Loader, bei DRAM/PMIC, im DTB, im Kernel oder erst im Userspace liegt. Ohne
-UART ist ein Gerät mit schwarzem Bildschirm oder ohne Netzwerk im frühen
-Bootstadium praktisch nicht gezielt konfigurier- oder diagnostizierbar. Ein
-RP2040-Zero kann dafür mit der passenden Firmware als Adapter verwendet werden:
-[rp2040-zero-uart-adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
-Verwende 3,3-V-TTL, gemeinsame Masse, 115200 Baud, 8N1 und niemals 5-V-TTL
-oder echtes RS-232 direkt an der Platine.
 
 Die vollständige Zuordnung von Armbian-Ausgangspunkt, Patch, Build-Skript,
 Resultat, Portierungsprüfung und Nachweis steht im

@@ -1,7 +1,8 @@
 # Öffentliche Testmatrix: stabil getesteter T95-Stand
 
-Die historische Asset-Kennung `v0.1.1-hardened-experimental` bleibt in
-Dateinamen und bestehenden Downloadpfaden unverändert.
+Der finale Asset-Kanal ist `v0.1.1`. Historische Experiment-Assets bleiben
+im privaten Laborbestand dokumentiert und werden nicht als finaler Download
+beworben.
 
 Diese Zusammenfassung enthält nur generische Prüfergebnisse. Rohe UART-Logs,
 lokale IP- und MAC-Adressen, Routerdaten, SD-Backups und die Android-Forensik

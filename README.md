@@ -113,10 +113,10 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```
@@ -458,7 +458,7 @@ sha256sum -c SHA256SUMS
 Das Release-Image heißt:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz
 ```
 
 ### 2. Lokale Image-Kopie personalisieren
@@ -472,10 +472,10 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```

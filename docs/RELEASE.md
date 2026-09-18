@@ -10,7 +10,7 @@ dem Unterseitenfoto sind redigiert.
 
 | Eigenschaft | Wert |
 |---|---|
-| Releasekanal | `v0.1.1-hardened-experimental` (historische Asset-Kennung) |
+| Releasekanal | `v0.1.1` (finaler, hardwaregebundener Release) |
 | Projektstatus | stabil getestet auf `H616-T95MAX-AXP313A-V3.0` |
 | System | Armbian 26.8.4 Trixie |
 | Kernel | `6.18.48-current-sunxi64` |
@@ -73,13 +73,13 @@ export HARDENED_ARTIFACT="$REPO/build/artifacts/t95-tanix-6.18-hardened-20260915
 bash "$REPO/build/audit-t95-generic-release-image.sh" \
   "$HARDENED_ARTIFACT" "$SOURCE_ARTIFACT"
 T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-  bash "$REPO/build/create-t95-release-asset.sh" v0.1.1-hardened-experimental
+  bash "$REPO/build/create-t95-release-asset.sh" v0.1.1
 ```
 
 Der Release-Ordner enthält sieben Dateien:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz
 RELEASE-MANIFEST.txt
 HARDENING-METADATA.txt
 HARDENED-ARTIFACT-SHA256SUMS
@@ -91,16 +91,16 @@ SHA256SUMS
 Vor Upload immer prüfen:
 
 ```bash
-cd "$REPO/release-assets/v0.1.1-hardened-experimental"
+cd "$REPO/release-assets/v0.1.1"
 sha256sum -c SHA256SUMS
-xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz
+xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz
 ```
 
 ## Lokale Personalisierung und SD-Schreibvorgang
 
 Das GitHub-Image ist absichtlich nicht direkt loginfähig. Es wird vor dem
 Schreiben lokal und außerhalb des Repositorys personalisiert. Das Werkzeug
-fragt zweimal verdeckt nach einem eigenen Passwort (mindestens 12 Zeichen)
+fragt zweimal verdeckt nach einem eigenen, nichtleeren Passwort beliebiger Länge
 und schreibt nur dessen SHA-512-Hash in die private Kopie. Passwort und Hash
 erscheinen nicht in der Kommandozeile oder im begleitenden Manifest.
 
@@ -109,9 +109,9 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 (cd "$DOWNLOAD" && sha256sum -c SHA256SUMS)
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 

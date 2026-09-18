@@ -276,6 +276,16 @@ die nachweislich boardabhängigen Teile angepasst. Änderungen am Kernel oder am
 Rootfs sind erst dann gerechtfertigt, wenn UART-Log und DTB-Prüfung zeigen,
 dass die Bootkette bereits funktioniert.
 
+Für eine Portierung sollte ein **3,3-V-TTL-UART-Adapter** als Pflichtwerkzeug
+eingeplant werden. Die serielle Ausgabe zeigt, ob der Fehler im TOC0-/U-Boot-
+Loader, bei DRAM/PMIC, im DTB, im Kernel oder erst im Userspace liegt. Ohne
+UART ist ein Gerät mit schwarzem Bildschirm oder ohne Netzwerk im frühen
+Bootstadium praktisch nicht gezielt konfigurier- oder diagnostizierbar. Ein
+RP2040-Zero kann dafür mit der passenden Firmware als Adapter verwendet werden:
+[rp2040-zero-uart-adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
+Verwende 3,3-V-TTL, gemeinsame Masse, 115200 Baud, 8N1 und niemals 5-V-TTL
+oder echtes RS-232 direkt an der Platine.
+
 Die vollständige Zuordnung von Armbian-Ausgangspunkt, Patch, Build-Skript,
 Resultat, Portierungsprüfung und Nachweis steht im
 [Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md). Dort sind auch die bewusst

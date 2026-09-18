@@ -21,6 +21,7 @@ IMAGE="$WORKDIR/$IMAGE_NAME"
 MANIFEST="$WORKDIR/SHA256SUMS"
 
 mkdir -p "$WORKDIR"
+cd "$WORKDIR"
 if [[ -d "$REPO/.git" ]]; then
   git -C "$REPO" pull --ff-only
 else

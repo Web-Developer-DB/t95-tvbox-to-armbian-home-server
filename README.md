@@ -120,7 +120,7 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 
 - eine T95 mit der geprüften Platine `H616-T95MAX-AXP313A-V3.0`;
 - eine entbehrliche microSD-Karte (mindestens so groß wie das Release-Image);
-- ein Linux-PC mit `bash`, `sudo`, `xz`, `sha256sum`, `lsblk`, `dd` und `e2fsck`;
+- ein Linux-PC mit `bash`, `git`, `sudo`, `xz`, `sha256sum`, `lsblk`, `dd` und `e2fsck`;
 - alternativ Windows 10/11 mit WSL2 sowie funktionierendem USB-/Blockgeräte-
   Passthrough. Für SD-Schreiben wird natives Linux ausdrücklich empfohlen;
 - ein Netzwerkkabel zum Router und optional eine USB-Festplatte für Dateien.
@@ -142,25 +142,43 @@ sha256sum -c SHA256SUMS
 
 Nur bei einer erfolgreichen Prüfung fortfahren.
 
-### 2. Persönliche lokale Image-Kopie erzeugen
+### 2. Werkzeuge lokal klonen und Image personalisieren
 
 Das öffentliche Image enthält absichtlich kein verwendbares Standardpasswort.
-Erzeuge deshalb eine lokale Kopie mit einem eigenen Passwort. Das Passwort
-bleibt außerhalb des Repositorys und wird nicht in GitHub veröffentlicht.
+Erzeuge deshalb eine lokale Kopie mit einem eigenen Passwort. Wechsle zuerst in
+den Ordner, in dem die aus dem GitHub-Release heruntergeladenen Dateien liegen.
+Der folgende Block klont die benötigten Skripte automatisch in ein
+Unterverzeichnis des aktuellen Ordners und setzt alle Pfade passend:
 
 ```bash
-export REPO=/pfad/zum/t95-tvbox-to-armbian-home-server
-export DOWNLOAD=/pfad/zum/GitHub-Release-Download
-mkdir -p "$HOME/t95-private"
+# Diesen Block im Ordner mit den heruntergeladenen Release-Dateien ausführen.
+DOWNLOAD="$PWD"
+REPO="$PWD/t95-tvbox-to-armbian-home-server"
+if [[ -d "$REPO/.git" ]]; then
+  git -C "$REPO" pull --ff-only
+else
+  git clone --depth 1 \
+    https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git \
+    "$REPO"
+fi
+PRIVATE="$PWD/t95-private"
+mkdir -p "$PRIVATE"
+IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
+test -f "$IMAGE_XZ" || { echo "Fehlt: $IMAGE_XZ" >&2; exit 1; }
 
-xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+if [[ ! -f "$IMAGE" ]]; then
+  xz -dk --keep "$IMAGE_XZ"
+fi
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
-  "$HOME/t95-private/t95-personal.img" \
+  "$IMAGE" \
+  "$PRIVATE/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```
+
+Das Image selbst wird nicht mit Git geklont, sondern als Release-Asset
+heruntergeladen; Git liefert hier nur die geprüften Skripte und Dokumentation.
 
 ### 3. SD-Karte ermitteln und Image schreiben
 
@@ -176,8 +194,8 @@ im folgenden Befehl durch den **tatsächlichen** Gerätenamen ersetzen:
 ```bash
 bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
   /dev/sdX \
-  "$HOME/t95-private/t95-personal.img" \
-  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
+  "$PRIVATE/t95-personal.img" \
+  "$PRIVATE/t95-personal.img.t95-provisioned-manifest" \
   WRITE-T95-PROVISIONED-TO-SDX
 ```
 
@@ -535,24 +553,43 @@ Das Release-Image heißt:
 T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
 ```
 
-### 2. Lokale Image-Kopie personalisieren
+### 2. Werkzeuge lokal klonen und Image personalisieren
 
 Das folgende Werkzeug läuft auf dem Linux-PC und schreibt nur eine lokale
-Kopie. Das Passwort wird nicht in einem Manifest oder im Repository abgelegt.
+Kopie. Wechsle zunächst in den Ordner mit den heruntergeladenen
+Release-Dateien. Der Block klont die benötigten Werkzeuge automatisch in das
+aktuelle Arbeitsverzeichnis; das Passwort wird nicht in einem Manifest oder im
+Repository abgelegt.
 
 ```bash
-export REPO=/pfad/zum/t95-tvbox-to-armbian-home-server
-export DOWNLOAD=/pfad/zum/GitHub-Release-Download
-mkdir -p "$HOME/t95-private"
+# Diesen Block im Ordner mit den heruntergeladenen Release-Dateien ausführen.
+DOWNLOAD="$PWD"
+REPO="$PWD/t95-tvbox-to-armbian-home-server"
+if [[ -d "$REPO/.git" ]]; then
+  git -C "$REPO" pull --ff-only
+else
+  git clone --depth 1 \
+    https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git \
+    "$REPO"
+fi
+PRIVATE="$PWD/t95-private"
+mkdir -p "$PRIVATE"
+IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
+test -f "$IMAGE_XZ" || { echo "Fehlt: $IMAGE_XZ" >&2; exit 1; }
 
-xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+if [[ ! -f "$IMAGE" ]]; then
+  xz -dk --keep "$IMAGE_XZ"
+fi
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
-  "$HOME/t95-private/t95-personal.img" \
+  "$IMAGE" \
+  "$PRIVATE/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```
+
+Das große Image wird als GitHub-Release-Asset geladen; per Git werden nur
+Skripte und Dokumentation geholt.
 
 Die persönliche `.img`-Datei und die zugehörige
 `.t95-provisioned-manifest`-Datei bleiben außerhalb von GitHub.
@@ -584,8 +621,8 @@ nach dem Schreiben zurück. Die interne eMMC wird nicht angesprochen.
 ```bash
 bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
   /dev/sdX \
-  "$HOME/t95-private/t95-personal.img" \
-  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
+  "$PRIVATE/t95-personal.img" \
+  "$PRIVATE/t95-personal.img.t95-provisioned-manifest" \
   WRITE-T95-PROVISIONED-TO-SDX
 ```
 

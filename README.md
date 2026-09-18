@@ -49,9 +49,24 @@ Daten wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
   <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="240">
 </p>
 
+## Vor der Portierung: UART ist erforderlich
+
+> [!IMPORTANT]
+> Wenn eine ähnliche H616-TV-Box nicht startet, kein Bild zeigt oder keine
+> Netzwerkadresse erhält, ist die serielle UART-Ausgabe der wichtigste Weg zur
+> Fehlerdiagnose. Ohne UART bleiben frühe Fehler in TOC0/U-Boot, DRAM/PMIC,
+> DTB oder Kernel weitgehend unsichtbar. Für Portierungsversuche deshalb vor
+> dem ersten Image-Test einen **3,3-V-TTL-UART-Adapter** bereitstellen.
+
+Verwende 115200 Baud, 8N1, gemeinsame Masse und niemals 5-V-TTL oder echtes
+RS-232 direkt an der Platine. Ein RP2040-Zero kann mit der passenden Firmware
+als Adapter dienen: [RP2040-Zero-UART-Adapterprojekt](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
+Das separate Projekt beschreibt Firmware, Verdrahtung und Capture der Bootlogs.
+
 ## Inhaltsübersicht
 
 - [Projektziel](#projektziel)
+- [UART-Adapter und Portierung](#vor-der-portierung-uart-ist-erforderlich)
 - [Endanwender-Schnellstart](#endanwender-schnellstart)
 - [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
 - [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)

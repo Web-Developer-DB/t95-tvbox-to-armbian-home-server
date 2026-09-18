@@ -1,4 +1,4 @@
-# Entwurf für GitHub Release `v0.1.1-hardened-experimental`
+# GitHub Release `v0.1.1`
 
 ## T95 H616 / AXP313A: gehärtetes SD-Armbian
 
@@ -58,7 +58,7 @@ Vollständige Anleitung: [RELEASE.md](RELEASE.md).
 
 ### Assets
 
-- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1-hardened-experimental.img.xz`
+- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz`
 - `RELEASE-MANIFEST.txt`
 - `HARDENING-METADATA.txt`
 - `HARDENED-ARTIFACT-SHA256SUMS`

@@ -39,12 +39,12 @@ elif [[ -t 0 ]]; then
 else
     die 'Passwortabfrage benötigt ein interaktives Terminal; keine Passwort-Pipe verwenden'
 fi
-printf 'Neues Root-Passwort für die lokale SD-Kopie eingeben (mindestens 12 Zeichen).\n' >&2
+printf 'Neues Root-Passwort für die lokale SD-Kopie eingeben (beliebige Länge, nicht leer).\n' >&2
 IFS= read -r -s -p 'Passwort: ' password < "$prompt_input"
 printf '\n' >&2
 IFS= read -r -s -p 'Passwort wiederholen: ' password_confirm < "$prompt_input"
 printf '\n' >&2
-[[ ${#password} -ge 12 ]] || die 'Passwort ist kürzer als 12 Zeichen'
+[[ -n "$password" ]] || die 'Passwort darf nicht leer sein'
 [[ "$password" == "$password_confirm" ]] || die 'Passwörter stimmen nicht überein'
 root_hash=$(printf '%s' "$password" | openssl passwd -6 -stdin)
 unset password password_confirm

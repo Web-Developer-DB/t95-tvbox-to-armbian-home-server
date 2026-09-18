@@ -113,10 +113,10 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```
@@ -156,7 +156,31 @@ entfernt werden.
 Die Box bootet im unterstützten Releaseweg von microSD. Die interne eMMC wird
 hierbei nicht verändert.
 
-### 5. Optional: Dateien über USB/Samba freigeben
+### 5. Kernel und DTB vor Updates schützen
+
+> [!IMPORTANT]
+> Dieser geprüfte T95-Aufbau verwendet Kernel `6.18.48` und ein passendes
+> T95-DTB. Vor allgemeinen Systemupdates müssen die beiden Kernelpakete
+> eingefroren werden. Sonst kann ein späteres Kernel- oder DTB-Update die
+> Bootfähigkeit oder die AC300-Ethernet-Unterstützung verändern.
+
+Direkt nach dem Armbian-Ersteinrichtungsdialog und **vor** `apt upgrade`,
+`apt full-upgrade` oder der Samba-Installation ausführen:
+
+```bash
+sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
+apt-mark showhold
+uname -r
+```
+
+Erwartet werden beide Paketnamen unter `apt-mark showhold` und die Version
+`6.18.48-current-sunxi64` bei `uname -r`. Normale Debian-/Armbian-Pakete
+dürfen danach weiterhin aktualisiert werden; die Kernel-/DTB-Pakete bleiben
+jedoch geschützt. Ein bewusst geplantes Kernelupdate ist nur nach Backup und
+mit der Anleitung im Abschnitt [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz)
+vorzunehmen.
+
+### 6. Optional: Dateien über USB/Samba freigeben
 
 Nach erfolgreicher SSH-Anmeldung kann das optionale Modul
 [`server/samba-usb/`](server/samba-usb/) installiert werden. Es richtet Samba,
@@ -164,7 +188,7 @@ USB-Automount und eine geschützte Dateifreigabe ein. Die vollständige
 Endanwender-Anleitung steht in
 [`server/samba-usb/README.md`](server/samba-usb/README.md).
 
-### 6. Backup erstellen
+### 7. Backup erstellen
 
 Nach der Ersteinrichtung zuerst ein vollständiges SD-Backup auf dem PC anlegen.
 Die sichere Schrittfolge steht in [`docs/BACKUP.md`](docs/BACKUP.md). Backups
@@ -458,7 +482,7 @@ sha256sum -c SHA256SUMS
 Das Release-Image heißt:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
 ```
 
 ### 2. Lokale Image-Kopie personalisieren
@@ -472,10 +496,10 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
 
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```

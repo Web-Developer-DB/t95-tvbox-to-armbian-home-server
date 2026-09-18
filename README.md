@@ -11,6 +11,16 @@ in einen kleinen, stromsparenden **Armbian-Linux-Home-Server** verwandelt.
 Der Schwerpunkt liegt auf nachvollziehbarem Boot- und Hardware-Bring-up,
 Ethernet, UART-Diagnose und dokumentierten technischen Anpassungen.
 
+> [!NOTE]
+> **Privates Hardwareprojekt:** Ausgangspunkt war eine T95-TV-Box mit einer
+> als BadBox-belastet beziehungsweise -verdächtig eingestuften Android-
+> Installation. Deshalb wurde die Box nicht weiter als vertrauenswürdiges
+> TV-Gerät verwendet. Ziel dieses privaten Projekts war es, die vorhandene
+> Hardware ohne Nutzung des ursprünglichen Android-Systems als kleinen
+> Armbian-Linux-Home-Server weiterzuverwenden. Dieser Umbau war erfolgreich;
+> das geprüfte Ergebnis bootet von microSD und stellt Ethernet, SSH und
+> optionale Samba-Dateifreigaben bereit.
+
 > [!WARNING]
 > Dieses Projekt ist für genau die geprüfte Platine gedacht:
 > `H616-T95MAX-AXP313A-V3.0`. Der Aufdruck „T95“ beschreibt keine
@@ -23,6 +33,21 @@ Ethernet, UART-Diagnose und dokumentierten technischen Anpassungen.
 > SSH und Dateizugriff wurden im praktischen Betrieb ohne beobachtete Fehler
 > geprüft. Das ist keine Zusage für andere T95-Varianten oder für noch nicht
 > getestete Langzeit- und Peripheriefunktionen.
+
+## Hardware-Fotos
+
+Die folgenden Fotos zeigen die tatsächlich geprüfte T95-Platine und das
+Gehäuse. Sie stehen bewusst früh in der README, damit die Hardware vor dem
+Download des Images visuell mit dem eigenen Gerät verglichen werden kann.
+Sie dienen der Zuordnung und ersetzen keine elektrische Prüfung. EXIF-/GPS-
+Daten wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
+
+<p>
+  <img src="docs/images/t95-box-top.jpg" alt="Oberseite des T95-Gehäuses" width="240">
+  <img src="docs/images/t95-case-bottom-redacted.jpg" alt="Unterseite des T95-Gehäuses mit abgedecktem Aufkleber" width="240">
+  <img src="docs/images/t95-board-memory.jpg" alt="T95-Platine mit H616 und Speicherbausteinen" width="240">
+  <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="240">
+</p>
 
 ## Inhaltsübersicht
 
@@ -187,6 +212,15 @@ Nach erfolgreicher SSH-Anmeldung kann das optionale Modul
 USB-Automount und eine geschützte Dateifreigabe ein. Die vollständige
 Endanwender-Anleitung steht in
 [`server/samba-usb/README.md`](server/samba-usb/README.md).
+
+Der Unterschied zu einer normalen Samba-Installation über die Distribution:
+Standard-Samba stellt vor allem den SMB-Dienst bereit. Dieses optionale Modul
+ergänzt ihn um die T95-spezifische feste Freigabe `T95-DATA`, automatisches
+Einbinden neuer USB-Sticks oder USB-Festplatten und eine eigene dynamische
+SMB2/SMB3-Freigabe pro angeschlossenem Medium. Der Freigabename wird aus dem
+Laufwerkslabel abgeleitet; beim Entfernen und Wiedereinstecken werden die
+Freigaben automatisch aktualisiert. Dadurch ist keine manuelle
+`smb.conf`-Änderung für jedes USB-Laufwerk erforderlich.
 
 ### 7. Backup erstellen
 
@@ -369,18 +403,7 @@ Das integrierte Ethernet ist auf 100 Mbit/s begrenzt; gemessen wurden etwa
 Samba-Zugriffen ist daher das Netzwerk und nicht die eMMC der limitierende
 Faktor.
 
-## Hardware-Fotos
-
-Die Fotos zeigen die tatsächlich geprüfte Platine und das Gehäuse. Sie dienen
-der visuellen Zuordnung und ersetzen keine elektrische Prüfung. EXIF-/GPS-Daten
-wurden entfernt; der individuelle MAC-/Barcode-Aufkleber ist abgedeckt.
-
-<p>
-  <img src="docs/images/t95-box-top.jpg" alt="Oberseite des T95-Gehäuses" width="240">
-  <img src="docs/images/t95-case-bottom-redacted.jpg" alt="Unterseite des T95-Gehäuses mit abgedecktem Aufkleber" width="240">
-  <img src="docs/images/t95-board-memory.jpg" alt="T95-Platine mit H616 und Speicherbausteinen" width="240">
-  <img src="docs/images/t95-board-connectors.jpg" alt="T95-Platine mit Anschlüssen und AC300-Bereich" width="240">
-</p>
+## Beispiel einer erfolgreichen SSH-Sitzung
 
 ### SSH-Statusansicht
 

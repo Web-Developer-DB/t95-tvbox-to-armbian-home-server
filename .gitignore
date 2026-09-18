@@ -62,6 +62,7 @@ tools/*
 !tools/write-t95-release-image-to-sd.sh
 !tools/provision-t95-release-image.sh
 !tools/write-t95-provisioned-image-to-sd.sh
+!tools/install-t95-release.sh
 
 # Lokale, mit einem individuellen Root-Passwort personalisierte Images sind
 # nie Release-Assets und bleiben außerhalb von Git.

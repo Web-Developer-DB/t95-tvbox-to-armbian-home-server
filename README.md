@@ -116,11 +116,28 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 > Release-Image herunter, personalisiere es lokal und schreibe es auf eine
 > microSD-Karte. Die technischen Portierungsdetails folgen weiter unten.
 
+### Ein-Skript-Start
+
+Wenn die Release-SD ohne manuelle Pfadpflege vorbereitet werden soll, führe
+diesen Befehl aus dem gewünschten Arbeitsordner aus. Das Skript klont die
+Werkzeuge, lädt und prüft das Release, fragt das lokale Root-Passwort ab und
+fragt anschließend ausdrücklich, ob auf ein Wechselmedium geschrieben werden
+soll:
+
+```bash
+bash <(curl -fsSL \
+  https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-release.sh)
+```
+
+Die Zielauswahl bleibt absichtlich interaktiv; interne eMMC- und NVMe-Geräte
+werden vom Skript nicht als Ziel akzeptiert. Für eine nachvollziehbare
+Einzelprüfung stehen darunter weiterhin alle Einzelschritte.
+
 ### Voraussetzungen
 
 - eine T95 mit der geprüften Platine `H616-T95MAX-AXP313A-V3.0`;
 - eine entbehrliche microSD-Karte (mindestens so groß wie das Release-Image);
-- ein Linux-PC mit `bash`, `git`, `sudo`, `xz`, `sha256sum`, `lsblk`, `dd` und `e2fsck`;
+- ein Linux-PC mit `bash`, `git`, `curl`, `sudo`, `xz`, `sha256sum`, `lsblk`, `dd` und `e2fsck`;
 - alternativ Windows 10/11 mit WSL2 sowie funktionierendem USB-/Blockgeräte-
   Passthrough. Für SD-Schreiben wird natives Linux ausdrücklich empfohlen;
 - ein Netzwerkkabel zum Router und optional eine USB-Festplatte für Dateien.
@@ -131,29 +148,19 @@ mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
 > durch das aktuell mit `lsblk` ermittelte SD-Gerät ersetzt werden. Niemals
 > eine interne NVMe-, System- oder sonstige Festplatte auswählen.
 
-### 1. Release herunterladen und prüfen
+### 1. Arbeitsordner einrichten und Release laden
 
-Lade aus dem [GitHub-Release](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases)
-das Image und `SHA256SUMS` in denselben Ordner. Prüfe dort:
-
-```bash
-sha256sum -c SHA256SUMS
-```
-
-Nur bei einer erfolgreichen Prüfung fortfahren.
-
-### 2. Werkzeuge lokal klonen und Image personalisieren
-
-Das öffentliche Image enthält absichtlich kein verwendbares Standardpasswort.
-Erzeuge deshalb eine lokale Kopie mit einem eigenen Passwort. Wechsle zuerst in
-den Ordner, in dem die aus dem GitHub-Release heruntergeladenen Dateien liegen.
-Der folgende Block klont die benötigten Skripte automatisch in ein
-Unterverzeichnis des aktuellen Ordners und setzt alle Pfade passend:
+Öffne ein Linux-Terminal und führe den folgenden Block vollständig aus. Er
+erstellt einen Arbeitsordner, klont die benötigten Skripte und lädt das
+geprüfte Release-Image direkt von GitHub. Du musst keine Repository-Pfade
+eintippen:
 
 ```bash
-# Diesen Block im Ordner mit den heruntergeladenen Release-Dateien ausführen.
-DOWNLOAD="$PWD"
-REPO="$PWD/t95-tvbox-to-armbian-home-server"
+set -eu
+WORKDIR="$HOME/t95-t95-install"
+mkdir -p "$WORKDIR"
+cd "$WORKDIR"
+REPO="$WORKDIR/t95-tvbox-to-armbian-home-server"
 if [[ -d "$REPO/.git" ]]; then
   git -C "$REPO" pull --ff-only
 else
@@ -161,30 +168,56 @@ else
     https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git \
     "$REPO"
 fi
-PRIVATE="$PWD/t95-private"
+IMAGE_XZ="$WORKDIR/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+SHA256SUMS="$WORKDIR/SHA256SUMS"
+curl -fL \
+  -o "$IMAGE_XZ" \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.0/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+curl -fL \
+  -o "$SHA256SUMS" \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.0/SHA256SUMS
+grep -F '  T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz' "$SHA256SUMS" \
+  | sha256sum -c -
+```
+
+Nur wenn die Prüfung mit `OK` endet, fortfahren.
+
+### 2. Lokale Image-Kopie mit eigenem Passwort erzeugen
+
+Das öffentliche Image enthält absichtlich kein verwendbares Standardpasswort.
+Der folgende zweite Block wird im selben Terminal ausgeführt und erstellt eine
+private, lokale Kopie:
+
+```bash
+set -eu
+WORKDIR="$HOME/t95-t95-install"
+REPO="$WORKDIR/t95-tvbox-to-armbian-home-server"
+DOWNLOAD="$WORKDIR"
+PRIVATE="$WORKDIR/t95-private"
 mkdir -p "$PRIVATE"
 IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
 IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
-test -f "$IMAGE_XZ" || { echo "Fehlt: $IMAGE_XZ" >&2; exit 1; }
-
 if [[ ! -f "$IMAGE" ]]; then
   xz -dk --keep "$IMAGE_XZ"
 fi
-
 bash "$REPO/tools/provision-t95-release-image.sh" \
   "$IMAGE" \
   "$PRIVATE/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 ```
 
-Das Image selbst wird nicht mit Git geklont, sondern als Release-Asset
-heruntergeladen; Git liefert hier nur die geprüften Skripte und Dokumentation.
+Das große Image wird als GitHub-Release-Asset geladen; per Git werden nur
+Skripte und Dokumentation geholt. Passwort und persönliche Image-Kopie bleiben
+außerhalb von GitHub.
 
 ### 3. SD-Karte ermitteln und Image schreiben
 
 SD-Karte einstecken und die Ausgabe unmittelbar vor dem Schreiben prüfen:
 
 ```bash
+WORKDIR="$HOME/t95-t95-install"
+REPO="$WORKDIR/t95-tvbox-to-armbian-home-server"
+PRIVATE="$WORKDIR/t95-private"
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
 ```
 
@@ -588,8 +621,9 @@ bash "$REPO/tools/provision-t95-release-image.sh" \
   PROVISION-T95-ROOT-PASSWORD
 ```
 
-Das große Image wird als GitHub-Release-Asset geladen; per Git werden nur
-Skripte und Dokumentation geholt.
+Das große Image wird als
+GitHub-Release-Asset geladen; per Git werden nur Skripte und Dokumentation
+geholt.
 
 Die persönliche `.img`-Datei und die zugehörige
 `.t95-provisioned-manifest`-Datei bleiben außerhalb von GitHub.
@@ -797,6 +831,7 @@ Sicherheitsupdates oder Backups.
 | [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
 | [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |
 | [`tools/write-t95-provisioned-image-to-sd.sh`](tools/write-t95-provisioned-image-to-sd.sh) | verifizierter SD-Schreiber |
+| [`tools/install-t95-release.sh`](tools/install-t95-release.sh) | Endanwender-Quickstart: Download, Prüfung, Personalisierung und optionales SD-Schreiben |
 | [`server/samba-usb/`](server/samba-usb/) | Samba- und USB-Automount für den Home-Server |
 | [`docs/images/`](docs/images/) | bereinigte Hardware-Fotos |
 

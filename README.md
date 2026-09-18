@@ -6,10 +6,10 @@
 ![Kernel: 6.18](https://img.shields.io/badge/Kernel-6.18.48-purple)
 ![Boot: SD](https://img.shields.io/badge/Boot-microSD-informational)
 
-Ein reproduzierbarer Umbau, der eine **T95-TV-Box mit Allwinner H616**
-in einen kleinen, stromsparenden **Armbian-Linux-Home-Server** verwandelt.
-Der Schwerpunkt liegt auf nachvollziehbarem Boot- und Hardware-Bring-up,
-Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
+Ein geprüftes Armbian-System, das eine **T95-TV-Box mit Allwinner H616**
+in einen kleinen, stromsparenden **Linux-Home-Server** verwandelt.
+Die Box startet von microSD, ist per Ethernet und SSH erreichbar und kann
+optional Dateien über Samba und USB-Laufwerke bereitstellen.
 
 > [!WARNING]
 > Dieses Projekt ist für genau die geprüfte Platine gedacht:
@@ -28,20 +28,16 @@ Ethernet, UART-Diagnose und einem sicheren Veröffentlichungsweg.
 
 - [Projektziel](#projektziel)
 - [Endanwender-Schnellstart](#endanwender-schnellstart)
-- [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
-- [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
 - [Nachgewiesener Stand](#nachgewiesener-stand)
 - [eMMC als internes Datenlaufwerk](#emmc-als-internes-datenlaufwerk)
 - [Hardware-Fotos](#hardware-fotos)
-- [Technische Detailreferenz: Image-Personalisierung und SD-Schreiben](#technische-detailreferenz-image-personalisierung-und-sd-schreiben)
 - [SD-Backup und Wiederherstellung](#sd-backup-und-wiederherstellung)
 - [Samba- und USB-Dateiserver](#samba--und-usb-dateiserver)
 - [UART-Diagnose mit RP2040-Zero](#uart-diagnose-mit-rp2040-zero)
 - [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz)
 - [Sicherheitsgrenzen](#sicherheitsgrenzen)
-- [Projektstruktur](#projektstruktur)
-- [Reproduzierbarer Build und Release](#reproduzierbarer-build-und-release)
+- [Nützliche Projektdateien](#nützliche-projektdateien)
 - [Optionale Weiterentwicklung](#optionale-weiterentwicklung)
 - [Lizenz](#lizenz)
 
@@ -57,23 +53,23 @@ flowchart LR
     U["RP2040-Zero<br/>UART-Adapter"] -. Diagnose .-> B
 ```
 
-Das Repository dokumentiert nicht nur ein fertiges Image, sondern die Schritte,
-mit denen der Start reproduziert und im Fehlerfall zurückverfolgt werden kann:
+Mit dem geprüften Release kannst du die Box ohne eigene Kernel- oder
+Bootloader-Kompilierung als kleinen Server einrichten:
 
-1. Platine identifizieren und UART anschließen.
-2. T95-spezifischen TOC0-/U-Boot-Loader auf microSD testen.
-3. Armbian mit passendem DTB und AC300-Ethernet starten.
-4. Erststart, Netzwerk und Stabilität prüfen.
-5. Samba-/USB-Dateiserver reproduzierbar einrichten.
-6. Ein generisches Release-Image lokal mit eigenem Zugang personalisieren.
+1. Release-Image und Prüfsumme herunterladen.
+2. Eine lokale Kopie mit einem eigenen Root-Passwort erzeugen.
+3. Die Kopie auf eine microSD-Karte schreiben.
+4. Die T95 starten und den Armbian-Ersteinrichtungsdialog abschließen.
+5. Per SSH verwalten und bei Bedarf Samba/USB-Freigaben aktivieren.
+
+Für die normale Installation sind keine eigenen Änderungen am System nötig.
 
 ## Endanwender-Schnellstart
 
 > [!TIP]
-> **Dieser Abschnitt ist für Endanwender gedacht.** Du musst weder U-Boot
-> kompilieren noch ein Kernel- oder DTB-Image bauen. Lade das geprüfte
-> Release-Image herunter, personalisiere es lokal und schreibe es auf eine
-> microSD-Karte. Die Entwickler- und Portierungsdetails folgen weiter unten.
+> Du musst weder U-Boot kompilieren noch ein Kernel- oder DTB-Image bauen.
+> Lade das geprüfte Release-Image herunter, personalisiere es lokal und
+> schreibe es auf eine microSD-Karte.
 
 ### Voraussetzungen
 
@@ -172,57 +168,9 @@ enthalten persönliche Daten und gehören nicht in GitHub.
 
 > [!NOTE]
 > Wenn die Box nicht startet oder keine DHCP-Adresse erhält, nicht sofort ein
-> anderes Image schreiben. Zuerst [UART- und Entwicklerdiagnose](#uart-diagnose-mit-rp2040-zero)
-> sowie die [technische Detailreferenz](#technische-detailreferenz-image-personalisierung-und-sd-schreiben)
-> verwenden.
-
-## Armbian-Standard und T95-Anpassungen
-
-Als Ausgangspunkt dient ein offizielles Armbian-Image für die verwandte
-Tanix-TX6s-/AXP313-Plattform: Armbian 26.8.4, Debian 13 Trixie und Kernel
-`6.18.48-current-sunxi64`. Kernel, Initramfs und das Debian-Root-Dateisystem
-werden im nachgewiesenen T95-6.18-Aufbau weitgehend unverändert übernommen.
-Die Bootfähigkeit entsteht durch eine zusätzliche, hardware­spezifische
-Bootkette:
-
-| Bestandteil | Armbian-Ausgangsstand | T95-Projektänderung | Bei anderer Box zuerst prüfen |
-| --- | --- | --- | --- |
-| Kernel und Rootfs | vorhanden, funktionierender Standard | kein Kernel-Neubau im finalen 6.18-Aufbau | Kernelversion und Treiberbestand beibehalten |
-| U-Boot / TOC0 | generischer Board-Bootpfad | eigener T95-Loader, SD-Laden von `mmc 0:1`, TOC0 bei Byte 8192 | SoC, DRAM, PMIC und Boot-ROM-Vertrag |
-| TF-A / BL31 | passend zum Ausgangsboard | mit dem T95-U-Boot gepaarte TF-A-Version | SoC-/Boardvariante und BL31-Kompatibilität |
-| DTB | Tanix-TX6s-/AXP313-DTB | T95-kompatibler Name und AC300-/RMII-Beschreibung | tatsächliche Platine, PHY-Adresse, MDIO und Taktpfad |
-| `armbianEnv.txt` | generische DTB-/Bootauswahl | T95-DTB, serielle Konsole, ext4-Root und Diagnoseparameter | nur die wirklich belegten Gerätewerte ändern |
-| AC300-Ethernet | nicht für jede T95-Revision garantiert | DTB-/U-Boot-Vorinitialisierung für `end0` | PHY, Reset, Clock, MAC und Link separat messen |
-| `clk_ignore_unused nohz=off` | nicht erforderlich | vorläufige Diagnose-/Stabilitätshilfe | nach erfolgreichem Boot wieder unabhängig testen |
-| Sicherheits-Härtung | nicht Teil des Rohimages | Root sperren, Hostkeys entfernen, neue Hostkeys vor `sshd` erzeugen | Zugangsdaten immer lokal personalisieren |
-| Samba und USB-Shares | nicht Teil des Minimalimages | separates Modul unter `server/samba-usb/` | erst nach stabilem Linux- und Netzwerkstart |
-
-Für diese Platine ist daher **nur das Austauschen des DTB nicht ausreichend**:
-Ein ungeeigneter U-Boot-/TOC0-Loader kann bereits vor dem Kernel hängen bleiben.
-Umgekehrt muss für einen reinen Kernel- oder Userspace-Fehler nicht sofort die
-gesamte Armbian-Basis geändert werden. Die bewährte Reihenfolge ist:
-
-1. **Kein U-Boot-Banner:** zuerst Loader, TOC0-Offset, SD-Layout und UART prüfen.
-2. **U-Boot startet, DRAM/PMIC scheitert:** nur DRAM-, AXP313- oder Boardparameter
-   des Loaders untersuchen.
-3. **Kernel startet, aber bleibt früh hängen:** DTB, Kernelversion und
-   `armbianEnv.txt` vergleichen; Rootfs zunächst unverändert lassen.
-4. **Linux läuft, Ethernet fehlt:** AC300-/PHY-Knoten, RMII, Reset und Clock
-   prüfen; Samba oder eMMC sind dafür nicht relevant.
-5. **Linux und Netzwerk laufen:** erst dann optionale Schichten wie Samba,
-   USB-Automount und eMMC-Datenablage einrichten.
-
-Diese Trennung erleichtert Portierungen: Ein Entwickler übernimmt zunächst
-Kernel und Rootfs aus dem passenden Armbian-Image und passt nur die nachweislich
-boardabhängigen Teile an. Änderungen am Kernel oder am Rootfs sind erst dann
-gerechtfertigt, wenn UART-Log und DTB-Prüfung zeigen, dass die Bootkette bereits
-funktioniert.
-
-Die vollständige Zuordnung von Armbian-Ausgangspunkt, Patch, Build-Skript,
-Resultat, Portierungsprüfung und Nachweis steht im
-[Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md). Dort sind auch die bewusst
-unveränderten Bestandteile und die Pflegeanforderungen für neue Armbian-Releases
-festgehalten.
+> anderes Image schreiben. Prüfe zuerst Stromversorgung, microSD-Sitz und
+> DHCP-Lease im Router. Wenn weiterhin kein Start möglich ist, hilft die
+> [UART-Diagnose mit dem RP2040-Zero](#uart-diagnose-mit-rp2040-zero).
 
 ## Geprüfte Hardware und Software
 
@@ -335,10 +283,11 @@ Diese Aufteilung verändert die Android-eMMC nicht automatisch und macht sie
 nicht bootfähig. Sie bietet trotzdem eine schnelle interne Ablage für Backups,
 Samba-Dateien und andere Serverdaten.
 
-Im öffentlichen SD-Release wird die interne eMMC nicht beschrieben. Wer sie
-wie im Laborversuch als Datenlaufwerk verwenden möchte, muss Partitionierung,
-Formatierung und Einbindung bewusst selbst durchführen und vorher ein eigenes
-Backup anlegen.
+Das öffentliche SD-Release beschreibt die interne eMMC nicht. Wenn du sie als
+Datenlaufwerk verwenden möchtest, partitioniere und formatiere sie bewusst,
+erstelle vorher ein eigenes Backup und binde sie anschließend zum Beispiel
+unter `/srv/T95-DATA` ein. Die eMMC wird dadurch nicht zu einem bootfähigen
+Armbian-System.
 
 Das integrierte Ethernet ist auf 100 Mbit/s begrenzt; gemessen wurden etwa
 94,5 Mbit/s beziehungsweise ungefähr 11–12 MB/s Nutzdaten pro Sekunde. Bei
@@ -374,157 +323,6 @@ Dokumentationswerte ersetzt.
 > Hostname wurden durch neutrale Dokumentationswerte ersetzt. Es handelt sich
 > daher nicht um eine unveränderte Live-Aufnahme.
 
-## Technische Detailreferenz: Image-Personalisierung und SD-Schreiben
-
-> [!NOTE]
-> **Dieser Abschnitt richtet sich an Entwickler, Maintainer und erfahrene
-> Linux-Anwender.** Für die normale Installation bitte den
-> [Endanwender-Schnellstart](#endanwender-schnellstart) am Anfang verwenden.
-
-> [!IMPORTANT]
-> Das öffentliche Image ist absichtlich generisch: Root ist gesperrt und es
-> enthält keine privaten SSH-Hostschlüssel. Vor dem Schreiben wird lokal eine
-> persönliche Kopie mit eigenem Passwort erzeugt.
-
-### Ausführungsumgebung: Linux oder WSL2
-
-Alle Befehle und Bash-Skripte in diesem Repository sind für eine **Linux-
-Shell** geschrieben. Empfohlen wird ein aktuelles Ubuntu- oder Debian-System
-mit `bash`, `sudo`, `xz`, `sha256sum`, `lsblk` und den üblichen Dateisystem-
-Werkzeugen.
-
-Unter Windows kann alternativ **WSL2** mit Ubuntu oder Debian verwendet werden.
-Dabei gelten wichtige Einschränkungen:
-
-- PowerShell und die klassische Windows-Eingabeaufforderung sind für diese
-  Befehle nicht geeignet.
-- Für UART-, FEL- und USB-Tests muss das Gerät per USB-Passthrough (z. B.
-  `usbipd-win`) in WSL sichtbar sein.
-- Für direkte SD-Schreibzugriffe muss die Karte in WSL als Linux-Blockgerät
-  `/dev/sdX` erscheinen und mit den erforderlichen Rechten erreichbar sein.
-- Ist USB- oder Blockgeräte-Passthrough nicht zuverlässig eingerichtet, sollte
-  der jeweilige Hardware-Schritt auf einem nativen Linux-System ausgeführt
-  werden. Besonders wichtig ist die Kontrolle von `lsblk`, bevor ein
-  Schreibwerkzeug gestartet wird.
-
-Die folgenden Beispiele verwenden deshalb bewusst Linux-Pfade, `sudo` und
-Bash-Syntax. Windows-Pfade wie `C:\\...` werden nicht direkt eingesetzt.
-
-> [!TIP]
-> **Native Linux-Installation wird empfohlen.** Sie vermeidet die zusätzliche
-> Geräte- und Rechte-Schicht von Windows/WSL2 und ist für SD-, FEL- und UART-
-> Tests am zuverlässigsten.
-
-### Warum natives Linux bevorzugt wird
-
-| Aufgabe | Native Linux | Windows / WSL2 |
-| --- | --- | --- |
-| Bash-Skripte | direkt ausführbar | nur innerhalb WSL2 |
-| SD-Karte | `/dev/sdX` mit `lsblk` direkt sichtbar | Blockgerät muss eigens durchgereicht werden |
-| Image schreiben | `dd`, `sync` und Rücklesen direkt möglich | Windows-Mounts und Laufwerksmapping können stören |
-| UART mit RP2040-Zero | `/dev/ttyACM*` direkt verfügbar | meist als COM-Port sichtbar, WSL übernimmt ihn nicht automatisch |
-| FEL / `sunxi-tools` | USB-Gerät direkt verfügbar | USB-Passthrough, z. B. `usbipd-win`, notwendig |
-| `udev` / `sudo` | nativ unterstützt | in WSL2 teilweise eingeschränkt |
-| Fehlerrisiko beim SD-Schreiben | gut kontrollierbar | höher durch wechselnde Laufwerkszuordnung |
-
-Die Windows-Variante ist möglich, aber nicht gleichwertig: Ein falsch
-zugeordnetes Blockgerät kann zum Schreiben auf die falsche Festplatte führen.
-Deshalb muss `lsblk` unmittelbar vor jedem SD-Schreibvorgang geprüft werden.
-
-### Wenn Windows trotzdem verwendet wird
-
-| Aufgabe | Empfohlene Umgebung |
-| --- | --- |
-| Repository-Checks, `sha256sum`, Build- und Image-Skripte | WSL2 (Ubuntu/Debian) |
-| RP2040-Zero-UART-Konsole und Live-Ausgabe | Windows PowerShell bzw. ein Windows-Seriellmonitor am COM-Port |
-| Direkter SD-Schreibzugriff | bevorzugt natives Linux; unter WSL2 nur mit funktionierendem Blockgeräte-Passthrough |
-
-Der RP2040-Zero wird unter Windows normalerweise als COM-Port erkannt. Für die
-UART-Konsole kann daher ein separates PowerShell-Fenster oder ein kompatibler
-Windows-Seriellmonitor mit **115200 Baud, 8N1 und ohne Flow-Control** verwendet
-werden. WSL2 übernimmt diesen COM-Port nicht automatisch. Soll die UART-
-Aufzeichnung stattdessen mit dem Linux-Skript erfolgen, muss der USB-/COM-Port
-explizit an WSL2 durchgereicht werden; beide Programme dürfen den Port nicht
-gleichzeitig öffnen.
-
-### 1. Release-Dateien prüfen
-
-Aus dem GitHub-Release herunterladen und im Download-Verzeichnis prüfen:
-
-```bash
-sha256sum -c SHA256SUMS
-```
-
-Das Release-Image heißt:
-
-```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz
-```
-
-### 2. Lokale Image-Kopie personalisieren
-
-Das folgende Werkzeug läuft auf dem Linux-PC und schreibt nur eine lokale
-Kopie. Das Passwort wird nicht in einem Manifest oder im Repository abgelegt.
-
-```bash
-export REPO=/pfad/zum/t95-tvbox-to-armbian-home-server
-export DOWNLOAD=/pfad/zum/GitHub-Release-Download
-mkdir -p "$HOME/t95-private"
-
-xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz"
-
-bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img" \
-  "$HOME/t95-private/t95-personal.img" \
-  PROVISION-T95-ROOT-PASSWORD
-```
-
-Die persönliche `.img`-Datei und die zugehörige
-`.t95-provisioned-manifest`-Datei bleiben außerhalb von GitHub.
-
-### 3. SD-Karte eindeutig bestimmen
-
-> [!CAUTION]
-> In allen folgenden Befehlen ist `/dev/sdX` nur ein Platzhalter. `X` muss
-> durch den **tatsächlichen Gerätenamen deiner SD-Karte** ersetzt werden, zum
-> Beispiel `/dev/sda` oder `/dev/sdb`. Diesen Namen unmittelbar vorher mit
-> `lsblk` ermitteln. Die Kennzeichnung `SDX` in einem Bestätigungstoken wie
-> `WRITE-T95-PROVISIONED-TO-SDX` bleibt dagegen unverändert, sofern das
-> Skript sie genau so verlangt.
-
-Nach jedem Einstecken den Gerätenamen neu prüfen. Niemals blind `/dev/sda`
-verwenden:
-
-```bash
-lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
-```
-
-Das Ziel muss eine entbehrliche, wechselbare microSD-Karte (`RM=1`) sein.
-
-### 4. Persönliches Image schreiben
-
-Das Werkzeug prüft Gerätekennung, Manifest, Image-Hash und liest die Karte
-nach dem Schreiben zurück. Die interne eMMC wird nicht angesprochen.
-
-```bash
-bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
-  /dev/sdX \
-  "$HOME/t95-private/t95-personal.img" \
-  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
-  WRITE-T95-PROVISIONED-TO-SDX
-```
-
-### 5. Kaltstart und Ersteinrichtung
-
-1. SD-Karte nur bei ausgeschalteter T95 einsetzen.
-2. Ethernet mit dem Router verbinden.
-3. T95 einschalten und die DHCP-Lease im Router ablesen.
-4. Per SSH anmelden und den Armbian-Ersteinrichtungsdialog abschließen.
-
-Es gibt kein veröffentlichtes Standardpasswort. Beim ersten Start werden
-eigene SSH-Hostschlüssel erzeugt, bevor `sshd` Verbindungen annimmt.
-
 ## SD-Backup und Wiederherstellung
 
 Vor Kernel-, DTB- oder Serveränderungen sollte ein vollständiges Abbild der
@@ -547,9 +345,8 @@ Box sauber herunterfahren → SD-Gerät mit lsblk prüfen → Partitionen aushä
 ```
 
 Die interne Android-eMMC wird durch den SD-Backup-Weg weder gelesen noch
-beschrieben. Für die aktuelle Labor-Konfiguration kann die eMMC separat als
-ext4-Datenlaufwerk eingebunden werden; sie ist dadurch nicht automatisch ein
-bootfähiges Armbian-System.
+beschrieben. Die eMMC kann separat als ext4-Datenlaufwerk eingebunden werden;
+sie ist dadurch nicht automatisch ein bootfähiges Armbian-System.
 
 ## Samba- und USB-Dateiserver
 
@@ -571,7 +368,7 @@ flowchart LR
 
 > [!IMPORTANT]
 > Die Installation wird auf der laufenden T95-Armbian-Box ausgeführt, nicht
-> auf dem Build-PC. Ein bestehender Linux-Benutzer wird als `T95_USER`
+> auf der laufenden T95. Ein bestehender Linux-Benutzer wird als `T95_USER`
 > übergeben; das Samba-Passwort wird interaktiv gesetzt und nicht im
 > Repository gespeichert.
 
@@ -621,7 +418,8 @@ Elektrische Eckdaten:
 * 3,3-V-TTL, 115200 Baud, 8N1 verwenden.
 * 5-V-TTL und echtes RS-232 niemals direkt anschließen.
 * Für reine Bootaufzeichnung kann die TX-Leitung des Adapters getrennt bleiben.
-* Capture-Dateien gehören ins lokale Labor und werden nicht veröffentlicht.
+* UART-Aufzeichnungen können persönliche Daten enthalten und gehören nicht in
+  GitHub.
 
 Beispiel für eine Aufzeichnung:
 
@@ -671,43 +469,17 @@ Sicherheitsupdates oder Backups.
 - `clk_ignore_unused nohz=off` sind vorläufige Diagnoseparameter, keine
   endgültige Serverkonfiguration.
 
-## Projektstruktur
+## Nützliche Projektdateien
 
 | Pfad | Zweck |
 | --- | --- |
 | [`docs/RELEASE.md`](docs/RELEASE.md) | geprüfter Releaseweg und Grenzen |
 | [`docs/VALIDATION.md`](docs/VALIDATION.md) | öffentliche Testmatrix und Hash-Nachweise |
-| [`docs/PUBLISHING.md`](docs/PUBLISHING.md) | Veröffentlichungs- und Geheimnisprüfung |
-| [`docs/GITHUB_RELEASE_NOTES.md`](docs/GITHUB_RELEASE_NOTES.md) | Textbausteine für ein GitHub-Release |
 | [`docs/BACKUP.md`](docs/BACKUP.md) | vollständiges SD-Backup und Wiederherstellung |
-| [`docs/CHANGES_FROM_ARMBIAN.md`](docs/CHANGES_FROM_ARMBIAN.md) | Datei-/Patch-Inventar gegenüber dem Armbian-Ausgangsstand |
-| [`build/README.md`](build/README.md) | hostseitige Buildkette |
-| [`build/patches/`](build/patches/) | versionierte T95-/AC300-Patches |
 | [`tools/provision-t95-release-image.sh`](tools/provision-t95-release-image.sh) | lokale Passwort-Initialisierung |
 | [`tools/write-t95-provisioned-image-to-sd.sh`](tools/write-t95-provisioned-image-to-sd.sh) | verifizierter SD-Schreiber |
 | [`server/samba-usb/`](server/samba-usb/) | Samba- und USB-Automount für den Home-Server |
 | [`docs/images/`](docs/images/) | bereinigte Hardware-Fotos |
-
-## Reproduzierbarer Build und Release
-
-Die Buildkette wird auf dem Linux-PC ausgeführt. Eine Übersicht steht in
-[`build/README.md`](build/README.md). Der sichere Ablauf ist:
-
-```text
-Quelle vorbereiten → DTB/Rootfs bauen → Image härten →
-Image auditieren → Release-Manifest erzeugen → lokal personalisieren → SD schreiben
-```
-
-Das generische Release-Image wird offline auf folgende Eigenschaften geprüft:
-
-- Rootkonto gesperrt;
-- keine privaten SSH-Hostschlüssel im Image;
-- Hostschlüssel-Erzeugung vor dem Start von `sshd`;
-- leere `machine-id`;
-- bereinigte freie ext4-Blöcke;
-- SHA-256-Prüfsummen für Image, Loader und DTB.
-
-Das große Image gehört als Release-Asset zu GitHub, nicht in den Git-Verlauf.
 
 ## Optionale Weiterentwicklung
 
@@ -719,6 +491,6 @@ Diese Punkte sind nicht Voraussetzung für den dokumentierten Home-Server-Betrie
 
 ## Lizenz
 
-Für dieses Repository ist derzeit absichtlich noch keine Lizenz festgelegt.
-Vor einer Weiterveröffentlichung müssen die Lizenz des Projekts und die
-Lizenzen aller übernommenen Upstream-Bestandteile geprüft werden.
+Für dieses Repository ist derzeit keine Lizenz festgelegt. Beachte die
+Lizenzhinweise des Projekts und der enthaltenen Armbian-/Upstream-Bestandteile,
+bevor du Dateien weiterverwendest oder veröffentlichst.

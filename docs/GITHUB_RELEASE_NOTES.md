@@ -1,4 +1,4 @@
-# GitHub Release `v0.1.1`
+# GitHub Release `v1.0.0`
 
 ## T95 H616 / AXP313A: gehärtetes SD-Armbian
 
@@ -28,7 +28,7 @@ SSH-Hostschlüssel**:
 
 ### Installation
 
-1. Alle sieben Assets herunterladen und `sha256sum -c SHA256SUMS` ausführen.
+1. Alle sechs Assets herunterladen und `sha256sum -c SHA256SUMS` ausführen.
 2. Das Image entpacken, mit
    `tools/provision-t95-release-image.sh` außerhalb des Repositorys lokal
    personalisieren und die dabei angelegte private Manifest-Datei behalten.
@@ -58,10 +58,9 @@ Vollständige Anleitung: [RELEASE.md](RELEASE.md).
 
 ### Assets
 
-- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v0.1.1.img.xz`
+- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz`
 - `RELEASE-MANIFEST.txt`
 - `HARDENING-METADATA.txt`
-- `HARDENED-ARTIFACT-SHA256SUMS`
 - `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin`
 - `T95-H616-AXP313A-tanix-6.18.dtb`
 - `SHA256SUMS`

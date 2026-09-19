@@ -45,6 +45,15 @@ docs/*
 !docs/GITHUB_RELEASE_NOTES.md
 !docs/BACKUP.md
 !docs/CHANGES_FROM_ARMBIAN.md
+!docs/PORTING.md
+!docs/HARDWARE_IDENTIFICATION.md
+!docs/UART_BRINGUP.md
+!docs/FEL_BRINGUP.md
+!docs/DRAM_PMIC.md
+!docs/DTB_PORTING.md
+!docs/BOOT_TROUBLESHOOTING.md
+!docs/reference-logs/
+!docs/reference-logs/**
 !docs/images/
 !docs/images/**
 build/*
@@ -56,6 +65,11 @@ build/*
 !build/build-t95-ac300-ext4boot.sh
 !build/build-t95-tanix-6.18-dtb.sh
 !build/assemble-t95-tanix-6.18-ext4-image.sh
+!build/PORTING_SOURCES.md
+!build/setup-h616-porting-host.sh
+!build/fetch-h616-porting-sources.sh
+!build/build-h616-fel-egon.sh
+!build/build-h616-toc0-test.sh
 !build/patches/
 !build/patches/**
 tools/*

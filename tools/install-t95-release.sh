@@ -23,15 +23,20 @@ MANIFEST="$WORKDIR/SHA256SUMS"
 mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 if [[ -d "$REPO/.git" ]]; then
-  git -C "$REPO" pull --ff-only
+  git -C "$REPO" fetch --depth 1 origin "refs/tags/v1.0.0:refs/tags/v1.0.0"
+  git -C "$REPO" checkout --detach v1.0.0
 else
-  git clone --depth 1 "$REPO_URL" "$REPO"
+  git clone --branch v1.0.0 --depth 1 "$REPO_URL" "$REPO"
 fi
 
 printf 'Lade und prüfe Release-Image ...\n'
 curl -fL --retry 3 -o "$IMAGE_XZ" "$RELEASE_BASE/$IMAGE_XZ_NAME"
 curl -fL --retry 3 -o "$MANIFEST" "$RELEASE_BASE/SHA256SUMS"
-grep -F "  $IMAGE_XZ_NAME" "$MANIFEST" | sha256sum -c -
+expected_sha="$(awk -v name="$IMAGE_XZ_NAME" '$2 == name { print $1; exit }' "$MANIFEST")"
+actual_sha="$(sha256sum "$IMAGE_XZ" | awk '{ print $1 }')"
+[[ -n "$expected_sha" && "$expected_sha" == "$actual_sha" ]] || \
+  die 'SHA-256-Prüfung des Release-Images fehlgeschlagen'
+printf '%s: OK\n' "$IMAGE_XZ_NAME"
 xz -t "$IMAGE_XZ"
 
 if [[ ! -f "$IMAGE" ]]; then

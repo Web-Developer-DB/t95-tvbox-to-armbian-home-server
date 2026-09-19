@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# HISTORISCHES LABORWERKZEUG: nicht aus einem öffentlichen Clone reproduzierbar.
+# Es benötigt ignorierte Zwischenartefakte und einen privaten TOC0-Schlüssel.
+# Für eine neue H616-Portierung build/build-h616-fel-egon.sh verwenden.
 # Build a T95-only TOC0 loader that starts Armbian's ext4 boot script.
 # It operates exclusively below build/{work,artifacts}; it never opens a block
 # device and has no eMMC or SD write path.

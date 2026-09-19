@@ -13,8 +13,8 @@ artifact=${T95_RELEASE_ARTIFACT:-}
 asset_prefix='T95-H616-AXP313A-Armbian-26.8.4-6.18.48'
 
 die() { printf 'ABBRUCH: %s\n' "$*" >&2; exit 1; }
-[[ "$release_id" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9.-]+$ ]] \
-    || die 'Aufruf: T95_RELEASE_ARTIFACT=/pfad/zum/gehärteten_artefakt $0 vX.Y.Z-kennzeichnung'
+[[ "$release_id" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9.-]+)?$ ]] \
+    || die 'Aufruf: T95_RELEASE_ARTIFACT=/pfad/zum/gehärteten_artefakt $0 vX.Y.Z[-kennzeichnung]'
 [[ -n "$artifact" && -d "$artifact" && -f "$artifact/HARDENING-METADATA.txt" && -f "$artifact/SHA256SUMS" ]] \
     || die 'T95_RELEASE_ARTIFACT muss auf ein geprüftes Härtungsartefakt zeigen'
 for tool in awk basename cp head mkdir mv rm sed sha256sum stat xz; do
@@ -60,13 +60,16 @@ xz -T0 -6 --check=sha256 -c -- "$image" > "$tmp"
 xz -t "$tmp"
 mv "$tmp" "$asset_image"
 
-cp "$artifact/SHA256SUMS" "$output/HARDENED-ARTIFACT-SHA256SUMS"
 cp "$artifact/HARDENING-METADATA.txt" "$output/HARDENING-METADATA.txt"
 cp "$loader" "$output/T95-H616-AXP313A-u-boot-sunxi-with-spl.bin"
 cp "$dtb" "$output/T95-H616-AXP313A-tanix-6.18.dtb"
 {
     printf 'release_id=%s\n' "$release_id"
-    printf '%s\n' 'channel=experimental'
+    if [[ "$release_id" == *-* ]]; then
+        printf '%s\n' 'channel=experimental'
+    else
+        printf '%s\n' 'channel=stable'
+    fi
     printf '%s\n' 'board=H616-T95MAX-AXP313A-V3.0'
     printf '%s\n' 'system=Armbian 26.8.4 Trixie'
     printf '%s\n' 'kernel_release=6.18.48-current-sunxi64'
@@ -88,7 +91,7 @@ cp "$dtb" "$output/T95-H616-AXP313A-tanix-6.18.dtb"
     printf '%s\n' 'signing_note=TOC0 loader is signed; private experiment key is intentionally excluded'
 } > "$output/RELEASE-MANIFEST.txt"
 (cd "$output" && sha256sum "$(basename "$asset_image")" RELEASE-MANIFEST.txt HARDENING-METADATA.txt \
-    HARDENED-ARTIFACT-SHA256SUMS T95-H616-AXP313A-u-boot-sunxi-with-spl.bin \
+    T95-H616-AXP313A-u-boot-sunxi-with-spl.bin \
     T95-H616-AXP313A-tanix-6.18.dtb > SHA256SUMS && sha256sum -c SHA256SUMS)
 trap - EXIT
 printf 'ERFOLG: GitHub-Release-Assets erzeugt: %s\n' "$output"

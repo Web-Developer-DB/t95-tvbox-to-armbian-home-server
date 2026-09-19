@@ -1,6 +1,6 @@
 # Öffentliche Testmatrix: stabil getesteter T95-Stand
 
-Der finale Asset-Kanal ist `v0.1.1`. Historische Experiment-Assets bleiben
+Der finale Asset-Kanal ist `v1.0.0`. Historische Experiment-Assets bleiben
 im privaten Laborbestand dokumentiert und werden nicht als finaler Download
 beworben.
 
@@ -62,7 +62,7 @@ Kopie ist kein Release-Asset.
 | Armbian-Quellimage, XZ | `f08a37afef45bca2b2a727b2d5e48d1d7521ff533f7ebc0ec03f52ada677870c` |
 
 Der Loader wurde bei Byte 8192 gegen die separate Loaderdatei verglichen. Das
-Release-Asset wurde mit `xz --check=sha256` komprimiert; seine sieben Dateien
+Release-Asset wurde mit `xz --check=sha256` komprimiert; seine sechs Dateien
 werden über `SHA256SUMS` geprüft.
 
 ## Optionale Weiterentwicklung

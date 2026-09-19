@@ -1,0 +1,14 @@
+# Sanitierter Referenzauszug: T95 SD -> U-Boot -> Linux
+# Relevante Soll-Zeilen: TOC0.GLH, MMC1, DRAM, Starting kernel, Armbian ttyS0
+
+TOC0 header: TOC0.GLH
+U-Boot SPL 2024.04 (T95 AXP313)
+DRAM: 2048 MiB
+Trying to boot from MMC1
+NOTICE: BL31: Detected Allwinner H616 SoC (1823)
+U-Boot 2024.04 (T95 AXP313)
+Model: T95 H616 AXP313A
+MMC: mmc@4020000: 0, mmc@4022000: 1
+Starting kernel ...
+Linux version 6.18.48-current-sunxi64
+Armbian 26.8.4 Trixie ttyS0

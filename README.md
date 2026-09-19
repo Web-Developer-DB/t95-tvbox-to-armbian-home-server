@@ -64,10 +64,17 @@ RS-232 direkt an der Platine. Ein RP2040-Zero kann mit der passenden Firmware
 als Adapter dienen: [RP2040-Zero-UART-Adapterprojekt](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
 Das separate Projekt beschreibt Firmware, Verdrahtung und Capture der Bootlogs.
 
+> [!IMPORTANT]
+> **Andere H616-TV-Box portieren:** Das fertige T95-Image ist nicht für
+> fremde Platinen bestimmt. Der getrennte Entwicklerpfad beginnt ohne
+> Schreibzugriff mit Inventur, UART und FEL/eGON und erklärt alle sicheren
+> Stop-Kriterien: [H616-Porting-Kit öffnen](docs/PORTING.md).
+
 ## Inhaltsübersicht
 
 - [Projektziel](#projektziel)
 - [UART-Adapter und Portierung](#vor-der-portierung-uart-ist-erforderlich)
+- [Entwicklerpfad für ähnliche H616-Boxen](docs/PORTING.md)
 - [Endanwender-Schnellstart](#endanwender-schnellstart)
 - [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
 - [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)
@@ -772,11 +779,17 @@ Elektrische Eckdaten:
 Beispiel für eine Aufzeichnung:
 
 ```bash
-python3 tools/capture_uart.py /dev/ttyACM1 \
+git clone https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter.git
+cd rp2040-zero-uart-adapter
+python3 tools/capture_uart.py /dev/ttyACM0 \
   --baud 115200 \
   --duration 240 \
   --prefix captures/d95-coldboot
 ```
+
+Das Capture-Werkzeug gehört bewusst zum RP2040-Repository, nicht zu diesem
+T95-Projekt. Die vollständige Verdrahtungs- und Fehlersuchanleitung steht in
+[`docs/UART_BRINGUP.md`](docs/UART_BRINGUP.md).
 
 ## Kernel- und DTB-Schutz
 

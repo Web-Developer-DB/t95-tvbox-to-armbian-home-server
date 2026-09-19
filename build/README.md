@@ -11,6 +11,30 @@ mit `BUILT_NOT_HARDWARE_TESTED` bleiben unverändert als historische,
 hashbare Beweise erhalten: Ihr Status beschreibt den Zeitpunkt des jeweiligen
 Host-Builds, nicht den späteren Hardwaretest des zusammengesetzten Images.
 
+## Öffentlicher Portierungsstart für andere H616-Boxen
+
+Für eine fremde, ähnliche H616-Platine nicht die historischen T95-
+Zusammensetzungsrezepte verwenden. Der öffentliche Startpfad ist vollständig
+hostseitig, benötigt keinen privaten Schlüssel und öffnet keine Blockgeräte:
+
+```bash
+bash build/setup-h616-porting-host.sh --check
+bash build/fetch-h616-porting-sources.sh
+bash build/build-h616-fel-egon.sh
+```
+
+Damit entsteht ein flüchtiger `eGON.BT0`-FEL-Diagnose-Loader. Erst wenn UART,
+PMIC und DRAM auf dem fremden Board belegt sind, kommt ein SD-TOC0-Test in
+Betracht. Dieser ist optional, verlangt einen eigenen lokalen Schlüssel und
+ist wegen möglicher Secure-Boot-Vertrauenskette nicht garantiert:
+
+```bash
+bash build/build-h616-toc0-test.sh --key /absoluter/pfad/zum/eigenen-key.pem
+```
+
+Details, Quell-Commit-Hashes und Sicherheitsgrenzen stehen in
+[PORTING_SOURCES.md](PORTING_SOURCES.md) und [../docs/PORTING.md](../docs/PORTING.md).
+
 ## Relevante Buildreihenfolge
 
 ```bash
@@ -36,7 +60,7 @@ bash build/audit-t95-generic-release-image.sh "$HARDENED_ARTIFACT" "$SOURCE_ARTI
 
 # 6. Erst danach GitHub-Release-Assets erzeugen
 T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-  bash build/create-t95-release-asset.sh v0.1.1-hardened-experimental
+  bash build/create-t95-release-asset.sh v1.0.0
 ```
 
 Der Härtungsschritt sperrt den Root-Account, entfernt alle Hostschlüssel und

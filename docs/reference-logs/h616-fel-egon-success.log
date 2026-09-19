@@ -1,0 +1,11 @@
+# Sanitierter Referenzauszug: H616 FEL/eGON-Diagnose
+# Relevante Soll-Zeilen: soc=00001823(H616), eGON.BT0, DRAM: 2048 MiB
+
+AWUSBFEX soc=00001823(H616) 00000001 ver=0001
+=> Executing the SPL... done.
+U-Boot SPL 2024.04 (FEL diagnostic)
+eGON header: eGON.BT0
+DRAM: 2048 MiB
+U-Boot 2024.04 (H616 FEL diagnostic)
+T95 FEL diagnostic complete
+Returning to FEL

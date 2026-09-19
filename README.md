@@ -1,5 +1,7 @@
 # T95 TV-Box → Armbian Linux Home Server
 
+**Deutsch** | [English](README.en.md)
+
 ![Status: stabil getestet](https://img.shields.io/badge/Status-stabil%20getestet-brightgreen)
 ![Board: H616](https://img.shields.io/badge/Board-Allwinner%20H616-blue)
 ![OS: Armbian](https://img.shields.io/badge/OS-Armbian%2026.8.4-18a303)

@@ -18,6 +18,35 @@ The server root `smb://<SERVER-IP>/` displays both the fixed internal
 no static `[USB]` aggregate share: every volume retains its real capacity and
 free-space information.
 
+## What does the Samba module set up?
+
+The module turns the running T95 into an authenticated file server:
+
+- `T95-DATA` is a permanent share for the storage directory you choose.
+- USB sticks and disks are mounted automatically.
+- Each mounted USB filesystem gets its own share.
+- Linux, Windows, Android, and VLC use the same Linux/Samba account.
+- `usb-eject` safely disconnects a USB drive before you unplug it.
+
+The fixed `T95-DATA` share and dynamic USB shares are separate. Choose the
+fixed share location during setup with `DATA_PATH`. USB storage is mounted and
+shared automatically; it does not need a manual path change.
+
+### Which storage location should I use?
+
+| Location | Example `DATA_PATH` | When to use it |
+| --- | --- | --- |
+| System microSD | `/srv/t95-sd-data/Share` | Small amounts of data and the simplest setup. Frequent writes may wear the SD card faster. |
+| Internal eMMC | `/srv/T95-DATA/Share` | Better for regular or larger data when eMMC is already mounted persistently at `/srv/T95-DATA`. |
+| USB drive | No `DATA_PATH` needed | USB storage is added automatically as a separate dynamic share. |
+
+The default `/srv/T95-DATA/Share` assumes an eMMC filesystem is mounted at
+`/srv/T95-DATA`. Without that mount, the folder is created on the SD card's
+system filesystem. To deliberately use the system SD, choose a separate path
+such as `/srv/t95-sd-data/Share`. If using eMMC, set it up, mount it
+persistently, and verify it with `findmnt` first. The Samba script never
+formats, partitions, or moves existing files.
+
 | Area | Tested reference |
 | --- | --- |
 | Hardware | T95 `H616-T95MAX-AXP313A-V3.0`, Allwinner AC300 Ethernet |
@@ -68,7 +97,16 @@ The manifest check must complete without `FAILED`. The script installs Samba,
 UDisks2, udiskie, Polkit, and exFAT/NTFS support. If needed, it asks
 interactively for the Samba password of `T95_USER`.
 
-Optional invocation values:
+When it prints `Fertig.`, setup is complete. Insert a USB drive and open
+`smb://<SERVER-IP>/` on a client, or `\\<SERVER-IP>\` in Windows Explorer. Sign
+in with the Linux username and its Samba password. No further manual Samba
+configuration is needed if the shares appear.
+
+### Customize setup
+
+Set the username, server name, and fixed share path when running the script.
+Replace `serveruser` with your ordinary Linux username. `DATA_PATH` selects
+where the fixed `T95-DATA` share points:
 
 ```bash
 sudo T95_USER=serveruser \
@@ -83,9 +121,64 @@ sudo T95_USER=serveruser \
 | `NETBIOS_NAME` | no | `T95-SERVER` | SMB network server name |
 | `DATA_PATH` | no | `/srv/T95-DATA/Share` | fixed-share directory |
 
-The derived mount base is `/media/<T95_USER>` and dynamic state lives below
-`~/.local/state/t95-usb-shares`. Mount an eMMC `DATA_PATH` persistently first,
-for example with `/etc/fstab`, and verify it with `findmnt`.
+Example: place the fixed share on the SD system filesystem:
+
+```bash
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Example: use eMMC already mounted at `/srv/T95-DATA`:
+
+```bash
+findmnt /srv/T95-DATA
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/T95-DATA/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Run the eMMC command only after `findmnt` shows the expected eMMC mount. If it
+does not, the directory would be created on the filesystem underneath it,
+usually the system SD.
+
+The script also uses `/media/<T95_USER>` as the USB mount base and
+`~/.local/state/t95-usb-shares` for dynamic USB mappings.
+
+### Change settings later
+
+Change to the cloned module directory and rerun the restore script with the new
+values. For example, to move the `T95-DATA` share location from eMMC to the SD:
+
+```bash
+cd ~/t95-tvbox-to-armbian-home-server/server/samba-usb
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+The script saves `/etc/samba/smb.conf` with a timestamp and generates a new
+configuration. It does **not** move your files to the new location. Copy or
+move them yourself and verify the new path before deleting old data. Direct
+changes to `/etc/samba/smb.conf` are replaced when the script runs again;
+backups are kept at `/etc/samba/smb.conf.before-t95.*`.
+
+### What each script does
+
+| Script | What it does | Do I run it myself? |
+| --- | --- | --- |
+| `scripts/restore-samba-usb-setup.sh` | Installs packages and services, creates `T95-DATA`, and configures Samba and USB automount. | Yes, once during setup; run again only to change configuration. |
+| `scripts/t95-usb-share` | Creates or removes the dynamic share for a mounted USB filesystem. | No, `udiskie` invokes it automatically. |
+| `scripts/usb-eject` | Disconnects the selected share, syncs writes, unmounts the drive, and powers it off. | Yes, before physically unplugging a USB drive. |
+
+Use the share name to eject safely:
+
+```bash
+sudo usb-eject SunDiskUSB
+```
+
+The share name normally matches the drive label. The sections below cover
+verification and troubleshooting if something does not work as expected.
 
 ## Verify after installation
 

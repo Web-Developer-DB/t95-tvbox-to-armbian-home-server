@@ -210,6 +210,10 @@ Nach `ERFOLG` ist die Serverwurzel im Dateimanager, VLC oder Windows-Explorer
 ausführliche Anleitung für bestehende Samba-Installationen, eMMC-Datenpfade,
 Prüfungen und sicheren USB-Auswurf folgt unter
 [`server/samba-usb/README.md`](server/samba-usb/README.md).
+Die Anleitung erklärt den Unterschied zwischen `T95-DATA` und automatisch
+freigegebenen USB-Laufwerken, zeigt die einfache Auswahl zwischen SD und eMMC
+und nennt, welche Skripte automatisch laufen und welches vor dem Abziehen
+eines USB-Laufwerks manuell gestartet werden muss.
 
 ### Voraussetzungen
 

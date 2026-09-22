@@ -243,7 +243,9 @@ After Linux and Ethernet are stable, the optional
 authenticated SMB2/SMB3 share, automatic USB mounting for the selected user,
 one usershare per volume, safe eject, manifest checks, and recovery guidance.
 Clients can use `smb://<SERVER-IP>/` or `\\<SERVER-IP>\`; VLC can stream
-compatible files directly over SMB.
+compatible files directly over SMB. Its user guide explains the difference
+between `T95-DATA` and automatically shared USB drives, how to choose SD or
+eMMC storage, and which scripts run automatically or before ejecting a drive.
 
 ## UART diagnostics with RP2040-Zero
 

@@ -29,6 +29,38 @@ Freigaben gemeinsam angezeigt.
 Es gibt absichtlich **keine** statische `[USB]`-Sammelfreigabe. Jedes Medium
 zeigt dadurch seine echte Kapazität und den korrekten freien Speicherplatz.
 
+## Was richtet das Samba-Modul ein?
+
+Das Modul macht aus der laufenden T95 einen zugriffsgeschützten Dateiserver:
+
+- `T95-DATA` ist eine feste Freigabe für den gewählten Speicherordner.
+- USB-Sticks und USB-Festplatten werden automatisch eingebunden.
+- Für jedes eingehängte USB-Dateisystem erscheint eine eigene Freigabe.
+- Linux, Windows, Android und VLC greifen mit demselben Linux-/Samba-Konto zu.
+- `usb-eject` wirft ein USB-Laufwerk kontrolliert aus, bevor es abgezogen wird.
+
+Die festen Daten von `T95-DATA` und die dynamischen USB-Freigaben sind zwei
+getrennte Dinge. Der Speicherpfad für `T95-DATA` wird bei der Einrichtung mit
+`DATA_PATH` gewählt. USB-Laufwerke werden dagegen automatisch eingebunden und
+brauchen keine manuelle Pfadänderung.
+
+### Welchen Speicherort soll ich wählen?
+
+| Ort | Beispiel für `DATA_PATH` | Wann passend? |
+| --- | --- | --- |
+| System-microSD | `/srv/t95-sd-data/Share` | Für kleine Datenmengen und einen einfachen Start. Viel Schreiben kann die SD-Karte stärker beanspruchen. |
+| Interne eMMC | `/srv/T95-DATA/Share` | Empfohlen für regelmäßige oder größere Datenmengen, wenn die eMMC bereits dauerhaft an `/srv/T95-DATA` eingehängt ist. |
+| USB-Laufwerk | Kein `DATA_PATH` nötig | USB-Speicher wird als eigene dynamische Freigabe automatisch hinzugefügt. |
+
+Das Standardziel `/srv/T95-DATA/Share` setzt voraus, dass ein eMMC-Dateisystem
+unter `/srv/T95-DATA` eingehängt ist. Ohne diesen Mount liegt der Ordner
+stattdessen auf dem System-Dateisystem der SD-Karte. Soll die feste Freigabe
+bewusst auf der SD-Karte liegen, wähle einen eigenen Ordner wie
+`/srv/t95-sd-data/Share`. Wenn der eMMC-Pfad verwendet werden soll, muss die
+eMMC zuerst eingerichtet, dauerhaft eingehängt und mit `findmnt` geprüft
+werden. Das Samba-Skript formatiert, partitioniert oder verschiebt keine
+vorhandenen Dateien.
+
 ### Getestete Referenzplattform
 
 | Bereich | Referenz |
@@ -102,7 +134,17 @@ Das Skript installiert unter anderem Samba, UDisks2, udiskie, Polkit und die
 Dateisystemwerkzeuge für exFAT/NTFS. Falls noch kein Samba-Konto existiert,
 fragt es interaktiv nach dem Samba-Passwort für `T95_USER`.
 
-Optionale Werte können beim Aufruf gesetzt werden:
+Nach `Fertig.` ist die Einrichtung abgeschlossen. Stecke einen USB-Datenträger
+ein und öffne auf einem Client `smb://<SERVER-IP>/` oder unter Windows
+`\\<SERVER-IP>\`. Melde dich mit dem Linux-Benutzernamen und dem Samba-Passwort
+an. Erscheinen die Freigaben, ist keine weitere manuelle Samba-Konfiguration
+erforderlich.
+
+### Einrichtung anpassen
+
+Du kannst Benutzername, Servername und festen Speicherpfad beim Skriptaufruf
+setzen. Ersetze `serveruser` durch deinen normalen Linux-Benutzer. `DATA_PATH`
+legt fest, wohin die feste Freigabe `T95-DATA` zeigt:
 
 ```bash
 sudo T95_USER=serveruser \
@@ -117,13 +159,68 @@ sudo T95_USER=serveruser \
 | `NETBIOS_NAME` | nein | `T95-SERVER` | Name des Servers im SMB-Netz |
 | `DATA_PATH` | nein | `/srv/T95-DATA/Share` | Verzeichnis der festen Freigabe |
 
-Das Skript verwendet daraus abgeleitet `/media/<T95_USER>` als Mountbasis und
-`~/.local/state/t95-usb-shares` für die dynamischen Zuordnungen.
+Beispiel: feste Freigabe auf dem System-Dateisystem der SD-Karte einrichten:
 
-Wenn `DATA_PATH` auf ein Verzeichnis der internen eMMC zeigen soll, muss diese
-Partition vorher manuell und dauerhaft (zum Beispiel über `/etc/fstab`)
-eingebunden und mit `findmnt` geprüft werden. Die eMMC ist damit ein internes
-Datenmedium, aber kein automatisch funktionierendes Armbian-Bootmedium.
+```bash
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Beispiel: feste Freigabe auf eMMC einrichten, die bereits unter
+`/srv/T95-DATA` eingehängt ist:
+
+```bash
+findmnt /srv/T95-DATA
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/T95-DATA/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Führe den eMMC-Aufruf erst aus, wenn `findmnt` den erwarteten eMMC-Mount zeigt.
+Sonst würde der Ordner auf dem gerade darunterliegenden Dateisystem, meist der
+System-SD, erstellt.
+
+Das Skript verwendet außerdem `/media/<T95_USER>` als USB-Mountbasis und
+`~/.local/state/t95-usb-shares` für dynamische USB-Zuordnungen.
+
+### Einstellungen später ändern
+
+Wechsle in das geklonte Modulverzeichnis und rufe das Restore-Skript mit den
+gewünschten Werten erneut auf. Zum Beispiel, um `T95-DATA` von eMMC auf die
+SD-Karte zu verlegen:
+
+```bash
+cd ~/t95-tvbox-to-armbian-home-server/server/samba-usb
+sudo T95_USER=serveruser \
+  DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Das Skript sichert `/etc/samba/smb.conf` mit Zeitstempel und erzeugt sie neu.
+Es verschiebt deine Dateien **nicht** vom alten Speicherort zum neuen. Kopiere
+oder verschiebe Daten daher selbst und prüfe den neuen Pfad, bevor du alte
+Dateien löschst. Eigene direkte Änderungen an `/etc/samba/smb.conf` werden bei
+einem erneuten Aufruf durch die Projektkonfiguration ersetzt; Sicherungen
+liegen unter `/etc/samba/smb.conf.before-t95.*`.
+
+### Die mitgelieferten Skripte
+
+| Skript | Was es macht | Muss ich es selbst starten? |
+| --- | --- | --- |
+| `scripts/restore-samba-usb-setup.sh` | Installiert Pakete und Dienste, erstellt `T95-DATA` und konfiguriert Samba sowie USB-Automount. | Ja, einmal bei der Einrichtung; erneut nur zum Ändern der Konfiguration. |
+| `scripts/t95-usb-share` | Erstellt oder entfernt die dynamische Freigabe für ein eingebundenes USB-Dateisystem. | Nein, `udiskie` ruft es automatisch auf. |
+| `scripts/usb-eject` | Trennt die ausgewählte Freigabe, synchronisiert Schreibvorgänge, hängt das Laufwerk aus und schaltet es ab. | Ja, vor dem physischen Abziehen eines USB-Laufwerks. |
+
+Zum sicheren Auswerfen den Freigabenamen verwenden:
+
+```bash
+sudo usb-eject SunDiskUSB
+```
+
+Der Freigabename entspricht normalerweise dem Laufwerkslabel. Die folgenden
+Abschnitte zeigen Prüfungen und Fehlerbehebung, falls etwas nicht wie erwartet
+funktioniert.
 
 ## Nach der Installation prüfen
 

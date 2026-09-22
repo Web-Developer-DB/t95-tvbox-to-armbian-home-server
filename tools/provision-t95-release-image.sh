@@ -18,7 +18,7 @@ die() { printf 'ABBRUCH: %s\n' "$*" >&2; exit 1; }
 [[ $# -eq 3 ]] || die "Aufruf: $0 GENERISCHES_IMAGE.img PERSOENLICHES_IMAGE.img $expected_confirmation"
 [[ "$confirmation" == "$expected_confirmation" ]] || die 'Bestätigungstoken stimmt nicht'
 [[ -f "$generic_image" && ! -b "$generic_image" && ! -L "$generic_image" ]] || die 'Generisches Image muss eine reguläre Datei sein'
-[[ ! -e "$personal_image" && ! -b "$personal_image" && ! -L "$personal_image" ]] || die 'Persönliches Zielimage darf noch nicht existieren'
+[[ ! -e "$personal_image" && ! -b "$personal_image" && ! -L "$personal_image" ]] || die 'Persönliches Zielimage existiert bereits. Neuen Dateinamen wählen oder die vorhandene Kopie im Ein-Skript-Installer wiederverwenden.'
 for tool in awk chmod cmp cp dd debugfs e2fsck head mktemp openssl rm sha256sum stat sync; do
     command -v "$tool" >/dev/null || die "Werkzeug fehlt: $tool"
 done

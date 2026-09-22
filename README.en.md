@@ -67,8 +67,16 @@ bash <(curl -fsSL \
 ```
 
 It clones the release tools, downloads and verifies v1.0.1, creates a private
-local image with your root password, shows available block devices, and asks
-explicitly before writing removable storage. It never accesses T95 eMMC.
+local image with your root password, and asks explicitly before writing
+removable storage. `J`, `Ja`, `Y`, and `Yes` are accepted as confirmation. On
+a later run, an existing matching private copy can be reused, a timestamped
+new copy can be created, or the run can be cancelled. Existing files are never
+silently overwritten.
+
+Before writing, it scans only removable USB disks, displays size, model, and
+serial number, and lets you choose by number. It then requires the exact shown
+device path, such as `/dev/sda`, as a second confirmation. Disconnect other
+USB drives where practical. It never accesses T95 eMMC.
 
 ### Requirements
 

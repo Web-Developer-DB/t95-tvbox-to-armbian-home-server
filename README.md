@@ -139,8 +139,17 @@ bash <(curl -fsSL \
 ```
 
 Die Zielauswahl bleibt absichtlich interaktiv; interne eMMC- und NVMe-Geräte
-werden vom Skript nicht als Ziel akzeptiert. Für eine nachvollziehbare
-Einzelprüfung stehen darunter weiterhin alle Einzelschritte.
+werden vom Skript nicht als Ziel akzeptiert. `J`, `Ja`, `Y` und `Yes` gelten
+als Zustimmung. Bei einem erneuten Start wird eine passende vorhandene private
+Kopie angeboten: wiederverwenden, eine neue Kopie mit Zeitstempel erzeugen
+oder abbrechen. Vorhandene Dateien werden nicht still überschrieben.
+
+Vor dem Schreiben scannt das Skript ausschließlich wechselbare USB-
+Datenträger, zeigt Größe, Modell und Seriennummer und lässt daraus nummeriert
+wählen. Danach muss der angezeigte Gerätename, zum Beispiel `/dev/sda`, noch
+einmal exakt bestätigt werden. Andere USB-Laufwerke nach Möglichkeit vor dem
+Schreiben abziehen. Für eine nachvollziehbare Einzelprüfung stehen darunter
+weiterhin alle Einzelschritte.
 
 ### Voraussetzungen
 

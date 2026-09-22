@@ -2,7 +2,7 @@
 
 [Deutsch](RELEASE.md) | **English**
 
-Status: 2026-09-17. This **stable, hardware-specific** SD release is only for
+Status: 2026-09-22. This **stable, hardware-specific** SD release is only for
 `H616-T95MAX-AXP313A-V3.0`. It is not a universal T95 image and does not modify
 Android eMMC. See [hardware photos](../README.en.md#hardware-photos).
 
@@ -10,12 +10,12 @@ Android eMMC. See [hardware photos](../README.en.md#hardware-photos).
 
 | Property | Value |
 |---|---|
-| Release channel | `v1.0.0`, final hardware-specific release |
+| Release channel | `v1.0.1`, final hardware-specific release |
 | System | Armbian 26.8.4 Trixie |
 | Kernel | `6.18.48-current-sunxi64` |
 | Boot medium | microSD; one ext4 partition at byte 4 MiB |
 | Bootloader | signed T95 TOC0 loader at byte 8192 |
-| DRAM / Ethernet | 2 GiB / AC300 EPHY (`end0`, 100 Mbit/s) |
+| DRAM / Ethernet | 2 GiB DDR3L, DCDC3 1.36 V / AC300 EPHY (`end0`, 100 Mbit/s) |
 | eMMC in release path | no read or write access |
 
 eMMC works as internal storage and may be mounted as an ext4 data drive, but
@@ -23,13 +23,17 @@ the Armbian eMMC installation/boot attempt did not succeed. microSD is the
 documented supported boot path.
 
 The hardened generic raw image is 1,535,115,264 bytes and has SHA-256
-`e2c1fad50f6bc138332de8ef944b9e83462a882414cc736e9537450de759df4c`.
+`849ec697bca90c07537b4b71bad350c9a05854ac8287fc960483d3bf0d0b7cf4`.
 It contains no usable root password, SSH host keys, `authorized_keys`, user
 directories, or `machine-id`.
 
 Root is locked in the public download. A systemd dependency generates unique
 host keys **before** `ssh.service`; Armbian's later host-key regeneration is
 disabled so these keys remain in use.
+
+`v1.0.1` keeps the AXP313A `dcdc3` regulator at 1.36 V in the Linux DTB. This
+matches SPL DRAM initialization and was verified by complete cold boots on two
+boxes with the exact PCB revision.
 
 ## Verified status and boundaries
 
@@ -57,13 +61,13 @@ export HARDENED_ARTIFACT="$REPO/build/artifacts/t95-tanix-6.18-hardened-20260915
 bash "$REPO/build/audit-t95-generic-release-image.sh" \
   "$HARDENED_ARTIFACT" "$SOURCE_ARTIFACT"
 T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-  bash "$REPO/build/create-t95-release-asset.sh" v1.0.0
+  bash "$REPO/build/create-t95-release-asset.sh" v1.0.1
 ```
 
 The release directory contains exactly:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 RELEASE-MANIFEST.txt
 HARDENING-METADATA.txt
 T95-H616-AXP313A-u-boot-sunxi-with-spl.bin
@@ -72,9 +76,9 @@ SHA256SUMS
 ```
 
 ```bash
-cd "$REPO/release-assets/v1.0.0"
+cd "$REPO/release-assets/v1.0.1"
 sha256sum -c SHA256SUMS
-xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 ```
 
 ## Local personalization and SD writing
@@ -88,9 +92,9 @@ appear in the shell command or manifest.
 export DOWNLOAD=/path/to/GitHub-release-download
 mkdir -p "$HOME/t95-private"
 (cd "$DOWNLOAD" && sha256sum -c SHA256SUMS)
-xz -dk --keep "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+xz -dk --keep "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img" \
   "$HOME/t95-private/t95-personal.img" PROVISION-T95-ROOT-PASSWORD
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
 bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" /dev/sdX \

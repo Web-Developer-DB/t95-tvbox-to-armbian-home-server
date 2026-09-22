@@ -15,7 +15,7 @@ Download-URL bezogen. Vor dem Ablegen unter `images/` müssen Dateiname und
 Hash stimmen. Für eine neue Armbian-Version gelten Dateiname, Layout, Kernel
 und Hash als neue Eingabe und müssen separat validiert werden.
 
-Der T95-TOC0-Loader aus dem v1.0.0-Release ist ein getestetes Binärartefakt.
+Der T95-TOC0-Loader aus dem v1.0.1-Release ist ein getestetes Binärartefakt.
 Sein historischer privater Signaturschlüssel ist nicht Teil dieses Repositories.
 Ein eigener TOC0-Testloader ist daher nur mit einem selbst verwalteten lokalen
 Schlüssel und ohne Zusage zur Secure-Boot-Kompatibilität möglich.

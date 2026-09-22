@@ -84,6 +84,8 @@ cp "$dtb" "$output/T95-H616-AXP313A-tanix-6.18.dtb"
     printf '%s\n' 'loader_header=TOC0.GLH'
     printf 'loader_sha256=%s\n' "$(sha256sum "$loader" | awk '{print $1}')"
     printf 'dtb_sha256=%s\n' "$(sha256sum "$dtb" | awk '{print $1}')"
+    printf '%s\n' 'dram_voltage_uV=1360000'
+    printf '%s\n' 'dram_change=Linux dcdc3 min/max fixed at 1360000uV; matches SPL DRAM setup'
     printf '%s\n' 'rootfs=ext4, one partition at byte 4194304'
     printf '%s\n' 'boot_diagnostic_args=clk_ignore_unused nohz=off'
     printf '%s\n' 'hardware_status=boot, AC300 Ethernet, DHCP and SSH verified before generic-image hardening'

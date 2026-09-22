@@ -66,7 +66,7 @@ bash <(curl -fsSL \
   https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-release.sh)
 ```
 
-It clones the release tools, downloads and verifies v1.0.0, creates a private
+It clones the release tools, downloads and verifies v1.0.1, creates a private
 local image with your root password, shows available block devices, and asks
 explicitly before writing removable storage. It never accesses T95 eMMC.
 
@@ -81,11 +81,11 @@ explicitly before writing removable storage. It never accesses T95 eMMC.
 
 ### Manual installation
 
-1. Download all six v1.0.0 assets and verify them:
+1. Download all six v1.0.1 assets and verify them:
 
    ```bash
    sha256sum -c SHA256SUMS
-   xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+   xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
    ```
 
 2. Clone the repository, extract the image, and create a personal local copy:
@@ -94,9 +94,9 @@ explicitly before writing removable storage. It never accesses T95 eMMC.
    git clone https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
    cd t95-tvbox-to-armbian-home-server
    mkdir -p "$HOME/t95-private"
-   xz -dk --keep /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+   xz -dk --keep /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
    bash tools/provision-t95-release-image.sh \
-     /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img \
+     /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img \
      "$HOME/t95-private/t95-personal.img" PROVISION-T95-ROOT-PASSWORD
    ```
 
@@ -135,6 +135,10 @@ The base is Armbian 26.8.4 / Debian 13 Trixie / kernel
 `6.18.48-current-sunxi64` from the Tanix TX6s/AXP313 platform. Kernel,
 initramfs, and rootfs remain mostly standard. The board-specific boot chain is
 the essential difference.
+
+Release `v1.0.1` also keeps the AXP313A DCDC3 DRAM regulator at 1.36 V in the
+Linux DTB, matching SPL. This has been cold-boot verified on two boards with
+the exact tested PCB revision.
 
 | Component | T95-specific part | Verify on another board |
 | --- | --- | --- |

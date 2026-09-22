@@ -31,7 +31,7 @@ expected_raw_size=$(sed -n 's/^image_uncompressed_size=//p' "$manifest")
 expected_raw_sha=$(sed -n 's/^image_uncompressed_sha256=//p' "$manifest")
 expected_header=$(sed -n 's/^loader_header=//p' "$manifest")
 image_state=$(sed -n 's/^image_state=//p' "$manifest")
-[[ "$release_id" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9.-]+$ ]] || die 'Ungültige Release-ID im Manifest'
+[[ "$release_id" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9][a-z0-9.-]*)?$ ]] || die 'Ungültige Release-ID im Manifest'
 [[ "$compressed_name" == "$asset_prefix"*".img.xz" ]] || die 'Unerwarteter Asset-Dateiname im Manifest'
 [[ "$expected_raw_size" =~ ^[0-9]+$ && "$expected_raw_sha" =~ ^[0-9a-f]{64}$ && "$expected_header" == TOC0.GLH ]] || die 'Unvollständiges oder ungültiges Manifest'
 [[ $((expected_raw_size % 4194304)) == 0 ]] || die 'Imagegröße ist nicht 4-MiB-ausgerichtet'

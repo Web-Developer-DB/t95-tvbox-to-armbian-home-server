@@ -17,7 +17,7 @@ unversioned URL. Its filename and checksum must match before it is placed in
 `images/`. A new Armbian version, layout, kernel, or checksum is a new input
 and must be validated separately.
 
-The T95 TOC0 loader in release v1.0.0 is a tested binary artifact. Its
+The T95 TOC0 loader in release v1.0.1 is a tested binary artifact. Its
 historical private signing key is not part of this repository. A custom TOC0
 test loader is therefore possible only with a locally managed user key and
 without any promise of Secure Boot compatibility.

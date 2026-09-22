@@ -3,7 +3,7 @@
 [Deutsch](PORTING.md) | **English**
 
 This guide is for developers working with a similar but not exactly tested
-H616 TV box. The v1.0.0 image is approved only for
+H616 TV box. The v1.0.1 image is approved only for
 `H616-T95MAX-AXP313A-V3.0`.
 
 > [!CAUTION]

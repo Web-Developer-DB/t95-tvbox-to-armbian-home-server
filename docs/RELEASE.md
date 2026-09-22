@@ -1,6 +1,6 @@
 # Release-Handbuch: T95 H616 / AXP313A
 
-Stand: 2026-09-17. Dieser **stabil getestete, hardwaregebundene** SD-Release gilt ausschließlich für
+Stand: 2026-09-22. Dieser **stabil getestete, hardwaregebundene** SD-Release gilt ausschließlich für
 `H616-T95MAX-AXP313A-V3.0`. Er ist kein universelles T95-Image und verändert
 die Android-eMMC nicht. Fotos zur Boardzuordnung stehen in der
 [README](../README.md#hardware-fotos); individuelle Daten auf
@@ -10,13 +10,13 @@ dem Unterseitenfoto sind redigiert.
 
 | Eigenschaft | Wert |
 |---|---|
-| Releasekanal | `v1.0.0` (finaler, hardwaregebundener Release) |
+| Releasekanal | `v1.0.1` (finaler, hardwaregebundener Release) |
 | Projektstatus | stabil getestet auf `H616-T95MAX-AXP313A-V3.0` |
 | System | Armbian 26.8.4 Trixie |
 | Kernel | `6.18.48-current-sunxi64` |
 | Bootmedium | microSD, eine Ext4-Partition ab Byte 4 MiB |
 | Bootloader | signierter T95-TOC0-Loader bei Byte 8192 |
-| DRAM / Ethernet | 2 GiB / AC300 EPHY (`end0`, 100 Mbit/s) |
+| DRAM / Ethernet | 2 GiB DDR3L, DCDC3 1,36 V / AC300 EPHY (`end0`, 100 Mbit/s) |
 | eMMC im Releaseweg | kein Lese- oder Schreibzugriff |
 
 Die eMMC funktioniert als interner Blockspeicher und kann außerhalb des
@@ -26,7 +26,7 @@ nachgewiesene und unterstützte Bootweg dieses Releases ist deshalb weiterhin
 die microSD-Karte.
 
 Das gehärtete generische Rohimage hat die SHA-256
-`e2c1fad50f6bc138332de8ef944b9e83462a882414cc736e9537450de759df4c`
+`849ec697bca90c07537b4b71bad350c9a05854ac8287fc960483d3bf0d0b7cf4`
 und ist 1.535.115.264 Byte groß. Es enthält kein verwendbares Root-Passwort,
 keine SSH-Hostschlüssel, keine `authorized_keys`, keine Benutzerverzeichnisse
 und keine `machine-id`.
@@ -35,6 +35,10 @@ Das Rootkonto ist im öffentlichen Download gesperrt. Beim ersten SSH-Start
 erzeugt eine systemd-Abhängigkeit eigene Hostschlüssel **vor** `ssh.service`.
 Armbians spätere Hostkey-Neuerzeugung ist für dieses Image deaktiviert, damit
 die bereits eindeutigen Schlüssel erhalten bleiben.
+
+`v1.0.1` hält im Linux-DTB den AXP313A-Regler `dcdc3` auf 1,36 V. Der Wert
+entspricht der SPL-DRAM-Initialisierung und wurde mit vollständigen Kaltstarts
+auf zwei Boxen der exakten Platinenrevision geprüft.
 
 ## Nachgewiesener Stand und Grenzen
 
@@ -73,13 +77,13 @@ export HARDENED_ARTIFACT="$REPO/build/artifacts/t95-tanix-6.18-hardened-20260915
 bash "$REPO/build/audit-t95-generic-release-image.sh" \
   "$HARDENED_ARTIFACT" "$SOURCE_ARTIFACT"
 T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-  bash "$REPO/build/create-t95-release-asset.sh" v1.0.0
+  bash "$REPO/build/create-t95-release-asset.sh" v1.0.1
 ```
 
 Der Release-Ordner enthält sechs Dateien:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 RELEASE-MANIFEST.txt
 HARDENING-METADATA.txt
 T95-H616-AXP313A-u-boot-sunxi-with-spl.bin
@@ -90,9 +94,9 @@ SHA256SUMS
 Vor Upload immer prüfen:
 
 ```bash
-cd "$REPO/release-assets/v1.0.0"
+cd "$REPO/release-assets/v1.0.1"
 sha256sum -c SHA256SUMS
-xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 ```
 
 ## Lokale Personalisierung und SD-Schreibvorgang
@@ -108,9 +112,9 @@ export DOWNLOAD=/pfad/zum/GitHub-Release-Download
 mkdir -p "$HOME/t95-private"
 (cd "$DOWNLOAD" && sha256sum -c SHA256SUMS)
 xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
 bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img" \
+  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img" \
   "$HOME/t95-private/t95-personal.img" \
   PROVISION-T95-ROOT-PASSWORD
 

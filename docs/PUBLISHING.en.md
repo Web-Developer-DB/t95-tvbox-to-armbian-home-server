@@ -14,7 +14,7 @@ A new, clean repository should contain:
 - `docs/BACKUP.en.md` without a personal backup image;
 - four sanitized photos under `docs/images/`;
 - a license selected by the maintainer;
-- the six files in a freshly generated `release-assets/v1.0.0/` directory as
+- the six files in a freshly generated `release-assets/v1.0.1/` directory as
   GitHub **release assets**, not Git commits.
 
 Before the first push, check a fresh copy:
@@ -59,8 +59,8 @@ files.
 
    ```bash
    T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-     bash "$REPO/build/create-t95-release-asset.sh" v1.0.0
-   cd "$REPO/release-assets/v1.0.0"
+     bash "$REPO/build/create-t95-release-asset.sh" v1.0.1
+   cd "$REPO/release-assets/v1.0.1"
    sha256sum -c SHA256SUMS
    xz -t *.img.xz
    ```

@@ -78,6 +78,28 @@ serial number, and lets you choose by number. It then requires the exact shown
 device path, such as `/dev/sda`, as a second confirmation. Disconnect other
 USB drives where practical. It never accesses T95 eMMC.
 
+### Required after the first SSH login: hold the kernel and DTB
+
+> [!CAUTION]
+> **Do not run `apt upgrade` or `armbian-upgrade` first.** This image was
+> tested with kernel `6.18.48-current-sunxi64` and its matching T95 DTB. An
+> uncontrolled kernel or DTB update can break booting or AC300 Ethernet.
+
+As soon as Armbian first-run setup is complete, and **before** installing
+other packages, Samba, or general updates, run over SSH:
+
+```bash
+sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
+apt-mark showhold
+uname -r
+```
+
+Continue only when `apt-mark showhold` lists both package names and `uname -r`
+reports `6.18.48-current-sunxi64`. Normal Debian/Armbian packages can still be
+updated afterward; only the kernel and DTB are held for the verified hardware
+state. See [Security, backups, and updates](#security-backups-and-updates)
+before a deliberate kernel update.
+
 ### Requirements
 
 - Exact board: `H616-T95MAX-AXP313A-V3.0`.

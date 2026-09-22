@@ -151,6 +151,31 @@ einmal exakt bestätigt werden. Andere USB-Laufwerke nach Möglichkeit vor dem
 Schreiben abziehen. Für eine nachvollziehbare Einzelprüfung stehen darunter
 weiterhin alle Einzelschritte.
 
+### Pflichtschritt nach dem ersten SSH-Login: Kernel und DTB einfrieren
+
+> [!CAUTION]
+> **Nicht zuerst `apt upgrade` oder `armbian-upgrade` ausführen.** Dieses Image
+> ist mit Kernel `6.18.48-current-sunxi64` und dem zugehörigen T95-DTB
+> getestet. Ein unkontrolliertes Kernel- oder DTB-Update kann den Bootvorgang
+> oder AC300-Ethernet wieder unbrauchbar machen.
+
+Sobald der Armbian-Ersteinrichtungsdialog abgeschlossen ist und **bevor**
+weitere Pakete, Samba oder allgemeine Updates installiert werden, per SSH
+ausführen:
+
+```bash
+sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
+apt-mark showhold
+uname -r
+```
+
+Erst fortfahren, wenn `apt-mark showhold` beide Paketnamen ausgibt und
+`uname -r` `6.18.48-current-sunxi64` meldet. Normale Debian-/Armbian-Pakete
+dürfen danach aktualisiert werden; nur Kernel und DTB bleiben für den
+nachgewiesenen Hardwarestand gesperrt. Der vollständige Umgang mit einem
+bewusst geplanten Kernelupdate steht unter
+[Kernel- und DTB-Schutz](#kernel--und-dtb-schutz).
+
 ### Voraussetzungen
 
 - eine T95 mit der geprüften Platine `H616-T95MAX-AXP313A-V3.0`;

@@ -1,7 +1,7 @@
 # H616-TV-Box portieren: sicherer Bring-up-Pfad
 
 Diese Anleitung ist für Entwickler mit einer ähnlichen, nicht exakt getesteten
-H616-TV-Box. Das v1.0.0-Image ist ausschließlich für
+H616-TV-Box. Das v1.0.1-Image ist ausschließlich für
 `H616-T95MAX-AXP313A-V3.0` freigegeben.
 
 > [!CAUTION]

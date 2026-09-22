@@ -4,8 +4,8 @@
 set -Eeuo pipefail
 
 readonly REPO_URL="https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git"
-readonly RELEASE_BASE="https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.0"
-readonly IMAGE_NAME="T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
+readonly RELEASE_BASE="https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.1"
+readonly IMAGE_NAME="T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img"
 readonly IMAGE_XZ_NAME="${IMAGE_NAME}.xz"
 
 die() { printf 'ABBRUCH: %s\n' "$*" >&2; exit 1; }
@@ -23,10 +23,10 @@ MANIFEST="$WORKDIR/SHA256SUMS"
 mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 if [[ -d "$REPO/.git" ]]; then
-  git -C "$REPO" fetch --depth 1 origin "refs/tags/v1.0.0:refs/tags/v1.0.0"
-  git -C "$REPO" checkout --detach v1.0.0
+  git -C "$REPO" fetch --depth 1 origin "refs/tags/v1.0.1:refs/tags/v1.0.1"
+  git -C "$REPO" checkout --detach v1.0.1
 else
-  git clone --branch v1.0.0 --depth 1 "$REPO_URL" "$REPO"
+  git clone --branch v1.0.1 --depth 1 "$REPO_URL" "$REPO"
 fi
 
 printf 'Lade und prüfe Release-Image ...\n'

@@ -1,4 +1,4 @@
-# GitHub release `v1.0.0`
+# GitHub release `v1.0.1`
 
 [Deutsch](GITHUB_RELEASE_NOTES.md) | **English**
 
@@ -13,6 +13,13 @@ board. Booting, clean shutdown, and file access also passed in practical use.
 UART diagnostics used an external
 [RP2040-Zero UART adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 at 3.3 V TTL and 115200 baud/8N1.
+
+### DRAM stability
+
+The Linux DTB keeps the AXP313A `dcdc3` regulator at **1.36 V** for both its
+minimum and maximum. It matches SPL initialization and prevents Linux from
+lowering the DRAM rail later. Complete cold boots to login were verified on two
+`H616-T95MAX-AXP313A-V3.0` T95 boxes.
 
 ### Security changes
 
@@ -55,7 +62,7 @@ Full guide: [RELEASE.en.md](RELEASE.en.md).
 
 ### Assets
 
-- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz`
+- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz`
 - `RELEASE-MANIFEST.txt`
 - `HARDENING-METADATA.txt`
 - `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin`

@@ -44,7 +44,8 @@ cd "$REPO"
 # 1. Geprüfte Armbian-XZ unter images/ vorbereiten (nur Host-Dateien)
 bash build/prepare-t95-tanix-6.18-source.sh
 
-# 2. T95-markierten 6.18-DTB aus der geprüften Tanix-Eingabe ableiten
+# 2. T95-markierten 6.18-DTB aus der geprüften Tanix-Eingabe ableiten.
+#    Der Build hält AXP313A-DCDC3 in SPL und Linux-DTB bei 1,36 V.
 bash build/build-t95-tanix-6.18-dtb.sh
 
 # 3. Zusammengesetztes Rohimage aus Loader, DTB und Rootfs erzeugen
@@ -60,7 +61,7 @@ bash build/audit-t95-generic-release-image.sh "$HARDENED_ARTIFACT" "$SOURCE_ARTI
 
 # 6. Erst danach GitHub-Release-Assets erzeugen
 T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-  bash build/create-t95-release-asset.sh v1.0.0
+  bash build/create-t95-release-asset.sh v1.0.1
 ```
 
 Der Härtungsschritt sperrt den Root-Account, entfernt alle Hostschlüssel und

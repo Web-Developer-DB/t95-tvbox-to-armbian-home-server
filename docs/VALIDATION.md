@@ -1,6 +1,6 @@
 # Öffentliche Testmatrix: stabil getesteter T95-Stand
 
-Der finale Asset-Kanal ist `v1.0.0`. Historische Experiment-Assets bleiben
+Der finale Asset-Kanal ist `v1.0.1`. Historische Experiment-Assets bleiben
 im privaten Laborbestand dokumentiert und werden nicht als finaler Download
 beworben.
 
@@ -16,6 +16,7 @@ bleiben außerhalb des öffentlichen Repositorys.
 | FEL-Erkennung | bestanden | SoC als Allwinner H616 erkannt |
 | TOC0 von microSD | bestanden | eigener Loader startet autonom von SD |
 | DRAM | bestanden | U-Boot meldet 2048 MiB |
+| DRAM-Spannung in Linux-DTB | bestanden | AXP313A DCDC3 Minimum/Maximum jeweils 1.360.000 µV |
 | AXP313/AC300 | bestanden | EPHY antwortet, Reset und Vorinitialisierung erfolgreich |
 | Ext4-Bootskript | bestanden | Kernel und Initramfs von SD geladen |
 | Linux-Userspace | bestanden | systemd und multi-user target erreicht |
@@ -56,9 +57,9 @@ Kopie ist kein Release-Asset.
 
 | Datei | SHA-256 |
 |---|---|
-| gehärtetes Rohimage, entpackt | `e2c1fad50f6bc138332de8ef944b9e83462a882414cc736e9537450de759df4c` |
+| gehärtetes Rohimage, entpackt | `849ec697bca90c07537b4b71bad350c9a05854ac8287fc960483d3bf0d0b7cf4` |
 | T95-TOC0-Loader | `6c408cc237f7e7514ed4307f087f9305f3447f70f9893ae52e1f290f6613ed6a` |
-| T95/Tanix-6.18-DTB | `ab5021cbbdc5df0eb96021ec014fa86bf8d93cc5b4e7f197ab8bb2031d7f6131` |
+| T95/Tanix-6.18-DTB | `b4b0b19d8287663f79efc59e50fc0a7408f7a5a0900d2cc162bfb8a72834857e` |
 | Armbian-Quellimage, XZ | `f08a37afef45bca2b2a727b2d5e48d1d7521ff533f7ebc0ec03f52ada677870c` |
 
 Der Loader wurde bei Byte 8192 gegen die separate Loaderdatei verglichen. Das

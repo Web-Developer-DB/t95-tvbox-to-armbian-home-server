@@ -177,15 +177,15 @@ else
     https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git \
     "$REPO"
 fi
-IMAGE_XZ="$WORKDIR/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
+IMAGE_XZ="$WORKDIR/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
 SHA256SUMS="$WORKDIR/SHA256SUMS"
 curl -fL \
   -o "$IMAGE_XZ" \
-  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.0/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.1/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 curl -fL \
   -o "$SHA256SUMS" \
-  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.0/SHA256SUMS
-grep -F '  T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz' "$SHA256SUMS" \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/download/v1.0.1/SHA256SUMS
+grep -F '  T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz' "$SHA256SUMS" \
   | sha256sum -c -
 ```
 
@@ -204,8 +204,8 @@ REPO="$WORKDIR/t95-tvbox-to-armbian-home-server"
 DOWNLOAD="$WORKDIR"
 PRIVATE="$WORKDIR/t95-private"
 mkdir -p "$PRIVATE"
-IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
-IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
+IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
+IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img"
 if [[ ! -f "$IMAGE" ]]; then
   xz -dk --keep "$IMAGE_XZ"
 fi
@@ -592,7 +592,7 @@ sha256sum -c SHA256SUMS
 Das Release-Image heißt:
 
 ```text
-T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz
+T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 ```
 
 ### 2. Werkzeuge lokal klonen und Image personalisieren
@@ -616,8 +616,8 @@ else
 fi
 PRIVATE="$PWD/t95-private"
 mkdir -p "$PRIVATE"
-IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz"
-IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img"
+IMAGE_XZ="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
+IMAGE="$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img"
 test -f "$IMAGE_XZ" || { echo "Fehlt: $IMAGE_XZ" >&2; exit 1; }
 
 if [[ ! -f "$IMAGE" ]]; then

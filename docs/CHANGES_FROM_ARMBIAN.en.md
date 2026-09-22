@@ -30,9 +30,9 @@ assets.
 | `BASE` | verified Tanix image | `build/prepare-t95-tanix-6.18-source.sh` | offline extraction/hash check for reproducible input | image version, layout, rootfs hash | `sha256sum`, `e2fsck -fn` |
 | `BOOT` | generic Allwinner path | `0001-t95-axp313-h616-fel-bringup.patch`, `build-h616-fel-egon.sh`; historical `build-t95-ac300-ext4boot.sh` | RAM-only eGON/FEL reference; optional T95 TOC0/U-Boot loader | SoC, Boot ROM contract, SD offset, DRAM | eGON/TOC0 header, UART banner |
 | `TFA` | matching TF-A | fetch/build scripts | BL31 paired with T95 U-Boot | SoC platform, BL31 compatibility | pinned commit, artifact hash |
-| `DTB` | Tanix TX6s/AXP313 DTB | `build-t95-tanix-6.18-dtb.sh` | T95 identity with H616/AC300 compatibility | board, PHY address, MDIO, clocks, reset | DTS/DTB inspection, hash |
+| `DTB` | Tanix TX6s/AXP313 DTB | `build-t95-tanix-6.18-dtb.sh` | T95 identity, H616/AC300 compatibility, and DCDC3 min/max fixed to 1,360,000 µV | board, PHY address, MDIO, clocks, reset, DRAM rail | DTS/DTB inspection, `fdtget`, hash, two cold boots |
 | `ENV` | generic boot selection | assembly script, `armbianEnv.txt` | T95 DTB, serial console, ext4 root, diagnostics | kernel path, root UUID, console | environment hash, UART log |
-| `AXP313` | board-specific SPL/DRAM | patch `0001` | AXP313A and tested 2 GiB DDR3 timing at 600 MHz | RAM, PMIC, voltage, frequency | `DRAM: 2048 MiB`, cold boot |
+| `AXP313` | board-specific SPL/DRAM | patch `0001`, `build-t95-tanix-6.18-dtb.sh` | AXP313A and tested 2 GiB DDR3 timing at 600 MHz; DCDC3 is 1.36 V in SPL and Linux DTB | RAM, PMIC, voltage, frequency | `DRAM: 2048 MiB`, two `fdtget` values of `1360000`, cold boot |
 | `AC300` | Ethernet not guaranteed | patch `0002`, T95 DTB | AC300/RMII pre-initialization | PHY, reset, clock, MAC, MDIO, link | kernel log, DHCP, `iperf3` |
 | `KMOD` | standard userspace | historical patch `0003` | no final kernel rebuild; diagnostics only | ABI, modules, initramfs order | `modinfo`, UART log |
 | `HARDEN` | raw image not public entry point | harden/audit scripts | lock root, remove host keys, create keys before ssh, scrub image | rerun for every image update | manifest, audit, secret scan |

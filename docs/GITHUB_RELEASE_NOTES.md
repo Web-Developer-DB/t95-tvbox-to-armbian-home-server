@@ -1,4 +1,4 @@
-# GitHub Release `v1.0.0`
+# GitHub Release `v1.0.1`
 
 ## T95 H616 / AXP313A: gehärtetes SD-Armbian
 
@@ -12,6 +12,13 @@ sauberes Herunterfahren und Dateizugriff im praktischen Betrieb ohne
 beobachtete Fehler abgenommen. UART-Diagnosen erfolgten mit einem
 externen [RP2040-Zero-UART-Adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 (3,3-V-TTL, 115200 Baud/8N1).
+
+### DRAM-Stabilität
+
+Der Linux-DTB hält den AXP313A-Regler `dcdc3` jetzt mit Minimum und Maximum
+auf **1,36 V**. Das entspricht der SPL-Initialisierung und verhindert eine
+nachträgliche Absenkung der DRAM-Rail durch Linux. Vollständige Kaltstarts bis
+zum Login wurden auf zwei T95-Boxen mit `H616-T95MAX-AXP313A-V3.0` geprüft.
 
 ### Sicherheitsänderung
 
@@ -58,7 +65,7 @@ Vollständige Anleitung: [RELEASE.md](RELEASE.md).
 
 ### Assets
 
-- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.0.img.xz`
+- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz`
 - `RELEASE-MANIFEST.txt`
 - `HARDENING-METADATA.txt`
 - `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin`

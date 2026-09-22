@@ -15,7 +15,7 @@ In ein neues, sauberes Repository gehören:
 - die vier bereinigten Fotos unter `docs/images/`;
 - eine vom Maintainer gewählte `LICENSE`;
 - die sechs Dateien eines frisch erzeugten
-  `release-assets/v1.0.0/`-Ordners als GitHub-
+  `release-assets/v1.0.1/`-Ordners als GitHub-
   **Release-Assets**, nicht als Git-Commit.
 
 Vor dem ersten Push in einer frischen Kopie prüfen:
@@ -61,8 +61,8 @@ Prüfung von `git status --ignored`.
 
    ```bash
    T95_RELEASE_ARTIFACT="$HARDENED_ARTIFACT" \
-     bash "$REPO/build/create-t95-release-asset.sh" v1.0.0
-   cd "$REPO/release-assets/v1.0.0"
+     bash "$REPO/build/create-t95-release-asset.sh" v1.0.1
+   cd "$REPO/release-assets/v1.0.1"
    sha256sum -c SHA256SUMS
    xz -t *.img.xz
    ```

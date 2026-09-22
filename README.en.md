@@ -100,6 +100,39 @@ updated afterward; only the kernel and DTB are held for the verified hardware
 state. See [Security, backups, and updates](#security-backups-and-updates)
 before a deliberate kernel update.
 
+### Optional next step: Samba file server and USB automount
+
+> [!NOTE]
+> This optional step installs the complete file-server function tested by this
+> project: the permanent `T95-DATA` share, automatic USB stick/disk mounting,
+> and one SMB2/SMB3 share for every attached medium. Run it **over SSH on the
+> T95**, not on the PC used to write the microSD.
+
+After holding the kernel/DTB, `apt update` is safe. Replace
+`YOUR_LINUX_USERNAME` with the ordinary user you created during Armbian
+first-run – not `root`:
+
+```bash
+sudo apt update
+sudo apt install -y git
+
+git clone --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+cd t95-tvbox-to-armbian-home-server/server/samba-usb
+sha256sum -c MANIFEST.sha256
+
+export T95_USER='YOUR_LINUX_USERNAME'
+id "$T95_USER"
+sudo T95_USER="$T95_USER" ./scripts/restore-samba-usb-setup.sh
+```
+
+The script requests a Samba password where necessary and backs up an existing
+`/etc/samba/smb.conf` before applying the tested configuration. After
+`SUCCESS`, open `smb://<T95-IP>/` in a file manager or VLC, or
+`\\<T95-IP>\` in Windows Explorer. The detailed guide for existing Samba
+setups, eMMC data paths, checks, and safe USB eject follows in
+[`server/samba-usb/README.md`](server/samba-usb/README.md).
+
 ### Requirements
 
 - Exact board: `H616-T95MAX-AXP313A-V3.0`.

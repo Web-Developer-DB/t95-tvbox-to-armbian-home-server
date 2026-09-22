@@ -176,6 +176,41 @@ nachgewiesenen Hardwarestand gesperrt. Der vollständige Umgang mit einem
 bewusst geplanten Kernelupdate steht unter
 [Kernel- und DTB-Schutz](#kernel--und-dtb-schutz).
 
+### Optional danach: Samba-Dateiserver und USB-Automount einrichten
+
+> [!NOTE]
+> Dieser Schritt ist optional, richtet aber die im Projekt getestete
+> Dateiserver-Funktion vollständig ein: die feste Freigabe `T95-DATA`,
+> automatische Einbindung von USB-Sticks/-Festplatten und eine SMB2/SMB3-
+> Freigabe für jedes eingesteckte Medium. Er wird **auf der T95 per SSH**
+> ausgeführt, nicht auf dem PC, auf dem die SD-Karte geschrieben wurde.
+
+Nach der Kernel-/DTB-Sperre ist `apt update` unbedenklich. Ersetze
+`DEIN_LINUX_BENUTZERNAME` durch den normalen Benutzer, den du im
+Armbian-Ersteinrichtungsdialog angelegt hast – nicht durch `root`:
+
+```bash
+sudo apt update
+sudo apt install -y git
+
+git clone --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+cd t95-tvbox-to-armbian-home-server/server/samba-usb
+sha256sum -c MANIFEST.sha256
+
+export T95_USER='DEIN_LINUX_BENUTZERNAME'
+id "$T95_USER"
+sudo T95_USER="$T95_USER" ./scripts/restore-samba-usb-setup.sh
+```
+
+Das Skript fragt bei Bedarf nach einem Samba-Passwort und sichert eine
+vorhandene `/etc/samba/smb.conf`, bevor es die geprüfte Konfiguration setzt.
+Nach `ERFOLG` ist die Serverwurzel im Dateimanager, VLC oder Windows-Explorer
+über `smb://<T95-IP>/` beziehungsweise `\\<T95-IP>\` erreichbar. Die
+ausführliche Anleitung für bestehende Samba-Installationen, eMMC-Datenpfade,
+Prüfungen und sicheren USB-Auswurf folgt unter
+[`server/samba-usb/README.md`](server/samba-usb/README.md).
+
 ### Voraussetzungen
 
 - eine T95 mit der geprüften Platine `H616-T95MAX-AXP313A-V3.0`;
@@ -317,7 +352,9 @@ vorzunehmen.
 
 ### 6. Optional: Dateien über USB/Samba freigeben
 
-Nach erfolgreicher SSH-Anmeldung kann das optionale Modul
+Die Befehle im [Schnellstart](#optional-danach-samba-dateiserver-und-usb-automount-einrichten)
+reichen für eine neue, normale T95-Installation. Nach erfolgreicher
+SSH-Anmeldung kann das optionale Modul
 [`server/samba-usb/`](server/samba-usb/) installiert werden. Es richtet Samba,
 USB-Automount und eine geschützte Dateifreigabe ein. Die vollständige
 Endanwender-Anleitung steht in

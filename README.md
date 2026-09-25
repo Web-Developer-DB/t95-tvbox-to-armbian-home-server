@@ -1,4 +1,4 @@
-# T95 TV-Box → Armbian Linux Home Server
+# T95 TV-Box allwinner h616 → Armbian Linux Home Server
 
 **Deutsch** | [English](README.en.md)
 

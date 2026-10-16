@@ -36,6 +36,54 @@ Ethernet, UART-Diagnose und dokumentierten technischen Anpassungen.
 > geprüft. Das ist keine Zusage für andere T95-Varianten oder für noch nicht
 > getestete Langzeit- und Peripheriefunktionen.
 
+## Schnellinstallation: Dashboard und Bluetooth
+
+Diese Befehle gehören ins **SSH-Terminal der laufenden T95-Armbian-Box**.
+Die GitHub-Links verwenden den Prüfbranch `codex/archive-ssh-dashboard`.
+
+**Gemeinsamer Einstieg:** Auswahlmenü für alle Aktionen, einschließlich
+„Dashboard + Bluetooth/Player gemeinsam installieren“:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/t95-setup.sh)
+```
+
+**Nur Dashboard installieren:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-dashboard.sh)
+```
+
+**Nur Dashboard deinstallieren / vorherigen Stand wiederherstellen:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-dashboard.sh)
+```
+
+**Nur Bluetooth und Musikplayer installieren:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-bluetooth.sh)
+```
+
+**Nur Musikplayer deinstallieren und Bluetooth deaktivieren:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-bluetooth.sh)
+```
+
+Die Einzelstarter führen ihre feste Aktion ohne Menüauswahl aus. Jeder Baustein
+hat eine eigene Sicherung und Rücknahme. Musikdateien und Kopplungen bleiben
+erhalten; der Bluetooth-Deinstallierer fordert zusätzlich die geprüfte Entfernung
+der durch das Setup neu hinzugefügten Zielpakete an. Die gemeinsame Installation
+führt erst Dashboard, dann Bluetooth aus; bei einem Fehler bleiben bereits
+erfolgreich eingerichtete Komponenten erhalten.
+
+Details: [Dashboard](docs/SSH_DASHBOARD.md),
+[Bluetooth-Installation](server/bluetooth/README.md),
+[Bluetooth-Cheat-Sheet](docs/BLUETOOTH_CHEATSHEET.md),
+[Musikplayer-Cheat-Sheet](docs/MUSIKPLAYER_CHEATSHEET.md).
+
 ## Hardware-Fotos
 
 Die folgenden Fotos zeigen die tatsächlich geprüfte T95-Platine und das
@@ -78,6 +126,7 @@ Das separate Projekt beschreibt Firmware, Verdrahtung und Capture der Bootlogs.
 - [UART-Adapter und Portierung](#vor-der-portierung-uart-ist-erforderlich)
 - [Entwicklerpfad für ähnliche H616-Boxen](docs/PORTING.md)
 - [Endanwender-Schnellstart](#endanwender-schnellstart)
+- [Dashboard und Bluetooth: gemeinsame und separate Schnellstarts](#schnellinstallation-dashboard-und-bluetooth)
 - [Armbian-Standard und T95-Anpassungen](#armbian-standard-und-t95-anpassungen)
 - [Vollständiges Änderungsinventar](docs/CHANGES_FROM_ARMBIAN.md)
 - [Geprüfte Hardware und Software](#geprüfte-hardware-und-software)
@@ -957,15 +1006,50 @@ Diese Punkte sind nicht Voraussetzung für den dokumentierten Home-Server-Betrie
 ## SSH-Anmeldedashboard
 
 Der aktuelle Dashboard-Stand vom 16.10.2026 ist mit Quelldateien, Dateirechten,
-Prüfsummen und bereinigtem Beispiel archiviert. Eine bestehende
-Armbian-Installation lässt sich mit einem Befehl wiederherstellen:
+Prüfsummen und bereinigtem Beispiel archiviert. Auf der T95 installieren:
 
 ```bash
-sudo python3 tools/restore-ssh-dashboard.py --apply
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-dashboard.sh)
 ```
 
-Ohne `--apply` zeigt das Werkzeug nur die geplanten Änderungen. Sicherung,
-Rücknahme, Voraussetzungen und Tests beschreibt [SSH_DASHBOARD.md](docs/SSH_DASHBOARD.md).
+Danach: `t95-dashboard status` oder `t95-dashboard remove` für die Rücknahme auf
+den vorherigen Stand. Das bisherige Werkzeug
+`python3 tools/restore-ssh-dashboard.py` bleibt als unverändernde Vorschau und
+für manuelle Installation mit `--apply` verfügbar. Details:
+[SSH_DASHBOARD.md](docs/SSH_DASHBOARD.md).
+
+## Bluetooth-Musikplayer
+
+Das interne BCM43342-Modul kann Musik an Bluetooth-Kopfhörer senden. Die
+Einrichtung installiert BlueZ, PipeWire/WirePlumber, MPD und die Anbindung
+für Wiedergabetasten:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-bluetooth.sh)
+```
+
+Danach `t95-bluetooth pair` zum Koppeln und
+`t95-bluetooth audio ADRESSE` zur Auswahl des Kopfhörers verwenden.
+
+| Aufgabe | Befehl nach Installation |
+|---|---|
+| Bluetooth kurz ausschalten, etwa für Kopfhörer am PC | `t95-bluetooth off` |
+| Wieder einschalten | `t95-bluetooth on` |
+| Bluetooth neu starten | `t95-bluetooth restart` |
+| Zustand prüfen | `t95-bluetooth status` |
+| Player entfernen und Bluetooth deaktivieren | `t95-bluetooth remove --remove-packages` |
+
+Musikdateien und Kopplungen bleiben erhalten; der Home-Server und Samba laufen
+beim Bluetooth-Ausschalten weiter. Details und Grenzen:
+[Bluetooth-Installation](server/bluetooth/README.md),
+[Bluetooth-Cheat-Sheet](docs/BLUETOOTH_CHEATSHEET.md),
+[Musikplayer-Cheat-Sheet](docs/MUSIKPLAYER_CHEATSHEET.md).
+
+**Veröffentlichungsstand:** Die Downloadbefehle verwenden den Prüfbranch
+`codex/archive-ssh-dashboard`. Der Installer wurde in temporären
+Dateisystemen mit simuliertem APT/systemd geprüft; ein vollständiger Test auf
+einer frischen SD steht noch aus. Lokaler Aufruf auf der T95:
+`sudo python3 server/setup/t95_setup.py bluetooth install --user "$USER"`.
 
 ## Lizenz
 

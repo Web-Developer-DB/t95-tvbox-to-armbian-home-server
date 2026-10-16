@@ -46,6 +46,8 @@ docs/*
 !docs/BACKUP.md
 !docs/CHANGES_FROM_ARMBIAN.md
 !docs/SSH_DASHBOARD.md
+!docs/BLUETOOTH_CHEATSHEET.md
+!docs/MUSIKPLAYER_CHEATSHEET.md
 !docs/PORTING.md
 !docs/HARDWARE_IDENTIFICATION.md
 !docs/UART_BRINGUP.md
@@ -94,6 +96,12 @@ tools/*
 !tools/write-t95-provisioned-image-to-sd.sh
 !tools/install-t95-release.sh
 !tools/restore-ssh-dashboard.py
+!tools/t95-setup.sh
+!tools/install-t95-dashboard.sh
+!tools/uninstall-t95-dashboard.sh
+!tools/install-t95-bluetooth.sh
+!tools/uninstall-t95-bluetooth.sh
+__pycache__/
 
 # Lokale, mit einem individuellen Root-Passwort personalisierte Images sind
 # nie Release-Assets und bleiben außerhalb von Git.

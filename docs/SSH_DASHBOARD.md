@@ -19,6 +19,54 @@ Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [
 
 ## Ein-Befehl-Wiederherstellung
 
+### GitHub-Starter mit Installation und Deinstallation
+
+Die Downloadbefehle verwenden den Prüfbranch `codex/archive-ssh-dashboard`.
+Auf der T95 direkt installieren:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-dashboard.sh)
+```
+
+Eigene Schnell-Deinstallation, ohne Auswahlmenü:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-dashboard.sh)
+```
+
+Rücknahme und Status funktionieren danach lokal ohne erneuten Download:
+
+```bash
+t95-dashboard status
+t95-dashboard remove
+```
+
+`remove` stellt die vor dieser
+Installation vorhandenen Dashboard-Dateien wieder her; es löscht nicht pauschal
+das Armbian-Dashboard. War vorher bereits exakt derselbe Stand vorhanden, sieht
+die Rücknahme deshalb gleich aus. Fremde zusätzliche MOTD-Module bleiben erhalten.
+
+Der Starter installiert die benötigten Anzeige-/Systemwerkzeuge über APT und
+führt das erste Installationsbackup unter `/var/lib/t95-setup/dashboard`.
+Wiederholtes Installieren ersetzt dieses Backup nicht. Nachträgliche manuelle
+Änderungen blockieren `remove`, bis sie separat gesichert/geprüft wurden;
+`remove --force` überschreibt sie bewusst mit dem Backup. Pakete bleiben
+standardmäßig erhalten; optional `remove --remove-packages` für ausschließlich
+neu hinzugefügte Zielpakete, mit vorgeschalteter APT-Prüfung.
+
+Aus einem lokalen Checkout auf der Box:
+
+```bash
+sudo python3 server/setup/t95_setup.py dashboard install
+sudo python3 server/setup/t95_setup.py dashboard remove
+```
+
+Weitere Details: [gemeinsamer Setup-Einstieg](../server/setup/README.md).
+Die neuen Setup-Skripte wurden in Fixtures geprüft, noch nicht mit echten
+APT-/systemd-Aktionen auf der Produktivbox.
+
+### Bestehendes Restore-Werkzeug mit Vorschau
+
 Im ausgecheckten Repository zunächst ohne Änderungen prüfen:
 
 ```bash

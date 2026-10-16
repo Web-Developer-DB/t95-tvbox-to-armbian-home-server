@@ -1,0 +1,647 @@
+#!/usr/bin/env python3
+"""T95: Dashboard und Bluetooth-Musikplayer installieren, bedienen, zurücknehmen."""
+import argparse
+from contextlib import contextmanager
+from datetime import datetime, timezone
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import re
+import shlex
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+
+SOURCE = Path(__file__).resolve().parents[2]
+FW_HASH = "09970c63b7a0fc677915195923739ddac5e9ee8d589ef9f4b0ded7370684874f"
+PACKAGES = {
+    "dashboard": ["figlet", "curl", "jq", "procps", "iproute2", "util-linux"],
+    "bluetooth": ["bluez", "pipewire", "pipewire-pulse", "wireplumber",
+                  "libspa-0.2-bluetooth", "mpd", "mpc", "mpdris2",
+                  "dbus-user-session", "python3-dbus", "python3-gi", "usbutils", "rfkill"],
+}
+USER_UNITS = ["pipewire.socket", "pipewire-pulse.socket", "pipewire.service",
+              "pipewire-pulse.service", "wireplumber.service", "mpd.service",
+              "mpdris2.service", "mpris-proxy.service"]
+PLAYER_UNITS = ["mpdris2.service", "mpd.service", "mpris-proxy.service"]
+
+
+def run(command, check=True, timeout=120):
+    try:
+        result = subprocess.run(command, text=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, timeout=timeout)
+    except FileNotFoundError as error:
+        if check:
+            raise
+        return subprocess.CompletedProcess(command, 127, str(error))
+    if check and result.returncode:
+        raise RuntimeError(f"{shlex.join(command)}\n{result.stdout.strip()}")
+    return result
+
+
+def fingerprint(path):
+    if path.is_symlink():
+        return {"kind": "link", "target": os.readlink(path)}
+    if not path.exists():
+        return {"kind": "absent"}
+    if not path.is_file():
+        raise ValueError(f"Keine reguläre Datei: {path}")
+    metadata = path.stat()
+    return {"kind": "file", "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "mode": stat.S_IMODE(metadata.st_mode), "uid": metadata.st_uid, "gid": metadata.st_gid}
+
+
+def atomic_file(path, data, mode=0o644, owner=None):
+    fd, name = tempfile.mkstemp(prefix=".t95-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as output:
+            output.write(data)
+            os.fchmod(output.fileno(), mode)
+            if owner is not None:
+                os.fchown(output.fileno(), *owner)
+        os.replace(name, path)
+    finally:
+        Path(name).unlink(missing_ok=True)
+
+
+def check_destination(path, allow_link=False):
+    if any(p.is_symlink() for p in path.parents):
+        raise ValueError(f"Umgeleitetes Konfigurationsverzeichnis: {path.parent}")
+    if path.is_symlink() and not allow_link:
+        raise ValueError(f"Umgeleitete Zieldatei: {path}")
+    if path.exists() and not path.is_file() and not (allow_link and path.is_symlink()):
+        raise ValueError(f"Keine reguläre Zieldatei: {path}")
+
+
+class Setup:
+    def __init__(self, component, username=None, root=Path("/"), runner=run):
+        self.component = component
+        self.root = root.resolve()
+        self.run = runner
+        self.state_dir = self.path("/var/lib/t95-setup") / component
+        self.state_file = self.state_dir / "state.json"
+        self.state = json.loads(self.state_file.read_text()) if self.state_file.exists() else None
+        saved_user = self.state.get("user") if self.state else None
+        sudo_user = os.environ.get("SUDO_USER")
+        username = username or saved_user or (sudo_user if sudo_user != "root" else None)
+        self.user = None
+        if username:
+            if not re.fullmatch(r"[a-z_][a-z0-9_-]*\$?", username):
+                raise ValueError("Ungültiger Benutzername")
+            account = pwd.getpwnam(username)
+            if account.pw_uid == 0:
+                raise ValueError("Bitte einen normalen Benutzer mit --user angeben")
+            self.user = username
+            self.uid, self.gid = account.pw_uid, account.pw_gid
+            self.home = self.path(account.pw_dir).resolve()
+        if saved_user and self.user != saved_user:
+            raise ValueError(f"Diese Installation gehört zu {saved_user}")
+
+    def path(self, absolute):
+        p = Path(absolute)
+        if not p.is_absolute() or ".." in p.parts:
+            raise ValueError(f"Ungültiger Pfad: {p}")
+        return self.root / p.relative_to("/")
+
+    def user_run(self, args, check=True):
+        if not self.user:
+            raise ValueError("Benutzer fehlt: --user NAME angeben")
+        return self.run(["runuser", "-u", self.user, "--", "env",
+                         f"HOME={self.home}", f"USER={self.user}",
+                         f"XDG_RUNTIME_DIR=/run/user/{self.uid}",
+                         f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{self.uid}/bus", *args], check=check)
+
+    def service(self, scope, args, check=True):
+        if scope == "user":
+            return self.user_run(["systemctl", "--user", *args], check)
+        return self.run(["systemctl", *args], check=check)
+
+    def save(self):
+        self.state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.state_dir.chmod(0o700)
+        atomic_file(self.state_file, (json.dumps(self.state, indent=2) + "\n").encode(), 0o600)
+
+    def begin(self):
+        if self.state and self.state["phase"] != "removed":
+            if self.state["phase"] == "installed":
+                print("Bereits installiert. Für Änderungen zuerst remove ausführen.")
+                return False
+            raise ValueError("Unvollständige Installation: zuerst remove zur Rücknahme ausführen")
+        if self.state_dir.exists():
+            archive = self.state_dir.with_name(self.component + "-" + str(time.time_ns()))
+            self.state_dir.rename(archive)
+        self.state = {"schema": 1, "component": self.component, "user": self.user,
+                      "phase": "preparing", "files": [], "directories": [],
+                      "services": [], "new_packages": [], "created": datetime.now(timezone.utc).isoformat()}
+        self.save()
+        return True
+
+    def directory(self, directory, user=False):
+        missing = []
+        current = directory
+        while not current.exists():
+            missing.append(current)
+            current = current.parent
+        # /lib may be the standard usr-merge symlink. Canonicalize that prefix
+        # before calling this method; refuse redirected user configuration paths.
+        if any(p.is_symlink() for p in (directory, *directory.parents) if p != self.root):
+            raise ValueError(f"Umgeleitetes Konfigurationsverzeichnis: {directory}")
+        for p in reversed(missing):
+            p.mkdir(mode=0o755)
+            if user:
+                os.chown(p, self.uid, self.gid)
+            self.state["directories"].append(str(p))
+            self.save()
+
+    def write(self, path, data=None, mode=0o644, user=False, link=None):
+        check_destination(path, allow_link=link is not None)
+        self.directory(path.parent, user)
+        record = next((r for r in self.state["files"] if r["path"] == str(path)), None)
+        if record is None:
+            record = {"path": str(path), "before": fingerprint(path)}
+            if record["before"]["kind"] == "file":
+                backup = self.state_dir / f"file-{len(self.state['files'])}"
+                atomic_file(backup, path.read_bytes(), 0o600)
+                record["backup"] = str(backup)
+            self.state["files"].append(record)
+            self.save()  # Journal before mutation, including power-loss recovery.
+        if path.is_symlink() and link is None:
+            raise ValueError(f"Umgeleitete Zieldatei: {path}")
+        if link is not None:
+            temporary = path.with_name(".t95-link-" + str(time.time_ns()))
+            try:
+                temporary.symlink_to(link)
+                temporary.replace(path)
+            finally:
+                temporary.unlink(missing_ok=True)
+        else:
+            atomic_file(path, data, mode, (self.uid, self.gid) if user else (0, 0))
+        record["installed"] = fingerprint(path)
+        self.save()
+
+    def conflicts(self):
+        return [r["path"] for r in self.state["files"]
+                if "installed" in r and fingerprint(Path(r["path"])) != r["installed"]]
+
+    def restore_files(self):
+        # Verify every backup before modifying any target.
+        for record in self.state["files"]:
+            if record["before"]["kind"] == "file":
+                if fingerprint(Path(record["backup"]))["sha256"] != record["before"]["sha256"]:
+                    raise ValueError("Sicherungsdatei beschädigt; Abbruch")
+        for record in reversed(self.state["files"]):
+            path, old = Path(record["path"]), record["before"]
+            self.directory(path.parent, user=self.user and path.is_relative_to(self.home))
+            if old["kind"] == "file":
+                atomic_file(path, Path(record["backup"]).read_bytes(), old["mode"], (old["uid"], old["gid"]))
+            elif old["kind"] == "link":
+                temp = path.with_name(".t95-restore-" + str(time.time_ns()))
+                temp.symlink_to(old["target"])
+                temp.replace(path)
+            else:
+                path.unlink(missing_ok=True)
+            record["installed"] = fingerprint(path)
+        self.save()
+        # Runtime state/music/playlist directories are deliberately retained.
+
+    def snapshot_services(self):
+        for scope, units in [("system", ["bluetooth.service", "mpd.socket", "mpd.service"]),
+                             ("user", USER_UNITS)]:
+            for unit in units:
+                enabled = self.service(scope, ["is-enabled", unit], False).stdout.strip()
+                active = self.service(scope, ["is-active", unit], False).stdout.strip() == "active"
+                self.state["services"].append(dict(scope=scope, unit=unit, enabled=enabled, active=active))
+        self.state["linger_before"] = self.run(
+            ["loginctl", "show-user", self.user, "-p", "Linger", "--value"], check=False).stdout.strip()
+        self.save()
+
+    def restore_services(self):
+        if not self.state["services"]:
+            return
+        for scope in ("system", "user"):
+            self.service(scope, ["daemon-reload"], False)
+        for record in self.state["services"]:
+            scope, unit = record["scope"], record["unit"]
+            if record["enabled"] in ("enabled", "enabled-runtime"):
+                self.service(scope, ["enable", unit], False)
+            else:
+                self.service(scope, ["disable", unit], False)
+            self.service(scope, ["start" if record["active"] else "stop", unit], False)
+
+    def install_packages(self):
+        owned = []
+        for package in PACKAGES[self.component]:
+            result = self.run(["dpkg-query", "-W", "-f=${Status}", package], check=False)
+            if result.stdout.strip() != "install ok installed":
+                owned.append(package)
+        self.state["new_packages"] = owned
+        self.save()
+        print("Paketlisten aktualisieren und benötigte Pakete installieren …", flush=True)
+        self.run(["apt-get", "update"], timeout=900)
+        self.run(["apt-get", "install", "-y", "--no-install-recommends", *PACKAGES[self.component]], timeout=1800)
+
+    def cache_tools(self):
+        destination = self.path("/usr/local/lib/t95-setup")
+        manager = destination / "server/setup/t95_setup.py"
+        check_destination(manager)
+        manager.parent.mkdir(parents=True, exist_ok=True)
+        atomic_file(manager, Path(__file__).read_bytes())
+        # Cached payload permits dashboard removal without network access.
+        archive = SOURCE / "server/ssh-dashboard/2026-10-16"
+        cached = destination / "server/ssh-dashboard/2026-10-16"
+        if archive.resolve() != cached.resolve():
+            shutil.copytree(archive, cached, dirs_exist_ok=True)
+        for component in ("bluetooth", "dashboard"):
+            wrapper = self.path(f"/usr/local/bin/t95-{component}")
+            check_destination(wrapper)
+            wrapper.parent.mkdir(parents=True, exist_ok=True)
+            content = ("#!/usr/bin/env bash\n# T95 managed command\nset -euo pipefail\n"
+                       f"if [[ $EUID == 0 ]]; then\n"
+                       f"  exec python3 /usr/local/lib/t95-setup/server/setup/t95_setup.py {component} \"$@\"\n"
+                       "fi\n"
+                       f"exec sudo python3 /usr/local/lib/t95-setup/server/setup/t95_setup.py {component} \"$@\"\n")
+            if wrapper.is_symlink() or (wrapper.exists() and b"# T95 managed command\n" not in wrapper.read_bytes()):
+                raise ValueError(f"Vorhandenes fremdes Werkzeug: {wrapper}")
+            atomic_file(wrapper, content.encode(), 0o755)
+
+    def install_dashboard(self):
+        archive = SOURCE / "server/ssh-dashboard/2026-10-16"
+        entries = json.loads((archive / "manifest.json").read_text())["files"]
+        if len({e["path"] for e in entries}) != len(entries):
+            raise ValueError("Doppelte Manifestpfade")
+        for e in entries:
+            p = Path(e["path"])
+            if p.is_absolute() or ".." in p.parts or not (
+                p.parent == Path("etc/update-motd.d") or str(p) in
+                {"etc/default/armbian-motd", "usr/lib/armbian/armbian-allwinner-battery"}):
+                raise ValueError("Ungültiger Dashboard-Pfad")
+            if e["mode"] not in ("0644", "0755") or (archive / "rootfs" / p).is_symlink():
+                raise ValueError("Ungültige Dashboard-Datei")
+            if fingerprint(archive / "rootfs" / p)["sha256"] != e["sha256"]:
+                raise ValueError("Dashboard-Prüfsumme falsch")
+            check_destination(self.path("/" + e["path"]))
+        self.install_packages()
+        for e in entries:
+            self.write(self.path("/" + e["path"]), (archive / "rootfs" / e["path"]).read_bytes(), int(e["mode"], 8))
+
+    def firmware_paths(self):
+        base = self.path("/lib/firmware/brcm").resolve(strict=True)
+        return base / "BCM43342.hcd", base / "BCM.mbox,t95-axp313.hcd"
+
+    def check_board(self):
+        compatible = self.path("/proc/device-tree/compatible").read_bytes().split(b"\0")
+        if b"mbox,t95-axp313" not in compatible:
+            raise ValueError("Bluetooth-Setup benötigt das T95-AXP313A-Board aus diesem Projekt")
+        firmware, alias = self.firmware_paths()
+        if fingerprint(firmware).get("sha256") != FW_HASH:
+            raise ValueError("Erwartete BCM43342-Firmware aus v1.0.1 fehlt/ist abweichend; keine fremde Firmware laden")
+        device = self.path("/sys/class/bluetooth/hci0/device").resolve(strict=True)
+        driver = (device / "driver").resolve(strict=True)
+        if (device.name != "serial0-0" or "5000400.serial" not in str(device) or
+                driver != self.path("/sys/bus/serial/drivers/hci_uart_bcm").resolve()):
+            raise ValueError("hci0 ist nicht das erwartete interne BCM43342-UART-Modul")
+        if (alias.exists() or alias.is_symlink()) and (not alias.is_symlink() or os.readlink(alias) != "BCM43342.hcd"):
+            raise ValueError("Abweichender Firmware-Alias vorhanden; manuell prüfen")
+        return driver, alias
+
+    def rebind(self, driver):
+        self.run(["systemctl", "stop", "bluetooth.service"])
+        (driver / "unbind").write_text("serial0-0\n")
+        try:
+            (driver / "bind").write_text("serial0-0\n")
+        finally:
+            # If binding failed, make one cleanup attempt before restoring BlueZ.
+            device_driver = self.path("/sys/bus/serial/devices/serial0-0/driver")
+            if not device_driver.exists():
+                try:
+                    (driver / "bind").write_text("serial0-0\n")
+                except OSError as error:
+                    print(f"Bluetooth-Rebind benötigt Prüfung: {error}", file=sys.stderr)
+            self.run(["systemctl", "start", "bluetooth.service"], check=False)
+        for _ in range(15):
+            if self.run(["bluetoothctl", "--timeout", "2", "list"], check=False).stdout.startswith("Controller "):
+                return
+            time.sleep(1)
+        raise RuntimeError("Bluetooth-Controller nach Firmware-Rebind nicht bereit")
+
+    def bt(self, *args):
+        result = self.run(["bluetoothctl", "--timeout", "15", *args])
+        if re.search(r"Failed|No default controller|not available", result.stdout):
+            raise RuntimeError(result.stdout.strip())
+        print(result.stdout.strip())
+
+    def install_bluetooth(self, music=None):
+        if not self.user:
+            raise ValueError("Für den Player --user NAME angeben")
+        driver, alias = self.check_board()
+        if (self.home / ".mpdconf").exists():
+            raise ValueError("Zusätzliche ~/.mpdconf vorhanden; vorher separat sichern/auflösen")
+        for relative in (".config/mpd/mpd.conf", ".config/mpDris2/mpDris2.conf",
+                         ".config/pipewire/client.conf.d/51-t95-mpd-target.conf",
+                         ".config/systemd/user/mpdris2.service",
+                         ".config/systemd/user/wireplumber.service.d/51-t95-state.conf",
+                         ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf"):
+            check_destination(self.home / relative)
+        # Paths are quoted for MPD and written into an INI file. Reject control
+        # characters and INI interpolation markers instead of accepting injection.
+        music = Path(music) if music else self.home / "Music"
+        if not music.is_absolute() or any(c in str(music) + str(self.home) for c in '\n\r"\\%'):
+            raise ValueError("Musikpfad muss absolut sein und darf keine Steuer-/Konfigurationszeichen enthalten")
+        self.snapshot_services()
+        self.install_packages()
+        if "pipewire" not in self.run(["mpd", "--version"]).stdout.lower():
+            raise ValueError("Installiertes MPD unterstützt keine PipeWire-Ausgabe")
+        self.run(["loginctl", "enable-linger", self.user])
+        self.run(["systemctl", "start", f"user@{self.uid}.service"])
+        for _ in range(15):
+            if self.user_run(["systemctl", "--user", "show-environment"], False).returncode == 0:
+                break
+            time.sleep(1)
+        else:
+            raise RuntimeError("Benutzerdienste nicht bereit")
+        self.service("system", ["disable", "--now", "mpd.socket", "mpd.service"])
+        self.service("user", ["stop", *PLAYER_UNITS], False)
+        if not alias.is_symlink():
+            self.write(alias, link="BCM43342.hcd")
+            self.rebind(driver)
+        share = self.home / ".local/share/t95-bluetooth"
+        for directory in (music, share / "mpd", share / "playlists", share / "wireplumber-state"):
+            # Only create music directories in the user's home; external mounts
+            # must already exist. Never chown an existing shared music folder.
+            if not directory.is_relative_to(self.home) and not directory.is_dir():
+                raise ValueError("Externer Musikordner muss bereits vorhanden/eingehängt sein")
+            if directory.is_relative_to(self.home):
+                self.directory(directory, user=True)
+        self.state["music"] = str(music)
+        self.state["target"] = "t95.bluetooth.unselected"
+        self.save()
+        self.write(self.home / ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf", b'''# T95 headless Bluetooth audio
+wireplumber.profiles = {
+  main = { monitor.bluez.seat-monitoring = disabled }
+}
+''', user=True)
+        self.write(self.home / ".config/systemd/user/wireplumber.service.d/51-t95-state.conf", b'''[Service]
+Environment=XDG_STATE_HOME=%h/.local/share/t95-bluetooth/wireplumber-state
+''', user=True)
+        # target alone permits WirePlumber to fall back to another sink. Limit
+        # this client rule to MPD, leaving other applications' routing intact.
+        self.write(self.home / ".config/pipewire/client.conf.d/51-t95-mpd-target.conf", b'''stream.rules = [
+  {
+    matches = [ { application.name = "Music Player Daemon" } ]
+    actions = { update-props = {
+      node.dont-fallback = true
+      node.dont-move = true
+    } }
+  }
+]
+''', user=True)
+        self.write_mpd()
+        self.write(self.home / ".config/mpDris2/mpDris2.conf", f'''[Connection]
+host = 127.0.0.1
+port = 6600
+[Library]
+music_dir = {music}
+[Bling]
+mmkeys = False
+notify = False
+'''.encode(), user=True)
+        self.write(self.home / ".config/systemd/user/mpdris2.service", b'''[Unit]
+Description=MPD MPRIS bridge for Bluetooth buttons
+Requires=mpd.service
+After=mpd.service dbus.service
+PartOf=mpd.service
+[Service]
+Type=simple
+ExecStart=/usr/bin/mpDris2
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=default.target
+''', user=True)
+        self.service("user", ["daemon-reload"])
+        self.service("system", ["enable", "--now", "bluetooth.service"])
+        self.run(["rfkill", "unblock", "bluetooth"])
+        self.bt("power", "on")
+        self.service("user", ["enable", "--now", *USER_UNITS])
+        self.service("user", ["restart", "wireplumber.service", "mpd.service", "mpdris2.service"])
+        self.user_run(["mpc", "-h", "127.0.0.1", "-p", "6600", "stop"])
+        print("Player eingerichtet, Wiedergabe gestoppt. Jetzt: t95-bluetooth pair")
+
+    def write_mpd(self):
+        share = self.home / ".local/share/t95-bluetooth"
+        self.write(self.home / ".config/mpd/mpd.conf", f'''# T95 managed MPD configuration
+music_directory "{self.state['music']}"
+playlist_directory "{share}/playlists"
+db_file "{share}/mpd/database"
+log_file "{share}/mpd/mpd.log"
+state_file "{share}/mpd/state"
+bind_to_address "127.0.0.1"
+port "6600"
+auto_update "yes"
+restore_paused "yes"
+audio_output {{
+    type "pipewire"
+    name "T95 Bluetooth"
+    target "{self.state['target']}"
+    mixer_type "software"
+}}
+'''.encode(), user=True)
+
+    def audio(self, address):
+        if not self.state or self.state["phase"] != "installed":
+            raise ValueError("Zuerst Bluetooth-Player installieren")
+        if not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", address or ""):
+            raise ValueError("Aufruf: t95-bluetooth audio AA:BB:CC:DD:EE:FF")
+        marker = address.replace(":", "_").upper()
+        # The profile suffix is discovered; do not assume it always is .1.
+        for _ in range(15):
+            nodes = json.loads(self.user_run(["pw-dump"]).stdout)
+            matches = [(n["id"], n.get("info", {}).get("props", {}).get("node.name", "")) for n in nodes
+                       if n.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"]
+            matches = [(i, name) for i, name in matches if name.upper().startswith("BLUEZ_OUTPUT." + marker + ".")]
+            if matches:
+                break
+            time.sleep(1)
+        else:
+            raise ValueError("Kein Audio-Ausgang für diese Adresse. Zuerst connect, A2DP und wpctl status prüfen")
+        if self.conflicts():
+            raise ValueError("Verwaltete Dateien wurden geändert; vor Audio-Auswahl separat sichern/prüfen")
+        node_id, name = matches[0]
+        self.user_run(["wpctl", "set-default", str(node_id)])
+        self.user_run(["wpctl", "set-volume", str(node_id), "0.20"])
+        self.user_run(["wpctl", "set-mute", str(node_id), "0"])
+        self.state["target"] = name
+        self.write_mpd()
+        self.service("user", ["restart", "mpd.service", "mpdris2.service"])
+        self.user_run(["mpc", "-h", "127.0.0.1", "-p", "6600", "stop"])
+        print("Kopfhörer als MPD-Ausgang gewählt, Lautstärke 20 %, Wiedergabe gestoppt.")
+
+    def radio(self, action):
+        if action in ("off", "restart"):
+            if self.user:
+                self.user_run(["mpc", "-h", "127.0.0.1", "-p", "6600", "stop"], False)
+            self.run(["rfkill", "block", "bluetooth"])
+            self.service("system", ["stop", "bluetooth.service"])
+            print("Bluetooth-Funk aus. Kopfhörer können jetzt mit dem PC verbunden werden.")
+        if action in ("on", "restart"):
+            if action == "restart":
+                time.sleep(1)
+            self.run(["rfkill", "unblock", "bluetooth"])
+            self.service("system", ["start", "bluetooth.service"])
+            for _ in range(15):
+                if self.run(["bluetoothctl", "--timeout", "2", "list"], check=False).stdout.startswith("Controller "):
+                    break
+                time.sleep(1)
+            else:
+                raise RuntimeError("Bluetooth-Controller nicht bereit; t95-bluetooth status prüfen")
+            self.bt("power", "on")
+
+    def remove_packages(self):
+        packages = [p for p in self.state["new_packages"] if p in PACKAGES[self.component]]
+        if not packages:
+            return
+        simulation = self.run(["apt-get", "-s", "remove", "--no-auto-remove", *packages]).stdout
+        removed = {line.split()[1].split(":")[0] for line in simulation.splitlines() if line.startswith("Remv ")}
+        if not removed.issubset(set(packages)):
+            raise ValueError("APT würde weitere Pakete entfernen. Pakete bleiben erhalten; keine automatische Rücknahme.")
+        self.run(["apt-get", "remove", "-y", "--no-auto-remove", *packages], timeout=1800)
+
+    def remove(self, force=False, purge=False):
+        if not self.state:
+            raise ValueError("Kein Installationsprotokoll vorhanden; bestehende Einrichtung wird nicht blind gelöscht")
+        if self.state["phase"] != "removed":
+            conflicts = self.conflicts()
+            if conflicts and not force:
+                raise ValueError("Seit Installation geänderte Dateien; separat sichern, dann --force verwenden:\n" + "\n".join(conflicts))
+            complete = self.state["phase"] == "installed"
+            if self.component == "bluetooth" and complete:
+                self.radio("off")
+                self.service("system", ["disable", "bluetooth.service"])
+                self.service("user", ["disable", "--now", *PLAYER_UNITS], False)
+                # Stop only audio services that were not running before setup.
+                for r in reversed(self.state["services"]):
+                    if r["scope"] == "user" and r["unit"] not in PLAYER_UNITS and not r["active"]:
+                        self.service("user", ["stop", r["unit"]], False)
+                        if r["enabled"] not in ("enabled", "enabled-runtime"):
+                            self.service("user", ["disable", r["unit"]], False)
+            self.restore_files()
+            if self.component == "bluetooth":
+                if complete:
+                    self.service("user", ["daemon-reload"])
+                else:
+                    # A failed/interrupted install may not have installed BlueZ
+                    # or rfkill. Restore its baseline instead of requiring them.
+                    self.restore_services()
+            self.state["phase"] = "removed"
+            self.save()
+            print("Entfernt: vorherige Dateien wiederhergestellt. Sicherung bleibt:", self.state_dir)
+        else:
+            print("Bereits entfernt.")
+        if purge:
+            self.remove_packages()
+        else:
+            print("Pakete bleiben installiert. Optional --remove-packages: nur durch dieses Setup hinzugefügte Zielpakete.")
+
+    def install(self, music=None):
+        if not self.path("/etc/armbian-release").is_file():
+            raise ValueError("Eine bestehende Armbian-Installation ist erforderlich")
+        if self.component == "bluetooth":
+            if not self.user:
+                raise ValueError("Für den Player --user NAME angeben")
+            self.check_board()
+        if not self.begin():
+            return
+        try:
+            if self.component == "dashboard":
+                self.install_dashboard()
+            else:
+                self.install_bluetooth(music)
+            self.cache_tools()
+            self.state["phase"] = "installed"
+            self.save()
+        except (Exception, KeyboardInterrupt):
+            print("Installation fehlgeschlagen; Konfigurationsdateien werden zurückgenommen.", file=sys.stderr)
+            self.restore_files()
+            if self.component == "bluetooth":
+                self.restore_services()
+            self.state["phase"] = "failed"
+            self.save()
+            print("APT-Pakete/Linger können verbleiben; Protokoll:", self.state_dir, file=sys.stderr)
+            raise
+        print(f"Fertig. Lokaler Einstieg: t95-{self.component} status / remove")
+
+    def status(self):
+        print("Setup:", self.state["phase"] if self.state else "nicht durch dieses Werkzeug installiert")
+        if self.state:
+            print("Protokoll:", self.state_dir)
+            print("Abweichende Dateien:", len(self.conflicts()) if self.state["phase"] != "removed" else "–")
+        if self.component == "bluetooth":
+            for command in (["systemctl", "is-active", "bluetooth.service"], ["rfkill", "list", "bluetooth"],
+                            ["bluetoothctl", "--timeout", "5", "show"]):
+                print(self.run(command, check=False).stdout.strip())
+            if self.user:
+                print(self.user_run(["systemctl", "--user", "is-active", *PLAYER_UNITS], False).stdout.strip())
+
+
+@contextmanager
+def setup_lock():
+    directory = Path("/var/lib/t95-setup")
+    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with (directory / "lock").open("a") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        yield
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("component", choices=["dashboard", "bluetooth"])
+    parser.add_argument("action", choices=["install", "remove", "status", "on", "off", "restart", "pair", "audio"])
+    parser.add_argument("address", nargs="?", help="Bluetooth-Adresse für audio")
+    parser.add_argument("--user", help="bestehender normaler Benutzer für die Audiowiedergabe")
+    parser.add_argument("--music-dir", help="absoluter Musikordner; Standard: HOME/Music")
+    parser.add_argument("--force", action="store_true", help="bei remove auch nachträglich geänderte Konfiguration zurücknehmen")
+    parser.add_argument("--remove-packages", action="store_true", help="bei remove nur neu hinzugefügte Zielpakete entfernen")
+    args = parser.parse_args()
+    if args.address and args.action != "audio":
+        parser.error("Eine Geräteadresse ist nur bei audio erlaubt")
+    if (args.force or args.remove_packages) and args.action != "remove":
+        parser.error("--force und --remove-packages sind nur bei remove erlaubt")
+    if args.music_dir and (args.component, args.action) != ("bluetooth", "install"):
+        parser.error("--music-dir ist nur bei bluetooth install erlaubt")
+    if os.geteuid() != 0:
+        parser.error("Bitte mit sudo python3 ausführen; --user NAME für den Player")
+    if args.component == "dashboard" and args.action not in ("install", "remove", "status"):
+        parser.error("Dashboard unterstützt install, remove und status")
+    with setup_lock():
+        setup = Setup(args.component, args.user)
+        if args.action == "install":
+            setup.install(args.music_dir)
+        elif args.action == "remove":
+            setup.remove(args.force, args.remove_packages)
+        elif args.action == "status":
+            setup.status()
+        elif args.action == "audio":
+            setup.audio(args.address)
+        elif args.action == "pair":
+            print("Kopfhörer in Kopplungsmodus, automatische PC/Handy-Verbindung verhindern.\n"
+                  "In bluetoothctl: power on; agent on; default-agent; scan on\n"
+                  "Dann: pair ADRESSE; trust ADRESSE; connect ADRESSE; scan off; quit\n"
+                  "Danach: t95-bluetooth audio ADRESSE")
+            setup.radio("on")
+            # Keep an interactive BlueZ client/agent alive throughout discovery and pairing.
+            subprocess.run(["bluetoothctl"], check=True)
+        else:
+            setup.radio(args.action)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
+        raise SystemExit(f"T95-Setup: {error}")

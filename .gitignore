@@ -45,6 +45,7 @@ docs/*
 !docs/GITHUB_RELEASE_NOTES.md
 !docs/BACKUP.md
 !docs/CHANGES_FROM_ARMBIAN.md
+!docs/SSH_DASHBOARD.md
 !docs/PORTING.md
 !docs/HARDWARE_IDENTIFICATION.md
 !docs/UART_BRINGUP.md
@@ -92,6 +93,7 @@ tools/*
 !tools/provision-t95-release-image.sh
 !tools/write-t95-provisioned-image-to-sd.sh
 !tools/install-t95-release.sh
+!tools/restore-ssh-dashboard.py
 
 # Lokale, mit einem individuellen Root-Passwort personalisierte Images sind
 # nie Release-Assets und bleiben außerhalb von Git.

@@ -1,0 +1,40 @@
+    _             _    _
+   /_\  _ _ _ __ | |__(_)__ _ _ _
+  / _ \| '_| '  \| '_ \ / _` | ' \
+ /_/ \_\_| |_|_|_|_.__/_\__,_|_||_|
+
+ v26.8.4 for Tanix TX6s AXP313 running Armbian Linux 6.18.48-current-sunxi64
+
+ Packages:     Debian stable (trixie)
+ Updates:      Kernel upgrade disabled and 3 packages available for upgrade
+ IPv4:        (LAN) <LAN_IPV4> (WAN) <PUBLIC_IPV4>
+ IPv6:        (LAN) <IPV6> (WAN) <IPV6>
+  Containers:   jellyfin
+
+ Performance:
+  Load:        %%              Uptime:         10h 14m Local users:  3
+ Memory usage: 2%%  of 1.93G
+  CPU temp:    45°C             Usage of /:  81% of 117G   	  storage /:   62% of 117G
+
+ Tips:
+
+ Proxmox on ARM board? https://tinyurl.com/2ecpuzk3
+
+ Commands:
+
+ Configuration: armbian-config
+ Upgrade      : armbian-upgrade
+ Monitoring   : htop
+ SD-Writes    : 0.44 GB (since last boot)
+
+Laufwerksübersicht:
+  mmcblk0p1    : Gesamt: 117G   | Frei: 23G    (81% ) | Mount: /
+  zram1        : Gesamt: 47M    | Frei: 39M    (11% ) | Mount: /var/log
+  mmcblk2p1    : Gesamt: 29G    | Frei: 23G    (17% ) | Mount: /srv/t95-emmc
+  sdb1         : Gesamt: 59G    | Frei: 817M   (99% ) | Mount: /media/user/USB-1
+  sda1         : Gesamt: 117G   | Frei: 43G    (62% ) | Mount: /media/user/USB-2
+
+28GB
+
+Last login: Fri Oct 16 21:47:38 2026 from <SSH_CLIENT_IPV4>
+user@t95-home-server:~$

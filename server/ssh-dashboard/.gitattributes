@@ -1,0 +1,2 @@
+# Preserve the archived bytes so checksum verification survives any checkout settings.
+2026-10-16/rootfs/** -text

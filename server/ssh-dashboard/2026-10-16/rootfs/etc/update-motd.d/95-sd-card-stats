@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Farbcodes definieren
+YELLOW="\e[0;33m"
+GREEN="\e[0;32m"
+GRAY="\e[0;90m"
+CYAN="\e[0;36m"
+RED="\e[0;31m"
+RESET="\e[0m"
+
+# --- TEIL 1: Schreibstatistik der SD-Karte ---
+STAT_FILE="/sys/block/mmcblk0/stat"
+if [ -f "$STAT_FILE" ]; then
+    SECTORS=$(awk '{print $7}' "$STAT_FILE")
+    BOOT_WRITES_GB=$(awk "BEGIN {printf \"%.2f\", ($SECTORS * 512) / 1073741824}")
+    
+    printf " ${YELLOW}%-12s${RESET} : ${GREEN}%s GB${RESET} ${GRAY}(since last boot)${RESET}\n" "SD-Writes" "$BOOT_WRITES_GB"
+fi
+
+# --- TEIL 2: Speicherplatz aller echten Laufwerke ---
+echo -e "\n${YELLOW}Laufwerksübersicht:${RESET}"
+
+df -h | grep -E '^/dev/|^zram' | while read -r line; do
+    DEV=$(echo "$line" | awk '{print $1}' | sed 's|/dev/||')
+    SIZE=$(echo "$line" | awk '{print $2}')
+    FREE=$(echo "$line" | awk '{print $4}')
+    PERC=$(echo "$line" | awk '{print $5}')
+    MOUNT=$(echo "$line" | awk '{print $6}')
+    
+    PERC_NUM=$(echo "$PERC" | tr -d '%')
+    
+    # Farbe für die Prozentanzeige bestimmen (Rot ab 90%, sonst Grün)
+    if [ "$PERC_NUM" -ge 90 ] 2>/dev/null; then
+        PERC_COLOR="$RED"
+    else
+        PERC_COLOR="$GREEN"
+    fi
+    
+    # Formatierte Ausgabe für jedes Laufwerk
+    printf "  %-12s : Gesamt: %-6s | Frei: ${CYAN}%-6s${RESET} (${PERC_COLOR}%-4s${RESET}) | Mount: %s\n" "$DEV" "$SIZE" "$FREE" "$PERC" "$MOUNT"
+done

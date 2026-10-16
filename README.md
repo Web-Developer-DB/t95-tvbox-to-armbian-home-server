@@ -954,6 +954,19 @@ Das große Image gehört als Release-Asset zu GitHub, nicht in den Git-Verlauf.
 
 Diese Punkte sind nicht Voraussetzung für den dokumentierten Home-Server-Betrieb.
 
+## SSH-Anmeldedashboard
+
+Der aktuelle Dashboard-Stand vom 16.10.2026 ist mit Quelldateien, Dateirechten,
+Prüfsummen und bereinigtem Beispiel archiviert. Eine bestehende
+Armbian-Installation lässt sich mit einem Befehl wiederherstellen:
+
+```bash
+sudo python3 tools/restore-ssh-dashboard.py --apply
+```
+
+Ohne `--apply` zeigt das Werkzeug nur die geplanten Änderungen. Sicherung,
+Rücknahme, Voraussetzungen und Tests beschreibt [SSH_DASHBOARD.md](docs/SSH_DASHBOARD.md).
+
 ## Lizenz
 
 Für dieses Repository ist derzeit absichtlich noch keine Lizenz festgelegt.

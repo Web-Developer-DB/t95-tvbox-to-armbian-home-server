@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "snapshot": "2026-10-16",
+  "baseline": {
+    "distribution": "Armbian Debian Trixie",
+    "armbian_bsp_version": "26.8.4",
+    "kernel": "6.18.48-current-sunxi64"
+  },
+  "files": [
+    {
+      "path": "etc/default/armbian-motd",
+      "mode": "0644",
+      "sha256": "e81c797e1240736fc394e48be1d662289b8c24d04487b7ab81e8f7f9952b2674"
+    },
+    {
+      "path": "etc/update-motd.d/00-clear",
+      "mode": "0755",
+      "sha256": "d25f882f4ceebb00c488070432494f8c78e5a755285c84f2b60bbb9e937b87d0"
+    },
+    {
+      "path": "etc/update-motd.d/10-armbian-header",
+      "mode": "0755",
+      "sha256": "7627c22d0d21237e712da7f8763376f96ad14be8ae9a460a3bd19e75baa0cb9c"
+    },
+    {
+      "path": "etc/update-motd.d/15-ap-info",
+      "mode": "0755",
+      "sha256": "0c88b153a6118a0c28b23c2c590317eea8a58cb571477073bd942a559f2f4052"
+    },
+    {
+      "path": "etc/update-motd.d/20-ip-info",
+      "mode": "0755",
+      "sha256": "4d5fc800f99b9874cbce31f8f0077aa5deb2f30df6e818b86feba9b238de4a7e"
+    },
+    {
+      "path": "etc/update-motd.d/25-containers-info",
+      "mode": "0755",
+      "sha256": "e2f18dcfac751ebc1b64b1b318197c0858452f692f776918ea992c0bbb48d2be"
+    },
+    {
+      "path": "etc/update-motd.d/30-armbian-sysinfo",
+      "mode": "0755",
+      "sha256": "51b80d3258cdd5bac2065f740c5af434618c1751556bcd04e4fa30784eb43e7f"
+    },
+    {
+      "path": "etc/update-motd.d/35-armbian-tips",
+      "mode": "0755",
+      "sha256": "65fd5dcb27c2e516119eb10153358a0098561cfe90416e96fbbbb7f3a9e70305"
+    },
+    {
+      "path": "etc/update-motd.d/41-commands",
+      "mode": "0755",
+      "sha256": "4b7a1b9c8458ccd313acd23a7935d2f9fe033d3f437709d90e510206fa6dc265"
+    },
+    {
+      "path": "etc/update-motd.d/95-sd-card-stats",
+      "mode": "0755",
+      "sha256": "2994970908c8e02ed3b60c413bfa14d7d757b7c6843b9c23e4f0885deb2d869d"
+    },
+    {
+      "path": "etc/update-motd.d/98-armbian-autoreboot-warn",
+      "mode": "0755",
+      "sha256": "a9a66ec5a40cdd34108978e8e8b06161c5a2bca769e6970548d46e01c87cc861"
+    },
+    {
+      "path": "etc/update-motd.d/99-blank",
+      "mode": "0755",
+      "sha256": "7db981b16a482bb2bbbde5e06938bb4ac6111c610a0c43cfaed4c72ed44ed275"
+    },
+    {
+      "path": "etc/update-motd.d/quotes.txt",
+      "mode": "0644",
+      "sha256": "20257b7ba03ce54e8550519b275ad028807002370f4df817ba72b5dcabab2ee2"
+    },
+    {
+      "path": "usr/lib/armbian/armbian-allwinner-battery",
+      "mode": "0755",
+      "sha256": "97e7be8e91ebe64726e302e180814f7aa43b1693afac8e3bd59aefade5e1e286"
+    }
+  ]
+}

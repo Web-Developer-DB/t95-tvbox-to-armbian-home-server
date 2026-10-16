@@ -1,6 +1,10 @@
 # Vollständige Dokumentation: Samba + dynamische USB-Freigaben auf T95/Armbian
 
-Stand: **2026-09-16**
+Stand des Referenzaufbaus: **2026-09-16**
+
+**Technische Referenz für Fortgeschrittene.** Für eine neue Installation folge
+der [Modulanleitung](../README.md). Nach deren Skriptinstallation musst du
+diese manuellen Konfigurationsschritte nicht zusätzlich ausführen.
 
 Diese Dokumentation beschreibt den tatsächlich getesteten Aufbau des T95-Armbian-Servers und die Fehler, die während der Einrichtung gefunden und behoben wurden.
 
@@ -228,7 +232,7 @@ sudo loginctl enable-linger $T95_USER
 User-Manager starten:
 
 ```bash
-sudo systemctl start user@1000.service
+sudo systemctl start "user@${T95_UID}.service"
 ```
 
 Die UID darf nicht fest angenommen werden. Allgemein:

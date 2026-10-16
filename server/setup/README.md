@@ -1,10 +1,50 @@
 # Gemeinsamer T95-Setup-Einstieg
 
+**Deutsch** | [English](README.en.md)
+
+**Ort: T95, normaler SSH-Benutzer mit `sudo`.** Erst
+[Grundinstallation, Kernel-Sperre und Backup](../../docs/INSTALLATION.md)
+abschließen. Dieses Menü installiert Zusatzmodule auf einer laufenden Box;
+es erstellt keine Armbian-SD und richtet Samba nicht ein.
+
+> [!NOTE]
+> **Prüfbranch:** Die neuen Installer sind mit simuliertem APT/systemd
+> getestet. Vollständige Installation, Rücknahme und Kaltstart auf einer
+> frischen T95-SD stehen noch aus. Die Hardwaretests der manuellen
+> Ausgangseinrichtung gelten nicht als Abnahme dieser Installer.
+
+## Voraussetzungen
+
+Bash, curl, tar, Python 3 und sudo müssen bereits vorhanden sein. Falls nötig,
+nach der Kernel-Sperre **auf der T95 als normaler Benutzer mit `sudo`** installieren:
+
+```bash
+sudo apt update
+sudo apt install -y bash curl tar python3 sudo
+```
+
+Die eigentlichen Dashboard-/Audiopakete installiert das Setup anschließend.
+Eine Git-Installation ist für den Downloadstarter nicht nötig.
+
+## Schnellstart auf der laufenden T95
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/t95-setup.sh)
+```
+
+Wähle die gewünschte Aktion im Menü; `0` installiert Dashboard und
+Bluetooth/Player nacheinander. Prüfe danach `t95-dashboard status` bzw.
+`t95-bluetooth status`. Musik und Kopplung benötigen zusätzliche Schritte in
+der [Bluetooth-Anleitung](../bluetooth/README.md).
+
+## Funktionsweise und einzelne Starter
+
 `tools/t95-setup.sh` lädt einen Quellstand von GitHub und ruft
 `server/setup/t95_setup.py` mit Rootrechten auf. Ohne Argumente bietet der
 Starter ein kleines Terminalmenü. Die Downloadmethode benötigt bereits Bash,
 curl, tar, Python 3 und sudo auf der Armbian-Box. Die Nutzpakete installiert das
 Setup selbst über APT. Eine Git-Installation ist nicht nötig.
+
 
 Der [Schnellstart am Anfang der README](../../README.md#schnellinstallation-dashboard-und-bluetooth)
 zeigt zuerst den gemeinsamen Einstieg und danach vier getrennte Downloadbefehle:
@@ -50,7 +90,29 @@ Anleitungen:
 [Bluetooth-Cheat-Sheet](../../docs/BLUETOOTH_CHEATSHEET.md) ·
 [Musikplayer-Cheat-Sheet](../../docs/MUSIKPLAYER_CHEATSHEET.md).
 
+## Lokaler Checkout
+
+**T95 · normaler SSH-Benutzer mit `sudo` für Pakete, Git als dieser Benutzer.**
+Der Release-Werkzeugeordner auf dem PC enthält die neuen Module nicht.
+Verwende einen separaten Checkout mit ausdrücklich gewähltem Prüfbranch:
+
+```bash
+sudo apt update
+sudo apt install -y git
+git clone --branch codex/archive-ssh-dashboard --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git "$HOME/t95-server-tools"
+cd "$HOME/t95-server-tools"
+git branch --show-current
+```
+
+**Ergebnis:** `codex/archive-ssh-dashboard`; `server/setup/t95_setup.py` ist
+vorhanden. Wenn der Zielordner bereits existiert, Branch und lokale Änderungen
+prüfen, statt ihn zu überschreiben. Lokale Aufrufe in den Modulanleitungen
+laufen aus diesem Repository-Hauptverzeichnis.
+
 ## Zustand und Rücknahme
+
+Informationen zu Sicherungen und Rücknahme gelten für beide Quellzugänge.
 
 Jede Komponente führt ein privates Journal unter
 `/var/lib/t95-setup/<Komponente>/state.json`. Vor Überschreiben werden bestehende

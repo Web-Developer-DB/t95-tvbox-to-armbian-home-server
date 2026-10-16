@@ -11,6 +11,13 @@ Reproducible Samba and USB configuration for a T95 running as an Armbian home
 server. Run these instructions **on the running T95**, not on the PC used to
 build or write the T95 image.
 
+[Back to installation](../../docs/INSTALLATION.en.md#7-set-up-file-sharing) ·
+[Troubleshooting](../../docs/TROUBLESHOOTING.en.md)
+
+**Recommended first setup:** the fixed share explicitly uses the system SD
+at `/srv/t95-sd-data/Share`. USB drives get separate shares. eMMC is a later
+extension.
+
 ## Result at a glance
 
 The server root `smb://<SERVER-IP>/` displays both the fixed internal
@@ -78,31 +85,55 @@ this project.
 
 ## Quick start: reproducible restore
 
-Run these commands **on the T95**. Replace `serveruser` with a real local Linux
-user.
+The script replaces `/etc/samba/smb.conf` after a timestamped backup. For
+an existing customized Samba installation, first read the
+[technical reference](docs/SAMBA-USB-SETUP.en.md).
+
+Run these commands **on the T95 as your normal SSH user with sudo**.
+`T95_USER` automatically selects that user; `id` must show your normal
+username, not `root`. First apply the
+[kernel holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
+and back up the SD. This checkout uses the review branch; it is separate from
+the release-tools directory on your PC. If Git is missing, run on the T95:
 
 ```bash
-git clone https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+sudo apt update
+sudo apt install -y git
+```
+
+```bash
+git clone --branch codex/archive-ssh-dashboard --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
 cd t95-tvbox-to-armbian-home-server/server/samba-usb
 sha256sum -c MANIFEST.sha256
 
-export T95_USER=serveruser
+export T95_USER="$(id -un)"
 id "$T95_USER"
 ip -brief address
 
-sudo T95_USER="$T95_USER" ./scripts/restore-samba-usb-setup.sh
+sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
 ```
 
-The manifest check must complete without `FAILED`. The script installs Samba,
+The manifest check must complete without `FAILED`. This invocation puts
+`T95-DATA` on the SD. The script installs Samba,
 UDisks2, udiskie, Polkit, and exFAT/NTFS support. If needed, it asks
 interactively for the Samba password of `T95_USER`.
 
-When it prints `Fertig.`, setup is complete. Insert a USB drive and open
-`smb://<SERVER-IP>/` on a client, or `\\<SERVER-IP>\` in Windows Explorer. Sign
-in with the Linux username and its Samba password. No further manual Samba
-configuration is needed if the shares appear.
+When it prints `Fertig.`, first open `smb://<SERVER-IP>/T95-DATA` in the
+**client PC file manager**, or `\\<SERVER-IP>\T95-DATA` in Windows Explorer.
+Replace `<SERVER-IP>` with the current router address and sign in with your
+Linux username and Samba password. Write/read a small test file; no USB drive
+is required yet. Then attach USB storage and inspect its separate share in
+the server root `smb://<SERVER-IP>/`.
+
+<details>
+<summary>Optional customization and script overview</summary>
 
 ### Customize setup
+
+These alternatives replace the quick-start installation command. Use them
+only to deliberately choose a different storage location or server name.
 
 Set the username, server name, and fixed share path when running the script.
 Replace `serveruser` with your ordinary Linux username. `DATA_PATH` selects
@@ -111,7 +142,7 @@ where the fixed `T95-DATA` share points:
 ```bash
 sudo T95_USER=serveruser \
   NETBIOS_NAME=T95-SERVER \
-  DATA_PATH=/srv/T95-DATA/Share \
+  DATA_PATH=/srv/t95-sd-data/Share \
   ./scripts/restore-samba-usb-setup.sh
 ```
 
@@ -180,6 +211,8 @@ sudo usb-eject SunDiskUSB
 The share name normally matches the drive label. The sections below cover
 verification and troubleshooting if something does not work as expected.
 
+</details>
+
 ## Verify after installation
 
 ```bash
@@ -192,8 +225,13 @@ sudo -u "$T95_USER" XDG_RUNTIME_DIR="/run/user/$T95_UID" \
   systemctl --user --no-pager --full status udiskie.service
 ```
 
-Expect valid `testparm` output, active `smbd`/where available `nmbd`, active
-`udiskie.service`, and at least `T95-DATA` in the usershare list.
+Expect valid `testparm` output containing `[T95-DATA]` and your selected
+path, active `smbd`/where available `nmbd`, and active `udiskie.service`.
+`net usershare list` shows dynamic USB shares only; it may be empty when no
+USB drive is mounted. The fixed `T95-DATA` share does not belong in that list.
+
+On the client, open `smb://<SERVER-IP>/T95-DATA`, create a small test file,
+and read it back to confirm actual access.
 
 After inserting USB storage:
 
@@ -204,7 +242,7 @@ journalctl -t T95-USB-SHARE --no-pager -n 30
 ```
 
 A labelled volume uses a sanitized label such as `SunDiskUSB`; unlabelled
-media use `External-USB-1`, then `External-USB-2`, and so on. A published mount
+media use `Extern-USB-1`, then `Extern-USB-2`, and so on. A published mount
 point must not create a duplicate share.
 
 ## Client and VLC access
@@ -215,7 +253,7 @@ Use the server root first:
 smb://<SERVER-IP>/
 ```
 
-Direct paths include `T95-DATA`, label-derived shares, or `External-USB-1`.
+Direct paths include `T95-DATA`, label-derived shares, or `Extern-USB-1`.
 Linux file managers use `smb://<SERVER-IP>/`; Windows Explorer uses
 `\\<SERVER-IP>\`; Android file managers add an SMB share; VLC opens the network
 share and selects a compatible file. Use the Samba password of `T95_USER`; no
@@ -227,7 +265,7 @@ Use the share name, never guess a `/dev/sdX` device:
 
 ```bash
 sudo usb-eject SunDiskUSB
-sudo usb-eject External-USB-1
+sudo usb-eject Extern-USB-1
 ```
 
 `usb-eject` temporarily stops udiskie, closes Samba connections to the selected

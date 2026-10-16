@@ -20,7 +20,7 @@ sudo -u $T95_USER /usr/local/bin/t95-usb-share \
   device_mounted /dev/sda1 /media/$T95_USER/NAME LABEL UUID
 ```
 
-## Duplicate `External-USB-N` share
+## Duplicate `Extern-USB-N` share
 
 ```bash
 for s in $(sudo -u $T95_USER net usershare list); do

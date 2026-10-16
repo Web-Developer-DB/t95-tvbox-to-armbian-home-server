@@ -1,10 +1,15 @@
 # Release-Handbuch: T95 H616 / AXP313A
 
+**Deutsch** | [English](RELEASE.en.md)
+
 Stand: 2026-09-22. Dieser **stabil getestete, hardwaregebundene** SD-Release gilt ausschließlich für
 `H616-T95MAX-AXP313A-V3.0`. Er ist kein universelles T95-Image und verändert
 die Android-eMMC nicht. Fotos zur Boardzuordnung stehen in der
 [README](../README.md#hardware-fotos); individuelle Daten auf
 dem Unterseitenfoto sind redigiert.
+
+**Für die Einrichtung:** [Schritt-für-Schritt-Installation](INSTALLATION.md).
+Dieses Handbuch beschreibt Release-Artefakte und Wartung.
 
 ## Release-Identität
 
@@ -101,41 +106,22 @@ xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 
 ## Lokale Personalisierung und SD-Schreibvorgang
 
-Das GitHub-Image ist absichtlich nicht direkt loginfähig. Es wird vor dem
-Schreiben lokal und außerhalb des Repositorys personalisiert. Das Werkzeug
-fragt zweimal verdeckt nach einem eigenen, nichtleeren Passwort beliebiger Länge
-und schreibt nur dessen SHA-512-Hash in die private Kopie. Passwort und Hash
-erscheinen nicht in der Kommandozeile oder im begleitenden Manifest.
+Das öffentliche Image ist vor der lokalen Personalisierung nicht per Passwort
+loginfähig. Root ist gesperrt. Der Installer fragt zweimal verdeckt nach einem
+eigenen, nichtleeren Passwort und schreibt dessen SHA-512-Hash nur in die
+private Kopie; Passwort und Hash erscheinen nicht im Begleitmanifest.
 
-```bash
-export DOWNLOAD=/pfad/zum/GitHub-Release-Download
-mkdir -p "$HOME/t95-private"
-(cd "$DOWNLOAD" && sha256sum -c SHA256SUMS)
-xz -dk --keep \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
-bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img" \
-  "$HOME/t95-private/t95-personal.img" \
-  PROVISION-T95-ROOT-PASSWORD
+Der maßgebliche Endanwenderweg steht in der [Installation](INSTALLATION.md).
+Die [manuelle Alternative](INSTALLATION.md#manuelle-alternative-zur-sd-vorbereitung)
+ersetzt ausschließlich deren SD-Vorbereitung. Beide Wege verwenden das Image
+und die Image-Werkzeuge vom Tag `v1.0.1`; die neuen Server-Zusatzmodule kommen
+separat aus `codex/archive-ssh-dashboard`.
 
-lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
-bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" \
-  /dev/sdX \
-  "$HOME/t95-private/t95-personal.img" \
-  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
-  WRITE-T95-PROVISIONED-TO-SDX
-```
-
-`/dev/sdX` ist ein Platzhalter und muss nach jedem Einstecken neu mit `lsblk`
-bestimmt werden. Der Schreiber akzeptiert ausschließlich eine wechselbare
-USB-SD-Karte, prüft ihren Rücklese-Hash und öffnet weder T95-eMMC noch FEL.
-Die persönliche Image-Datei samt Manifest ist privat und darf weder in Git
-noch als GitHub-Asset landen.
-
-Nach `ERFOLG`: SD nur bei ausgeschalteter T95 einsetzen, Ethernet verbinden
-und einschalten. Die DHCP-Adresse im Router suchen, den neuen SSH-Fingerprint
-prüfen und sich mit dem lokalen Personalisierungs-Passwort als `root`
-anmelden. Armbian führt anschließend durch seine Ersteinrichtung.
+Persönliche Images und `.t95-provisioned-manifest`-Dateien bleiben privat.
+Der Schreiber akzeptiert wechselbare USB-Karten, prüft Manifest und Rücklese-
+Hash und öffnet weder die T95-eMMC noch FEL. Nach `ERFOLG` die SD nur bei
+vollständig ausgeschalteter Box einsetzen. Erstes SSH-Login: `root` mit dem
+lokal gewählten Passwort, danach Armbian-Ersteinrichtung und normaler Benutzer.
 
 ## Den geprüften Kernel-/DTB-Stand schützen
 

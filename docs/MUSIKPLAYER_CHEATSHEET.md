@@ -1,5 +1,9 @@
 # Musikplayer-Cheat-Sheet: MPD auf der T95
 
+**Deutsch** | [English](MUSIKPLAYER_CHEATSHEET.en.md)
+
+**Ort: T95, normaler SSH-Benutzer des eingerichteten Players.**
+
 Als derselbe normale SSH-Benutzer arbeiten, für den der
 [Bluetooth-Musikplayer](../server/bluetooth/README.md) installiert wurde.
 `mpc`, `wpctl` und `systemctl --user` hier **ohne sudo** ausführen.

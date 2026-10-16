@@ -1,5 +1,7 @@
 # T95 Samba + USB-Automount
 
+**Deutsch** | [English](README.en.md)
+
 ![Status: getestet](https://img.shields.io/badge/Status-Samba%2FUSB%20getestet-brightgreen)
 ![Platform: Armbian](https://img.shields.io/badge/Platform-Armbian%20%2F%20Debian-18a303)
 ![Protocol: SMB2%2FSMB3](https://img.shields.io/badge/Protocol-SMB2%20%2F%20SMB3-blue)
@@ -8,6 +10,13 @@
 Reproduzierbare Samba-/USB-Konfiguration für den als Armbian-Home-Server
 betriebenen T95. Die Anleitung richtet sich an eine laufende T95-Armbian-Box,
 nicht an den Linux-PC, auf dem das T95-Image gebaut wird.
+
+[Zur Installation](../../docs/INSTALLATION.md#7-dateiserver-einrichten) ·
+[Hilfe bei Problemen](../../docs/TROUBLESHOOTING.md)
+
+**Empfohlener Erststart:** Die feste Freigabe liegt ausdrücklich auf der
+System-SD unter `/srv/t95-sd-data/Share`. USB-Laufwerke bekommen eigene
+Freigaben. eMMC ist eine spätere Erweiterung.
 
 ## Ergebnis auf einen Blick
 
@@ -98,14 +107,31 @@ Vor der Installation:
 
 ## Schnellstart: reproduzierbare Wiederherstellung
 
-Die folgenden Befehle werden **auf der T95** ausgeführt. `serveruser` ist nur
-ein Beispiel und muss durch einen tatsächlich vorhandenen Linux-Benutzer
-ersetzt werden.
+Die folgenden Befehle werden **auf der T95 als normaler SSH-Benutzer**
+ausgeführt. `T95_USER` wird automatisch auf diesen Benutzer gesetzt; die
+Ausgabe von `id` muss deinen normalen Benutzernamen zeigen, nicht `root`.
+
+**Ausführungsort:** Alle Befehle bis zum Clienttest auf der T95 als normaler
+SSH-Benutzer mit `sudo`. Zuerst die [Kernel-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
+setzen und ein SD-Backup erstellen. Der Checkout verwendet den Prüfbranch;
+der Release-Werkzeugeordner auf dem PC ist ein anderer Ordner.
+
+Das Skript ersetzt `/etc/samba/smb.conf` nach einer Sicherung mit Zeitstempel.
+Bei einer bereits angepassten Samba-Installation zuerst die
+[technische Referenz](docs/SAMBA-USB-SETUP.md) lesen.
+
+Falls Git fehlt, auf der T95 ausführen:
+
+```bash
+sudo apt update
+sudo apt install -y git
+```
 
 ### 1. Modul beziehen und Manifest prüfen
 
 ```bash
-git clone https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+git clone --branch codex/archive-ssh-dashboard --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
 cd t95-tvbox-to-armbian-home-server/server/samba-usb
 sha256sum -c MANIFEST.sha256
 ```
@@ -116,7 +142,7 @@ Manifestprüfung muss vor einer Wiederherstellung ohne `FAILED`-Zeile enden.
 ### 2. Linux-Benutzer und Netzwerk prüfen
 
 ```bash
-export T95_USER=serveruser
+export T95_USER="$(id -un)"
 id "$T95_USER"
 ip -brief address
 ```
@@ -127,20 +153,30 @@ ip -brief address
 ### 3. Installation ausführen
 
 ```bash
-sudo T95_USER="$T95_USER" ./scripts/restore-samba-usb-setup.sh
+sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
 ```
 
-Das Skript installiert unter anderem Samba, UDisks2, udiskie, Polkit und die
+Dieser Aufruf legt `T95-DATA` auf der SD an. Das Skript installiert
+unter anderem Samba, UDisks2, udiskie, Polkit und die
 Dateisystemwerkzeuge für exFAT/NTFS. Falls noch kein Samba-Konto existiert,
 fragt es interaktiv nach dem Samba-Passwort für `T95_USER`.
 
-Nach `Fertig.` ist die Einrichtung abgeschlossen. Stecke einen USB-Datenträger
-ein und öffne auf einem Client `smb://<SERVER-IP>/` oder unter Windows
-`\\<SERVER-IP>\`. Melde dich mit dem Linux-Benutzernamen und dem Samba-Passwort
-an. Erscheinen die Freigaben, ist keine weitere manuelle Samba-Konfiguration
-erforderlich.
+Nach `Fertig.` zuerst auf dem **Client-PC im Dateimanager**
+`smb://<SERVER-IP>/T95-DATA` oder unter Windows `\\<SERVER-IP>\T95-DATA`
+öffnen. Ersetze `<SERVER-IP>` durch die aktuelle Routeradresse und melde dich
+mit Linux-Benutzername und Samba-Passwort an. Schreibe und lies eine kleine
+Testdatei. Dazu ist noch kein USB-Laufwerk erforderlich. Anschließend kannst
+du USB-Speicher einstecken und dessen eigene Freigabe in der Serverwurzel
+`smb://<SERVER-IP>/` prüfen.
+
+<details>
+<summary>Optionale Anpassungen und Skriptübersicht</summary>
 
 ### Einrichtung anpassen
+
+Die folgenden Alternativen ersetzen den Aufruf aus Schritt 3. Führe sie nur
+aus, wenn du bewusst einen anderen Speicherort oder Namen wählen möchtest.
 
 Du kannst Benutzername, Servername und festen Speicherpfad beim Skriptaufruf
 setzen. Ersetze `serveruser` durch deinen normalen Linux-Benutzer. `DATA_PATH`
@@ -149,7 +185,7 @@ legt fest, wohin die feste Freigabe `T95-DATA` zeigt:
 ```bash
 sudo T95_USER=serveruser \
   NETBIOS_NAME=T95-SERVER \
-  DATA_PATH=/srv/T95-DATA/Share \
+  DATA_PATH=/srv/t95-sd-data/Share \
   ./scripts/restore-samba-usb-setup.sh
 ```
 
@@ -222,6 +258,8 @@ Der Freigabename entspricht normalerweise dem Laufwerkslabel. Die folgenden
 Abschnitte zeigen Prüfungen und Fehlerbehebung, falls etwas nicht wie erwartet
 funktioniert.
 
+</details>
+
 ## Nach der Installation prüfen
 
 Alle Prüfungen laufen auf der T95, außer dem abschließenden Clienttest.
@@ -241,7 +279,12 @@ Erwartet werden:
 - `testparm` meldet eine gültige Konfiguration ohne Syntaxfehler.
 - `smbd` und – sofern auf der Distribution vorhanden – `nmbd` laufen.
 - `udiskie.service` ist für `T95_USER` aktiv.
-- Die Liste enthält mindestens `T95-DATA`.
+- `testparm -s` zeigt den Abschnitt `[T95-DATA]` mit dem gewählten Pfad.
+- `net usershare list` zeigt nur dynamische USB-Freigaben. Ohne eingebundenes
+  USB-Laufwerk darf die Ausgabe leer sein; `T95-DATA` gehört nicht in diese Liste.
+
+Öffne auf dem Client `smb://<SERVER-IP>/T95-DATA`, lege eine kleine Testdatei
+an und lies sie wieder. Erst dieser Test bestätigt den tatsächlichen Zugriff.
 
 ### USB-Datenträger anschließen
 

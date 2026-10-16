@@ -1,73 +1,78 @@
-# GitHub Release `v1.0.1`
+# T95 → Armbian Home-Server v1.0.1
 
-## T95 H616 / AXP313A: gehärtetes SD-Armbian
+Stabil getestetes, hardwaregebundenes SD-Release für die Platine
+**`H616-T95MAX-AXP313A-V3.0`**, Allwinner H616, 2 GiB DDR3L,
+Armbian 26.8.4 / Debian 13 Trixie / Kernel `6.18.48-current-sunxi64`.
+Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
 
-Stabil getesteter, hardwaregebundener SD-Release für die exakt geprüfte Platine
-`H616-T95MAX-AXP313A-V3.0`. Der Startweg nutzt die microSD; die Android-eMMC
-wird nicht gelesen oder beschrieben.
+> [!IMPORTANT]
+> **Vor dem Schreiben zwingend lokal personalisieren.** Das öffentliche
+> Image enthält kein Standardpasswort: Root ist gesperrt. Ein unverändert
+> geflashtes Image ermöglicht keinen Passwortzugang. Verwende den unten
+> verlinkten Installationsweg, um eine private Kopie mit eigenem Passwort
+> zu erstellen und anschließend geprüft auf SD zu schreiben.
 
-Der zugrunde liegende Start mit U-Boot, 2 GiB RAM, AC300-Ethernet, DHCP und
-SSH wurde auf der Zielplatine nachgewiesen. Zusätzlich wurden Start,
-sauberes Herunterfahren und Dateizugriff im praktischen Betrieb ohne
-beobachtete Fehler abgenommen. UART-Diagnosen erfolgten mit einem
-externen [RP2040-Zero-UART-Adapter](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
-(3,3-V-TTL, 115200 Baud/8N1).
+## Installation
 
-### DRAM-Stabilität
+**[→ Vollständige Anleitung auf Deutsch](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.md)** ·
+**[English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.en.md)**
 
-Der Linux-DTB hält den AXP313A-Regler `dcdc3` jetzt mit Minimum und Maximum
-auf **1,36 V**. Das entspricht der SPL-Initialisierung und verhindert eine
-nachträgliche Absenkung der DRAM-Rail durch Linux. Vollständige Kaltstarts bis
-zum Login wurden auf zwei T95-Boxen mit `H616-T95MAX-AXP313A-V3.0` geprüft.
+1. Exakte Platinenrevision prüfen; Linux-PC und USB-Kartenleser vorbereiten.
+2. Installer verwenden: Release laden, Prüfsumme kontrollieren und persönliche
+   Image-Kopie mit eigenem Root-Passwort erzeugen.
+3. SD anhand von Größe/Modell/Seriennummer auswählen. Schreiben löscht die
+   gesamte Zielkarte; das Werkzeug liest die Karte zurück und prüft sie.
+4. SD nur bei ausgeschalteter T95 einsetzen, Ethernet verbinden, starten und
+   die DHCP-Adresse im Router suchen. Per SSH als `root` mit dem in Schritt 2
+   gewählten Passwort anmelden; den Hostschlüssel der richtigen Box zuordnen.
+5. Armbian-Ersteinrichtung abschließen, als normaler Benutzer erneut anmelden,
+   Kernel-/DTB-Pakete vor Updates sperren und ein privates SD-Backup erstellen.
+6. Optional Samba installieren und Dateizugriff prüfen. Der empfohlene feste
+   Speicherpfad liegt ausdrücklich auf der System-SD; USB-Freigaben sind separat.
 
-### Sicherheitsänderung
+Die Anleitung verwendet das Basisimage und die Image-Werkzeuge von `v1.0.1`.
+Neue Dashboard-/Bluetooth-Installer im Codex-Prüfbranch sind Zusatzmodule;
+ihre vollständige Abnahme auf einer frischen T95-SD steht noch aus.
 
-Der öffentliche Download enthält **kein Standardpasswort** und **keine
-SSH-Hostschlüssel**:
+## Änderung in v1.0.1: DRAM-Stabilität
 
-- Root ist im generischen Image gesperrt.
-- Der Anwender erzeugt vor dem SD-Schreiben lokal eine private Kopie mit einem
-  eigenen Passwort.
-- Die T95 erzeugt bei ihrem ersten SSH-Start eigene Hostschlüssel, bevor
-  `ssh.service` Verbindungen annimmt.
-- Der frühere Root-Hash und die drei privaten Quellhostkeys wurden im gesamten
-  gehärteten Rohimage geprüft und nicht gefunden.
+Der Linux-DTB hält den AXP313A-Regler `dcdc3` mit Minimum und Maximum auf
+**1,36 V**. Das entspricht der SPL-Initialisierung und verhindert die vorherige
+Absenkung auf 1,20 V beim Kernelstart. Vollständige Kaltstarts bis zum Login
+wurden auf zwei Boxen der exakten Platinenrevision geprüft.
 
-### Installation
+## Was geprüft ist und welche Grenzen gelten
 
-1. Alle sechs Assets herunterladen und `sha256sum -c SHA256SUMS` ausführen.
-2. Das Image entpacken, mit
-   `tools/provision-t95-release-image.sh` außerhalb des Repositorys lokal
-   personalisieren und die dabei angelegte private Manifest-Datei behalten.
-3. Ausschließlich
-   `tools/write-t95-provisioned-image-to-sd.sh` mit einem frisch per `lsblk`
-   geprüften wechselbaren `/dev/sdX` verwenden.
-4. Karte nur bei ausgeschalteter Box einsetzen, Ethernet vor dem Einschalten
-   verbinden, DHCP-Adresse ermitteln und den neuen SSH-Fingerprint prüfen.
-5. Per SSH als `root` mit dem lokal gewählten Passwort anmelden und Armbians
-   Ersteinrichtung abschließen.
+- microSD-Boot, Ethernet/DHCP, SSH, sauberes Herunterfahren und Dateizugriff
+  wurden auf der Zielplatine geprüft. Samba/USB/VLC wurden auf der
+  Referenzinstallation separat geprüft.
+- Die Zugangsdaten-Härtung ist offline geprüft: kein verwendbares
+  Root-Passwort, keine SSH-Hostschlüssel, leere Maschinenidentität. Eigene
+  Hostschlüssel entstehen vor dem ersten Start des SSH-Dienstes.
+- **Die Android-eMMC wird durch den SD-Installationsweg nicht bereinigt oder
+  beschrieben.** Eine spätere Nutzung als Datenlaufwerk erfordert eine eigene
+  Einrichtung. Armbian-Boot von eMMC ist nicht der unterstützte Weg.
+- WLAN, HDMI als Serverfunktion, Fernbedienung, zusätzliche Dauerlast- und
+  Langzeitmessungen gehören nicht zur Basisabnahme. `clk_ignore_unused nohz=off`
+  bleibt eine Diagnosekonfiguration.
+- Gezielte Kernel-/Bootloader-Updates benötigen Backup und erneute Hardwareprüfung.
+- Ein kompletter Durchlauf der neu geordneten Anleitung auf einer separaten SD
+  ist noch offen; vorhandene Hardwaretests sind davon getrennt.
 
-Vollständige Anleitung: [RELEASE.md](RELEASE.md).
+[Hilfe nach Symptomen](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/TROUBLESHOOTING.md) ·
+[Testmatrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/VALIDATION.md)
 
-### Wichtige Grenzen
+## Download-Dateien
 
-- Nur diese Board-Revision ist unterstützt. Andere „T95“-Boxen können andere
-  SoCs, RAM, PMICs oder Netzwerkhardware besitzen.
-- `clk_ignore_unused nohz=off` bleibt eine Diagnosekonfiguration.
-- WLAN, Audio, Fernbedienung, zusätzliche USB-/SMB-Dauerlast und Langzeitbetrieb
-  sind nicht Teil der Stabilitätszusage. Die grundlegende Samba-/USB-/VLC-
-  Funktion wurde separat auf der T95 geprüft.
-- Kernel- und Bootloader-Updates nur nach Backup und erneuter UART-/Netzwerk-
-  Validierung durchführen.
-- Der gehärtete Asset-Aufbau wurde offline geprüft; der stabil getestete
-  Grundstand bezieht sich auf die geprüfte Platine und die dokumentierte
-  personalisierte SD-Installation.
-
-### Assets
+Der empfohlene Installer lädt die benötigten Dateien automatisch. Für die
+manuelle Alternative genügen Image und zugehörige Image-Prüfsumme; der
+komplette Satz enthält zusätzlich Entwickler- und Nachweisdateien:
 
 - `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz`
+- `SHA256SUMS`
 - `RELEASE-MANIFEST.txt`
 - `HARDENING-METADATA.txt`
 - `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin`
 - `T95-H616-AXP313A-tanix-6.18.dtb`
-- `SHA256SUMS`
+
+Persönliche Images, Passwortdaten, SSH-Schlüssel und SD-Backups bleiben privat.

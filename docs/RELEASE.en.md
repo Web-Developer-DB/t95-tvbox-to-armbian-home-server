@@ -6,6 +6,9 @@ Status: 2026-09-22. This **stable, hardware-specific** SD release is only for
 `H616-T95MAX-AXP313A-V3.0`. It is not a universal T95 image and does not modify
 Android eMMC. See [hardware photos](../README.en.md#hardware-photos).
 
+**For setup:** [step-by-step installation](INSTALLATION.en.md).
+This handbook covers release artifacts and maintenance.
+
 ## Release identity
 
 | Property | Value |
@@ -83,33 +86,22 @@ xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 
 ## Local personalization and SD writing
 
-The public image cannot be logged into directly. Personalize it locally outside
-the repository. The tool asks twice, without echoing, for a non-empty password
-and writes only its SHA-512 hash to the private image. Password and hash do not
-appear in the shell command or manifest.
+The public image has locked root and no password login before personalization.
+The installer asks twice for a nonempty personal password and writes only its
+SHA-512 hash into the private image. Neither password nor hash is recorded in
+the companion manifest.
 
-```bash
-export DOWNLOAD=/path/to/GitHub-release-download
-mkdir -p "$HOME/t95-private"
-(cd "$DOWNLOAD" && sha256sum -c SHA256SUMS)
-xz -dk --keep "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz"
-bash "$REPO/tools/provision-t95-release-image.sh" \
-  "$DOWNLOAD/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img" \
-  "$HOME/t95-private/t95-personal.img" PROVISION-T95-ROOT-PASSWORD
-lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
-bash "$REPO/tools/write-t95-provisioned-image-to-sd.sh" /dev/sdX \
-  "$HOME/t95-private/t95-personal.img" \
-  "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
-  WRITE-T95-PROVISIONED-TO-SDX
-```
+The authoritative user path is [installation](INSTALLATION.en.md). Its
+[manual alternative](INSTALLATION.en.md#manual-alternative-for-sd-preparation)
+replaces SD preparation only. Both use the image and image tools from tag
+`v1.0.1`; new optional server modules separately use
+`codex/archive-ssh-dashboard`.
 
-`/dev/sdX` must be replaced after every insertion using `lsblk`. The writer
-accepts only a removable USB SD card, verifies read-back hash, and opens neither
-eMMC nor FEL. Never publish the personal image or manifest.
-
-Insert the SD only while the T95 is powered off, connect Ethernet, boot, find
-its DHCP address, verify the new SSH fingerprint, log in as `root` using the
-local password, and complete Armbian first-run setup.
+Keep personal images and `.t95-provisioned-manifest` files private. The writer
+requires removable USB cards, checks manifest/read-back hash, and opens neither
+T95 eMMC nor FEL. After `ERFOLG`, insert SD only with the box fully off. Initial
+SSH login uses root and the locally chosen password; complete Armbian first-run
+setup and reconnect as a normal user afterward.
 
 ## Protect kernel and DTB
 

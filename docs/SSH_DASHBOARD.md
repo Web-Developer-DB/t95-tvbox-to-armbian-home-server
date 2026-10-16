@@ -1,5 +1,19 @@
 # SSH-Anmeldedashboard archivieren und wiederherstellen
 
+**Deutsch** | [English](SSH_DASHBOARD.en.md)
+
+**Ort: laufende T95, normaler SSH-Benutzer mit `sudo`.** Zuerst
+[Grundsystem, Kernel-Sperre und SD-Backup](INSTALLATION.md) abschließen.
+Das Dashboard zeigt Systeminformationen beim SSH-Login; es ist keine Weboberfläche.
+
+Starter-Voraussetzungen: [Bash, curl, tar, Python 3, sudo](../server/setup/README.md#voraussetzungen).
+
+> [!NOTE]
+> Der archivierte Bildschirm stammt von der Referenzbox. Die neuen
+> Installations-/Rücknahmeskripte wurden mit simulierten Systemdiensten
+> geprüft; ein vollständiger Lauf auf einer frischen T95-SD mit Kaltstart
+> steht noch aus.
+
 Der Stand vom **16.10.2026** ist unter `server/ssh-dashboard/2026-10-16/` gesichert: 14 tatsächliche Quelldateien der laufenden T95, SHA-256-Prüfsummen und Unix-Dateimodi. Ausgangsbasis: Armbian-BSP 26.8.4, Debian Trixie, Kernel 6.18.48-current-sunxi64. Die vorhandenen Lizenzhinweise der Armbian-Dateien bleiben erhalten; siehe `NOTICE.md` im Archiv.
 
 Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [reference-logs/ssh-dashboard-2026-10-16.txt](reference-logs/ssh-dashboard-2026-10-16.txt). Er zeigt das tatsächlich erfasste Dashboard. Zahlen, Temperaturen, belegter Speicher, Container, Tipps und Upgrade-Zähler sind Momentaufnahmen und werden bei späteren Anmeldungen neu ermittelt. Unbereinigte Mitschnitte, Zugangsdaten und private SSH-Schlüssel gehören nicht in dieses Archiv.
@@ -54,7 +68,8 @@ Wiederholtes Installieren ersetzt dieses Backup nicht. Nachträgliche manuelle
 standardmäßig erhalten; optional `remove --remove-packages` für ausschließlich
 neu hinzugefügte Zielpakete, mit vorgeschalteter APT-Prüfung.
 
-Aus einem lokalen Checkout auf der Box:
+Aus einem [lokalen Checkout des Prüfbranches](../server/setup/README.md#lokaler-checkout)
+auf der Box, im Repository-Hauptverzeichnis als normaler SSH-Benutzer mit `sudo`:
 
 ```bash
 sudo python3 server/setup/t95_setup.py dashboard install
@@ -67,7 +82,9 @@ APT-/systemd-Aktionen auf der Produktivbox.
 
 ### Bestehendes Restore-Werkzeug mit Vorschau
 
-Im ausgecheckten Repository zunächst ohne Änderungen prüfen:
+Diese manuelle Alternative ist nach der Starter-Installation nicht zusätzlich
+nötig. Im Checkout des Prüfbranches, im Repository-Hauptverzeichnis als normaler
+Benutzer, zunächst ohne Änderungen prüfen (auch auf dem Linux-PC möglich):
 
 ```bash
 python3 tools/restore-ssh-dashboard.py

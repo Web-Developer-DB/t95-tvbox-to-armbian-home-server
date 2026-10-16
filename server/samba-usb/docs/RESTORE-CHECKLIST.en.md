@@ -2,7 +2,16 @@
 
 [Deutsch](RESTORE-CHECKLIST.md) | **English**
 
-For a fast manual restore. These examples assume an existing Linux user;
+Technical checklist for the already prepared eMMC reference installation.
+For a new SD installation, use the [Samba quick start](../README.en.md); do not
+repeat these manual steps after its script finishes.
+
+Replace `__T95_USER__` and `__T95_MOUNT_BASE__` in templates with the actual
+username and `/media/<username>` before applying them. Copying unchanged
+Polkit/Samba templates does not expand shell variables. For this eMMC path,
+`/srv/T95-DATA` must already be mounted persistently and verified.
+
+These examples assume an existing Linux user;
 replace `serveruser` with the desired name:
 
 ```bash
@@ -21,7 +30,7 @@ export T95_UID="$(id -u "$T95_USER")"
    `config/samba/smb.conf.fragment`; do not create a static `[USB]` share.
 6. Install `t95-usb-share` and `usb-eject` from `scripts/` into
    `/usr/local/bin/`, mode `0755`.
-7. Copy the Polkit rule to `/etc/polkit-1/rules.d/50-t95-udisks.rules`.
+7. Replace the user placeholder in the Polkit rule and copy it to `/etc/polkit-1/rules.d/50-t95-udisks.rules`.
 8. Copy `config.json` to `/home/$T95_USER/.config/udiskie/config.json`.
 9. Copy `udiskie.service` to
    `/home/$T95_USER/.config/systemd/user/udiskie.service`.

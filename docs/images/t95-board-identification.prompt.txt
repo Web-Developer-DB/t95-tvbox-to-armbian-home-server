@@ -1,0 +1,8 @@
+Method: built-in image_gen, image editing, 2026-10-17.
+Input: docs/images/t95-board-connectors.jpg (unchanged original).
+Output: docs/images/t95-board-identification.png.
+Purpose: AI-assisted orientation detail only. Original photos are authoritative
+for hardware inspection; the generated view is explicitly labelled in both READMEs.
+
+Final prompt:
+Use case: precise-object-edit. Edit target: the supplied real T95 PCB photograph. Asset type: clearly identified annotated detail view for hardware-identification documentation, landscape. Primary request: crop and enlarge ONLY the central area just above the aluminum heatsink, containing the existing white PCB revision marking, with a little surrounding circuitry and top of heatsink for orientation. Add a thin high-contrast orange rectangle AROUND (never covering) the original printed PCB marking and a short orange arrow from above pointing to it. Add no new text at all. Critical invariants: keep all photographic features, lettering, board traces, components, textures, positions and relative sizes exactly as in the source crop; do not reconstruct, clean up, redraw or invent hardware. The original inscription is H616-T95MAX-AXP313A-V3.0: preserve the real lettering exactly, do not replace it with a synthetic label. Neutral technical documentation, no decorative design, no watermarks, no other edits. The output will be labeled an AI-assisted orientation detail and linked to the untouched original as authoritative evidence.

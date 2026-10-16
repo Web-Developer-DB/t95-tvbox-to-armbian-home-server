@@ -1,5 +1,7 @@
 # Vollständiges Armbian-SD-Backup
 
+**Deutsch** | [English](BACKUP.en.md)
+
 Diese Anleitung erstellt ein sektorgetreues Backup der **gesamten** Armbian-
 SD-Karte und stellt es auf derselben oder einer mindestens gleich großen
 Ersatzkarte wieder her. Bootloader, Partitionstabelle, DTB, Kernel, Rootfs,
@@ -10,6 +12,11 @@ Benutzerkonten und Konfigurationen werden gemeinsam erfasst.
 > Samba-Datenbanken, Logs und weitere Geheimnisse enthalten. Es ist ein
 > privates Recovery-Backup und darf nicht in GitHub, in ein öffentliches
 > Release oder in einen Cloud-Ordner ohne Verschlüsselung hochgeladen werden.
+
+**Ausführungsort:** Schritt 1 auf der T95 als normaler SSH-Benutzer mit `sudo`;
+alle übrigen Befehle auf dem Linux-PC als normaler Benutzer mit `sudo`.
+
+[Zur Installation](INSTALLATION.md#6-grundsystem-sichern) · [Hilfe](TROUBLESHOOTING.md)
 
 ## Voraussetzungen
 
@@ -74,11 +81,11 @@ zuerst mit `lsblk` prüfen:
 
 ```bash
 sudo umount "${SD_DEVICE}1"
-sudo umount "${SD_DEVICE}2"
 ```
 
-Eine Meldung wie „nicht eingehängt“ ist unkritisch. Weitere vorhandene
-Partitionen ebenfalls aushängen; das Gerät selbst wird nicht gemountet.
+Das Release `v1.0.1` hat eine Partition. Eine Meldung wie „nicht eingehängt“
+ist unkritisch. Falls deine Karte weitere Partitionen zeigt, diese ebenfalls
+aushängen; das Gerät selbst wird nicht gemountet.
 
 ## 4. Komprimiertes Vollbackup erstellen
 
@@ -150,7 +157,6 @@ eingehängten Partitionen aushängen:
 
 ```bash
 sudo umount "${SD_DEVICE}1"
-sudo umount "${SD_DEVICE}2"
 ```
 
 ### 2. Archiv prüfen
@@ -186,12 +192,16 @@ sudo udevadm settle
 lsblk -b -o NAME,SIZE,FSTYPE,LABEL,PARTUUID,MOUNTPOINTS "$SD_DEVICE"
 ```
 
-Bei einem Armbian-Layout kann das Root-Dateisystem zusätzlich rein lesend
-geprüft werden (Partitionsnummer mit `lsblk` bestätigen):
+Dieses Release hat genau eine ext4-Partition: `${SD_DEVICE}1`. Prüfe sie
+nur im ausgehängten Zustand. Kontrolliere zuvor das tatsächliche Layout mit
+`lsblk`; bei einem anderen Image kann die Partitionsnummer abweichen:
 
 ```bash
-sudo e2fsck -fn "${SD_DEVICE}2"
+sudo e2fsck -fn "${SD_DEVICE}1"
 ```
+
+Der Abschnitt prüft Layout und Dateisystem; er führt keinen vollständigen
+byteweisen Vergleich mit dem Backup durch.
 
 Danach alle Partitionen aushängen, die Karte sicher entfernen und sie **nur
 bei ausgeschalteter T95** einsetzen. Nach dem Start die bekannte UART-

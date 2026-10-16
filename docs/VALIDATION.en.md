@@ -77,3 +77,37 @@ verified through `SHA256SUMS`.
 The documented baseline may be described as a **stable tested home-server
 release** for the verified board. The open items are extensions, not known bugs
 in the accepted functional scope.
+
+## Installation guide acceptance
+
+**2026-10-17 status: open.** The reorganized guide received editorial/static
+checks; a full run of this exact user path on a separate SD is outstanding.
+Existing hardware results and simulated optional-installer tests are separate.
+
+**Documentation checks on 2026-10-17:** all 16 existing setup tests,
+21 shell syntax checks, and 34 Samba/dashboard checksum entries pass.
+Relative documentation links, image targets, language links, and former README
+section anchors were checked. The start page and navigation to installation
+and Samba were inspected in a local Markdown preview. New command blocks
+received Bash syntax checks; they were not executed against hardware.
+
+A reviewer with basic terminal/SSH skills should follow
+[installation](INSTALLATION.en.md) without extra verbal instructions. Preserve
+the working production card as recovery.
+
+- [ ] Record exact PCB, date, reviewer, and image version.
+- [ ] Prepare the Linux PC; identify source versions and SD target without help.
+- [ ] Complete download/checks, password personalization, and verified SD writing.
+- [ ] Cold boot, locate router address, log in as root, and finish Armbian first-run setup.
+- [ ] Reconnect as normal user; check sudo, kernel version, and both holds.
+- [ ] Create the base-system backup and verify archive/checksum.
+- [ ] Install Samba with explicit SD storage; test the fixed share without USB.
+- [ ] Write/read a client test file; identify the Samba password correctly.
+- [ ] Attach USB, check its dynamic share, eject safely, reinsert, and access again.
+- [ ] Shut down cleanly, cold boot, and recheck SSH/file access.
+- [ ] Back up the configured SD; separately verify restoring a replacement and booting it.
+
+Record actual card/client types, outcome, and deviations without private
+credentials. Leave unchecked items open; hashes and syntax checks do not count
+as hardware acceptance. Dashboard/Bluetooth additionally need their own
+install/removal tests per [setup verification](../server/setup/README.en.md#verify-before-publishing).

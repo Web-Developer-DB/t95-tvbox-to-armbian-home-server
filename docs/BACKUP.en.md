@@ -11,6 +11,11 @@ bootloader, partition table, DTB, kernel, rootfs, accounts, and configuration.
 > and other secrets. Treat it as private recovery material: do not upload it to
 > GitHub, a public release, or an unencrypted cloud folder.
 
+**Run on:** shutdown on the T95 as your normal SSH user with `sudo`;
+all remaining commands on the Linux PC as your normal user with `sudo`.
+
+[Back to installation](INSTALLATION.en.md#6-back-up-the-base-system) · [Help](TROUBLESHOOTING.en.md)
+
 ## Requirements
 
 - The T95 is stable and can be shut down cleanly; remove the card only after
@@ -40,10 +45,10 @@ bootloader, partition table, DTB, kernel, rootfs, accounts, and configuration.
 
    ```bash
    sudo umount "${SD_DEVICE}1"
-   sudo umount "${SD_DEVICE}2"
    ```
 
-   “Not mounted” is harmless. Unmount additional partitions if present.
+   Release `v1.0.1` has one ext4 partition, `${SD_DEVICE}1`. “Not mounted”
+   is harmless. Unmount additional partitions if your actual card has any.
 
 3. Install zstd once, choose a destination on another drive, and read/compress
    the complete card:
@@ -100,15 +105,19 @@ Restoration overwrites the selected card entirely.
    This writes the whole target card, including boot area and partition table;
    it does not access internal eMMC.
 
-4. Re-read the layout and optionally check the Armbian root filesystem
-   read-only after confirming the partition number:
+4. Re-read the layout. This release has one ext4 partition, `${SD_DEVICE}1`.
+   Check it read-only while unmounted; confirm the actual partition number
+   with `lsblk` before checking a card with a different layout:
 
    ```bash
    sudo partprobe "$SD_DEVICE"
    sudo udevadm settle
    lsblk -b -o NAME,SIZE,FSTYPE,LABEL,PARTUUID,MOUNTPOINTS "$SD_DEVICE"
-   sudo e2fsck -fn "${SD_DEVICE}2"
+   sudo e2fsck -fn "${SD_DEVICE}1"
    ```
+
+This checks the layout and filesystem; it is not a complete byte-for-byte
+comparison with the backup.
 
 Unmount partitions, remove the card safely, and insert it **only while the T95
 is powered off**. Then capture UART and test DHCP/SSH.

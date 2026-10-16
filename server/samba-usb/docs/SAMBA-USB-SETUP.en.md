@@ -100,7 +100,7 @@ Install `scripts/t95-usb-share` and `scripts/usb-eject` as
 `/usr/local/bin/t95-usb-share` and `/usr/local/bin/usb-eject`, mode `0755`.
 The first script records mount/share mappings under
 `~/.local/state/t95-usb-shares/`, turns labels into safe names, uses
-`External-USB-N` for unlabelled media, resolves name collisions with `-2`,
+`Extern-USB-N` for unlabelled media, resolves name collisions with `-2`,
 `-3`, and is idempotent for repeated events.
 
 `usb-eject SHARENAME` stops udiskie temporarily, closes only selected Samba
@@ -119,7 +119,7 @@ journalctl -t T95-USB-SHARE --no-pager -n 30
 ```
 
 Insert a USB volume. A labelled filesystem should appear as a sanitized
-label-derived share; an unlabelled one as `External-USB-1`. Test an
+label-derived share; an unlabelled one as `Extern-USB-1`. Test an
 authenticated client connection at `smb://<SERVER-IP>/`, upload/download a
 small file, then eject it using `sudo usb-eject SHARENAME`. Confirm the mount,
 usershare, and physical device have disappeared; reinserting recreates it.
@@ -129,7 +129,7 @@ usershare, and physical device have disappeared; reinserting recreates it.
 | Symptom | First check | Relevant fix |
 | --- | --- | --- |
 | Mount exists, no share | `net usershare list`, `journalctl -t T95-USB-SHARE` | inspect event hook and Polkit/user service |
-| Duplicate `External-USB-N` | usershares pointing to same path | retain idempotent mount-point check |
+| Duplicate `Extern-USB-N` | usershares pointing to same path | retain idempotent mount-point check |
 | `command not found` inside script | `PATH` was overwritten | use a variable such as `SAVED_PATH` |
 | `DeviceBusy` | `fuser`, `smbstatus --shares` | `smbcontrol smbd close-share SHARENAME` |
 | Immediate remount | udiskie still active | stop it for unmount/power-off sequence |

@@ -75,6 +75,21 @@ files.
    peripheral tests are optional follow-up work, not requirements for the
    stable tested baseline.
 
+## Publish documentation and release description together
+
+When a documented flow changes, update both languages and the
+[release description](GITHUB_RELEASE_NOTES.en.md). The release text uses
+absolute links so it also works on a GitHub release page. The German copy is
+[GITHUB_RELEASE_NOTES.md](GITHUB_RELEASE_NOTES.md).
+
+Before replacing the public description, publish the docs on the named
+branch and open each linked page on GitHub. A new local path is not yet a
+reachable web target. The text must state mandatory local password
+personalization, exact board support, kernel holds, and optional-installer
+validation status. After a later merge, review branch links and the default
+installer ref together. This documentation change does not alter image
+assets or release hashes.
+
 ## License and upstream review
 
 Before publishing, select a suitable license and separately review licensing

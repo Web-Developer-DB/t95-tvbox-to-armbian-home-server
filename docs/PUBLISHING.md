@@ -1,5 +1,7 @@
 # GitHub-Veröffentlichungscheckliste
 
+**Deutsch** | [English](PUBLISHING.en.md)
+
 Diese Checkliste trennt öffentliche Werkzeuge und Dokumentation von
 forensischen Daten, privaten Artefakten und personalisierten Systemzuständen.
 
@@ -78,6 +80,23 @@ Prüfung von `git status --ignored`.
    festhalten. Zusätzliche Langzeit- und Peripherietests bleiben optionale
    Weiterentwicklung und sind keine Voraussetzung für den stabil getesteten
    Grundstand.
+
+## Dokumentation und Releasebeschreibung synchron veröffentlichen
+
+Die Startseite verweist auf die maßgebliche Installation und Fehlerhilfe.
+Bei Änderungen an dokumentierten Abläufen beide Sprachen und die
+[Releasebeschreibung](GITHUB_RELEASE_NOTES.md) aktualisieren. Der Release-Text
+verwendet absolute Links, damit er auch direkt auf einer GitHub-Release-Seite
+funktioniert. Die englische Fassung steht in
+[GITHUB_RELEASE_NOTES.en.md](GITHUB_RELEASE_NOTES.en.md).
+
+Vor dem Ersetzen der öffentlichen Beschreibung zuerst die Dokumentation auf
+dem angegebenen Branch veröffentlichen und die verlinkten Seiten auf GitHub
+öffnen. Ein lokaler neuer Dateipfad ist noch kein erreichbares Webziel.
+Der Text muss lokale Passwort-Personalisierung vor dem Schreiben,
+Boardbindung, Kernel-Schutz und den Teststatus der Zusatzmodule nennen.
+Bei späterem Merge Branchlinks und Installer-Standardreferenz gemeinsam prüfen.
+Diese Dokumentationsänderung verändert keine Image-Assets oder Release-Hashes.
 
 ## Lizenz- und Upstream-Prüfung
 

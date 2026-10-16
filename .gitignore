@@ -39,6 +39,15 @@ lilygo_uart_monitor/__pycache__/
 # Release-Unterlagen und Werkzeuge; das vollständige Labor bleibt lokal.
 AGENTS.md
 docs/*
+!docs/INSTALLATION.md
+!docs/INSTALLATION.en.md
+!docs/TROUBLESHOOTING.md
+!docs/TROUBLESHOOTING.en.md
+!docs/TECHNICAL_REFERENCE.md
+!docs/TECHNICAL_REFERENCE.en.md
+!docs/SSH_DASHBOARD.en.md
+!docs/BLUETOOTH_CHEATSHEET.en.md
+!docs/MUSIKPLAYER_CHEATSHEET.en.md
 !docs/RELEASE.md
 !docs/PUBLISHING.md
 !docs/VALIDATION.md

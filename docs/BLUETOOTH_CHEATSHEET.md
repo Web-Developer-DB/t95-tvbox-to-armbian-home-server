@@ -1,5 +1,10 @@
 # Bluetooth-Cheat-Sheet: finden, koppeln, trennen
 
+**Deutsch** | [English](BLUETOOTH_CHEATSHEET.en.md)
+
+**Ort: T95, normaler SSH-Benutzer.** `sudo` nur dort verwenden, wo es im
+Befehl steht. Die Helfer übernehmen nötige erhöhte Rechte selbst.
+
 Für die T95 über SSH. Die kurzen `t95-bluetooth`-Befehle setzen die
 [Bluetooth-Installation](../server/bluetooth/README.md) voraus.
 `AA:BB:CC:DD:EE:FF` ist ein Platzhalter für die Adresse deines Geräts.

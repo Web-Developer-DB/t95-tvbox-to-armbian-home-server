@@ -1,298 +1,173 @@
-# T95 TV Box → Armbian Linux Home Server
+# T95 TV box → Armbian home server
 
 [Deutsch](README.md) | **English**
 
-![Status: stable tested](https://img.shields.io/badge/Status-stable%20tested-brightgreen)
-![Board: H616](https://img.shields.io/badge/Board-Allwinner%20H616-blue)
-![OS: Armbian](https://img.shields.io/badge/OS-Armbian%2026.8.4-18a303)
-![Kernel: 6.18](https://img.shields.io/badge/Kernel-6.18.48-purple)
-![Boot: SD](https://img.shields.io/badge/Boot-microSD-informational)
+Reuse a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** as a
+small file/media server. Armbian boots from microSD, Ethernet connects it to
+your home network, and SSH provides administration. Optional Samba shares
+serve files to PCs, Android, and VLC.
 
-A reproducible conversion of an Allwinner H616 T95 TV box into a small,
-energy-efficient Armbian Linux home server. It documents boot bring-up,
-Ethernet, UART diagnostics, and board-specific technical changes.
-
-> [!NOTE]
-> **Private hardware project:** this T95 originally had an Android installation
-> classified or suspected as BadBox-affected. It was not reused as a trusted TV
-> device. The successful outcome boots from microSD and provides Ethernet, SSH,
-> and optional Samba file sharing without using the original Android system.
+![Base release: hardware tested](https://img.shields.io/badge/Base_release-hardware_tested-brightgreen)
+![System: Armbian 26.8.4](https://img.shields.io/badge/Armbian-26.8.4-18a303)
+![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
 
 > [!WARNING]
-> This release is for `H616-T95MAX-AXP313A-V3.0` only. “T95” is not a uniform
-> hardware designation. Do not write the image to another box before checking
-> its PCB, UART, and boot behavior.
+> **Check the PCB first.** “T95” covers different hardware. Only
+> `H616-T95MAX-AXP313A-V3.0` is tested for this image. Stop for a different or
+> unknown board: [identify hardware](docs/HARDWARE_IDENTIFICATION.en.md) and
+> use the [developer path](docs/PORTING.en.md).
+
+## Install the home server
+
+**[→ Open the complete installation guide](docs/INSTALLATION.en.md)**
+
+The recommended route assumes basic terminal/SSH knowledge and a Linux PC
+with a USB card reader. It covers requirements, download, verification, your
+own local password, SD writing, first login, and file sharing.
+
+**Check hardware → prepare PC → create SD → SSH → hold kernel → backup
+→ Samba → verify file access**
+
+> [!IMPORTANT]
+> The download has **no default password**. Create a personal copy with your
+> own password before writing. The guide handles this with the verified
+> installer. Writing erases the selected SD completely; the internal Android
+> eMMC is not written by this route.
+
+**Already installed?** [Troubleshooting](docs/TROUBLESHOOTING.en.md) ·
+[Samba and USB](server/samba-usb/README.en.md) · [SD backup](docs/BACKUP.en.md)
 
 ## Hardware photos
 
-Compare your board before downloading. The photos help identify the tested
-hardware but do not replace electrical inspection. EXIF/GPS data was removed;
-the individual MAC/barcode label is covered.
+Compare the **PCB marking**, not just the case. On the connector side it is
+immediately above the heatsink. The AI-assisted orientation
+view marks its location; use the unchanged original photos below as the
+authoritative source for hardware comparison. Disconnect all power before opening the box.
+
+![AI-assisted orientation view of PCB inscription H616-T95MAX-AXP313A-V3.0](docs/images/t95-board-identification.png)
 
 <p>
-  <img src="docs/images/t95-box-top.jpg" alt="Top of T95 case" width="240">
-  <img src="docs/images/t95-case-bottom-redacted.jpg" alt="T95 underside with redacted label" width="240">
-  <img src="docs/images/t95-board-memory.jpg" alt="T95 board, H616 and memory" width="240">
-  <img src="docs/images/t95-board-connectors.jpg" alt="T95 board connectors and AC300 area" width="240">
+  <a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Original connector side of the tested PCB" width="320"></a>
+  <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original memory side of the PCB" width="240"></a>
+</p>
+<p>
+  <a href="docs/images/t95-box-top.jpg"><img src="docs/images/t95-box-top.jpg" alt="T95 case from above" width="200"></a>
+  <a href="docs/images/t95-case-bottom-redacted.jpg"><img src="docs/images/t95-case-bottom-redacted.jpg" alt="Case underside with individual sticker covered" width="200"></a>
 </p>
 
-## UART before porting
+Click original photos to enlarge. They do not replace hardware inspection.
+EXIF/GPS data was removed and individual stickers are covered.
 
-> [!CAUTION]
-> **Have a UART adapter before the first test.** UART is the primary way to
-> diagnose a black screen, failed TOC0/U-Boot, DRAM/PMIC, DTB, or early kernel
-> start. Use a **3.3 V TTL UART adapter**; do not connect 5 V TTL or RS-232.
+## What works?
 
-Use common ground, 115200 baud, 8N1. A RP2040-Zero can be used with the
-[RP2040-Zero UART adapter project](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter).
+| Function | Documented status |
+| --- | --- |
+| Armbian SD boot, Ethernet, DHCP, SSH, clean shutdown | Tested on the exact PCB |
+| Samba shares, USB automount/eject, VLC over SMB | Tested on the reference installation; separate setup |
+| eMMC as a data drive | Tested on the reference installation; separate preparation required |
+| Armbian boot from eMMC | Unsuccessful; microSD remains the supported boot path |
+| Codex-branch dashboard/Bluetooth installers | Automated tests with simulated services; fresh-SD acceptance still open |
+| Music to Bluetooth headphones | Manual reference setup tested; new installer needs separate validation |
+| Wi-Fi, HDMI as a server function, remote control, further long-term tests | Outside base acceptance |
 
-> [!IMPORTANT]
-> **Other H616 boards:** the finished image is not for them. First use the
-> host-only inventory, UART, and FEL/eGON workflow in the
-> [H616 porting kit](docs/PORTING.en.md). It provides safe stop criteria before
-> any SD or eMMC write.
+The base is Armbian **26.8.4 / Debian 13 Trixie / kernel
+`6.18.48-current-sunxi64`**. The guide protects kernel and DTB from
+uncontrolled replacement after first login. Ethernet is limited to 100 Mbit/s;
+the reference measured approximately 11–12 MB/s payload throughput.
 
-## End-user quick start
+[Public test matrix and open acceptance](docs/VALIDATION.en.md) ·
+[Hardware details, measurements, SSH example](docs/TECHNICAL_REFERENCE.en.md)
 
-This path is for the exact tested T95. You do not need to build U-Boot, a DTB,
-or a kernel.
+## Optional extensions
 
-### One-script installation
+After the working base system and a private SD backup:
 
-Run this in the directory where you want working files:
-
-```bash
-bash <(curl -fsSL \
-  https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-release.sh)
-```
-
-It clones the release tools, downloads and verifies v1.0.1, creates a private
-local image with your root password, and asks explicitly before writing
-removable storage. `J`, `Ja`, `Y`, and `Yes` are accepted as confirmation. On
-a later run, an existing matching private copy can be reused, a timestamped
-new copy can be created, or the run can be cancelled. Existing files are never
-silently overwritten.
-
-Before writing, it scans only removable USB disks, displays size, model, and
-serial number, and lets you choose by number. It then requires the exact shown
-device path, such as `/dev/sda`, as a second confirmation. Disconnect other
-USB drives where practical. It never accesses T95 eMMC.
-
-### Required after the first SSH login: hold the kernel and DTB
-
-> [!CAUTION]
-> **Do not run `apt upgrade` or `armbian-upgrade` first.** This image was
-> tested with kernel `6.18.48-current-sunxi64` and its matching T95 DTB. An
-> uncontrolled kernel or DTB update can break booting or AC300 Ethernet.
-
-As soon as Armbian first-run setup is complete, and **before** installing
-other packages, Samba, or general updates, run over SSH:
-
-```bash
-sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
-apt-mark showhold
-uname -r
-```
-
-Continue only when `apt-mark showhold` lists both package names and `uname -r`
-reports `6.18.48-current-sunxi64`. Normal Debian/Armbian packages can still be
-updated afterward; only the kernel and DTB are held for the verified hardware
-state. See [Security, backups, and updates](#security-backups-and-updates)
-before a deliberate kernel update.
-
-### Optional next step: Samba file server and USB automount
+| Goal | Guide |
+| --- | --- |
+| Share home-network files and USB drives | [Samba module](server/samba-usb/README.en.md) |
+| Show system information on SSH login | [Dashboard](docs/SSH_DASHBOARD.en.md) |
+| Send music to Bluetooth headphones | [Bluetooth and music player](server/bluetooth/README.en.md) |
+| Set up both optional modules through a menu | [Shared setup entry](server/setup/README.en.md) |
+| Later use eMMC as a data drive | [Requirements and reference](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
 
 > [!NOTE]
-> This optional step installs the complete file-server function tested by this
-> project: the permanent `T95-DATA` share, automatic USB stick/disk mounting,
-> and one SMB2/SMB3 share for every attached medium. Run it **over SSH on the
-> T95**, not on the PC used to write the microSD.
+> The new dashboard/Bluetooth launchers use the review branch. Full
+> installation/removal on a fresh T95 SD and cold boot are still outstanding.
+> This limitation also applies to combined installation.
 
-After holding the kernel/DTB, `apt update` is safe. Replace
-`YOUR_LINUX_USERNAME` with the ordinary user you created during Armbian
-first-run – not `root`:
+## Source versions
 
-```bash
-sudo apt update
-sudo apt install -y git
+| Component | Source |
+| --- | --- |
+| Base image | [Release `v1.0.1`](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/tag/v1.0.1) |
+| SD preparation launcher | `main`; explicitly obtains image tools from tag `v1.0.1` |
+| Documentation and new optional server modules | Review branch `codex/archive-ssh-dashboard` |
+| Local server-module checkout on the T95 | Explicitly this review branch; see [setup guide](server/setup/README.en.md#local-checkout) |
 
-git clone --depth 1 \
-  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
-cd t95-tvbox-to-armbian-home-server/server/samba-usb
-sha256sum -c MANIFEST.sha256
+The base image is a release asset. A Git checkout contains tools and docs.
+The PC's release-tools folder is not a checkout of the new server modules.
+Each guide owns its installation commands; do not mix files from different
+source versions.
 
-export T95_USER='YOUR_LINUX_USERNAME'
-id "$T95_USER"
-sudo T95_USER="$T95_USER" ./scripts/restore-samba-usb-setup.sh
-```
+## Documentation and developer path
 
-The script requests a Samba password where necessary and backs up an existing
-`/etc/samba/smb.conf` before applying the tested configuration. After
-`SUCCESS`, open `smb://<T95-IP>/` in a file manager or VLC, or
-`\\<T95-IP>\` in Windows Explorer. The detailed guide for existing Samba
-setups, eMMC data paths, checks, and safe USB eject follows in
-[`server/samba-usb/README.md`](server/samba-usb/README.md).
+| Task | Start here |
+| --- | --- |
+| Set up a new box | [Installation](docs/INSTALLATION.en.md) |
+| Resolve a visible error | [Troubleshooting](docs/TROUBLESHOOTING.en.md) |
+| Back up or restore the system | [SD backup](docs/BACKUP.en.md) |
+| Understand hardware and changes | [Technical reference](docs/TECHNICAL_REFERENCE.en.md), [Armbian changes](docs/CHANGES_FROM_ARMBIAN.en.md) |
+| Inspect release layout or deliberate kernel updates | [Release handbook](docs/RELEASE.en.md) |
+| Investigate another H616 board | [Porting](docs/PORTING.en.md), [UART](docs/UART_BRINGUP.en.md), [boot diagnostics](docs/BOOT_TROUBLESHOOTING.en.md) |
+| Build or publish an image | [Build chain](build/README.en.md), [publishing](docs/PUBLISHING.en.md), [release text](docs/GITHUB_RELEASE_NOTES.en.md) |
 
-### Requirements
+UART is the diagnostic path for porting and early boot failures. Prepare a
+**3.3 V TTL adapter** before those tasks; never connect 5 V TTL or RS-232.
+Hardware details and wiring belong to the developer path.
 
-- Exact board: `H616-T95MAX-AXP313A-V3.0`.
-- microSD, card reader, Ethernet cable, and a Linux PC.
-- Native Linux is recommended. WSL2 is suitable only with reliable USB block
-  device passthrough as `/dev/sdX`; PowerShell may still be needed for RP2040
-  serial access.
-- UART adapter ready before any hardware experiment.
+## Project and boundaries
 
-### Manual installation
+This private project began with an Android installation classified or
+suspected as BadBox-affected. The SD conversion does not use Android as its
+operating system or trust source. It does not automatically clean or remove
+Android eMMC.
 
-1. Download all six v1.0.1 assets and verify them:
-
-   ```bash
-   sha256sum -c SHA256SUMS
-   xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
-   ```
-
-2. Clone the repository, extract the image, and create a personal local copy:
-
-   ```bash
-   git clone https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
-   cd t95-tvbox-to-armbian-home-server
-   mkdir -p "$HOME/t95-private"
-   xz -dk --keep /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
-   bash tools/provision-t95-release-image.sh \
-     /path/to/download/T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img \
-     "$HOME/t95-private/t95-personal.img" PROVISION-T95-ROOT-PASSWORD
-   ```
-
-3. Identify the target card after each insertion. `/dev/sdX` is a placeholder,
-   not a literal device name:
-
-   ```bash
-   lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
-   ```
-
-4. Write only the verified removable card:
-
-   ```bash
-   bash tools/write-t95-provisioned-image-to-sd.sh /dev/sdX \
-     "$HOME/t95-private/t95-personal.img" \
-     "$HOME/t95-private/t95-personal.img.t95-provisioned-manifest" \
-     WRITE-T95-PROVISIONED-TO-SDX
-   ```
-
-5. Insert the card only while powered off, connect Ethernet, boot, locate the
-   DHCP address, verify the SSH fingerprint, log in as `root`, and complete
-   Armbian first-run setup.
-
-6. Immediately hold the verified kernel and DTB packages:
-
-   ```bash
-   sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
-   apt-mark showhold
-   ```
-
-7. Create a complete private backup with [BACKUP.en.md](docs/BACKUP.en.md).
-
-## Armbian baseline and T95 changes
-
-The base is Armbian 26.8.4 / Debian 13 Trixie / kernel
-`6.18.48-current-sunxi64` from the Tanix TX6s/AXP313 platform. Kernel,
-initramfs, and rootfs remain mostly standard. The board-specific boot chain is
-the essential difference.
-
-Release `v1.0.1` also keeps the AXP313A DCDC3 DRAM regulator at 1.36 V in the
-Linux DTB, matching SPL. This has been cold-boot verified on two boards with
-the exact tested PCB revision.
-
-| Component | T95-specific part | Verify on another board |
-| --- | --- | --- |
-| U-Boot / TOC0 | signed T95 loader, SD `mmc 0:1`, TOC0 at byte 8192 | SoC, DRAM, PMIC, Boot ROM |
-| TF-A / BL31 | paired with T95 U-Boot | board variant, BL31 compatibility |
-| DTB / environment | T95 identity, AC300/RMII, serial console, ext4 root | board, PHY, MDIO, clock, root path |
-| Ethernet | AC300 pre-initialization for `end0` | PHY, reset, clock, MAC, link |
-| Security | locked root; no host keys; create keys before SSH | personalize only locally |
-| Samba / USB | separate optional module | install after stable Linux/network |
-
-See the full [change inventory](docs/CHANGES_FROM_ARMBIAN.en.md) and
-[porting kit](docs/PORTING.en.md).
-
-## Verified status
-
-- Allwinner H616, 4 × Cortex-A53, 2 GiB DDR3.
-- Autonomous SD TOC0/U-Boot boot and ext4 root filesystem.
-- AC300 Ethernet on `end0`, 100 Mbit/s full duplex, DHCP and SSH.
-- CPU stress test passed; maximum observed temperature about 62 °C.
-- microSD read about 22–23 MB/s, write about 21.5 MB/s without relevant errors.
-- Internal eMMC works as a low-wear ext4 data drive; observed reads about
-  63.8–77.4 MB/s, but eMMC boot is not the supported path.
-- USB 2.0 mass storage read/write and optional automount are tested.
-
-The complete acceptance matrix and hashes are in
-[VALIDATION.en.md](docs/VALIDATION.en.md).
-
-## eMMC as an internal data drive
-
-eMMC is working internal storage but not the supported boot medium. Use it as
-an ext4 data drive, for example at `/srv/T95-DATA`; the public release writer
-does not access it. Do not use eMMC writes to repair a boot failure—check UART,
-loader, DTB, and SD first.
-
-## Samba and USB file server
-
-After Linux and Ethernet are stable, the optional
-[Samba + USB automount module](server/samba-usb/README.en.md) provides an
-authenticated SMB2/SMB3 share, automatic USB mounting for the selected user,
-one usershare per volume, safe eject, manifest checks, and recovery guidance.
-Clients can use `smb://<SERVER-IP>/` or `\\<SERVER-IP>\`; VLC can stream
-compatible files directly over SMB. Its user guide explains the difference
-between `T95-DATA` and automatically shared USB drives, how to choose SD or
-eMMC storage, and which scripts run automatically or before ejecting a drive.
-
-## UART diagnostics with RP2040-Zero
-
-Connect `GP0` (adapter TX) to T95 RX, `GP1` (adapter RX) to T95 TX, and GND to
-GND. For capture-only testing, leave adapter TX disconnected. Clone the
-separate adapter project, then for example:
-
-```bash
-python3 tools/capture_uart.py /dev/ttyACM0 \
-  --baud 115200 --duration 240 --prefix captures/d95-coldboot
-```
-
-Do not publish captures containing IPs, MACs, UUIDs, serial numbers, local
-paths, or credentials. See [UART bring-up](docs/UART_BRINGUP.en.md) and
-[boot troubleshooting](docs/BOOT_TROUBLESHOOTING.en.md).
-
-## Security, backups, and updates
-
-The release image has a locked root account and no SSH host keys, accounts,
-`authorized_keys`, or machine identity. Personalization happens locally; never
-publish a personal image or manifest. Back up the working SD using
-[BACKUP.en.md](docs/BACKUP.en.md) before intentional kernel/DTB changes.
-
-To change the tested package state deliberately:
-
-```bash
-sudo apt-mark unhold linux-image-current-sunxi64 linux-dtb-current-sunxi64
-sudo apt update
-sudo apt full-upgrade
-```
-
-Afterward, retest cold boot, DTB, AC300 Ethernet, and networking; apply the
-holds again if the tested versions remain necessary.
-
-## Developer build and porting
-
-The public developer path uses pinned U-Boot/TF-A sources and a host-only
-eGON/FEL diagnostic build without a private signing key. Optional TOC0 testing
-uses a locally supplied key and makes no Secure Boot claim. Read
-[PORTING.en.md](docs/PORTING.en.md), [build instructions](build/README.en.md),
-and [source pins](build/PORTING_SOURCES.en.md) before changing boot components.
-
-Historical laboratory scripts are reference material, not an update mechanism
-for a working server SD card. For black screen or missing DHCP, inspect UART
-before writing another image or touching eMMC.
+Keep personal images, backups, credentials, and raw diagnostic captures
+private. An SD backup excludes separate USB/eMMC data. A full run of the
+revised guide remains open in the
+[test matrix](docs/VALIDATION.en.md#installation-guide-acceptance).
 
 ## License
 
-No license has been selected yet. Choose one and review the obligations of
-Armbian, Linux, U-Boot, TF-A, and adopted patches before redistribution.
+No repository license has been selected yet. Before redistribution, review
+the project license and adopted upstream licenses. Existing Armbian license
+notices remain in place.
+
+<details>
+<summary>Earlier section links</summary>
+
+<a id="uart-before-porting"></a><a id="uart-diagnostics-with-rp2040-zero"></a><a id="developer-build-and-porting"></a>
+
+[Porting / UART](docs/PORTING.en.md)
+
+<a id="end-user-quick-start"></a><a id="one-script-installation"></a><a id="required-after-the-first-ssh-login-hold-the-kernel-and-dtb"></a><a id="manual-installation"></a>
+
+[Installation](docs/INSTALLATION.en.md)
+
+<a id="optional-next-step-samba-file-server-and-usb-automount"></a><a id="samba-and-usb-file-server"></a>
+
+[Samba / USB](server/samba-usb/README.en.md)
+
+<a id="requirements"></a>
+
+[Developer reference](build/README.en.md)
+
+<a id="armbian-baseline-and-t95-changes"></a><a id="verified-status"></a><a id="emmc-as-an-internal-data-drive"></a>
+
+[Technical reference](docs/TECHNICAL_REFERENCE.en.md)
+
+<a id="security-backups-and-updates"></a>
+
+[Backup](docs/BACKUP.en.md)
+
+</details>

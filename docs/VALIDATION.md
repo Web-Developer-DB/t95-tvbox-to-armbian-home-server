@@ -1,5 +1,7 @@
 # Öffentliche Testmatrix: stabil getesteter T95-Stand
 
+**Deutsch** | [English](VALIDATION.en.md)
+
 Der finale Asset-Kanal ist `v1.0.1`. Historische Experiment-Assets bleiben
 im privaten Laborbestand dokumentiert und werden nicht als finaler Download
 beworben.
@@ -76,3 +78,39 @@ werden über `SHA256SUMS` geprüft.
 Der dokumentierte Grundstand darf für die geprüfte Platine als **stabil
 getesteter Home-Server-Release** bezeichnet werden. Die offenen Punkte sind
 Erweiterungen und keine bekannten Fehler im abgenommenen Funktionsumfang.
+
+## Abnahme der Installationsanleitung
+
+**Stand 17.10.2026: offen.** Die neu geordnete Anleitung wurde redaktionell
+und statisch geprüft. Ein vollständiger Durchlauf genau dieses Nutzerwegs
+auf einer separaten SD ist noch nicht durchgeführt. Vorhandene Hardwaretests
+oben und simulierte Tests der neuen Zusatzinstaller sind davon getrennt.
+
+**Dokumentationsprüfung am 17.10.2026:** Alle 16 vorhandenen Setup-Tests,
+21 Shell-Syntaxprüfungen und 34 Samba-/Dashboard-Prüfsummeneinträge bestehen.
+Relative Dokumentationsverweise, Bildziele, Übersetzungslinks und die früheren
+README-Sprungmarken wurden geprüft. Startseite und Übergang zur Installation
+und Samba-Anleitung wurden in einer lokalen Markdown-Vorschau kontrolliert.
+Die neuen Befehlsblöcke wurden auf Bash-Syntax geprüft, nicht auf Hardware ausgeführt.
+
+Ein Prüfer mit grundlegenden Terminal-/SSH-Kenntnissen soll der
+[Installation](INSTALLATION.md) ohne zusätzliche mündliche Anleitung folgen.
+Die funktionierende Produktiv-SD bleibt als Rückweg erhalten.
+
+- [ ] Exakten Boardaufdruck, Datum, Prüfer und Image-Version festhalten.
+- [ ] Linux-PC vorbereiten; Quellstände und SD-Ziel ohne Hilfe erkennen.
+- [ ] Download/Prüfung, Passwort-Personalisierung und verifiziertes SD-Schreiben abschließen.
+- [ ] Kaltstart, Routeradresse, erstes Root-Login und Armbian-Ersteinrichtung prüfen.
+- [ ] Als normaler Benutzer erneut anmelden; `sudo`, Kernelversion und beide Holds prüfen.
+- [ ] Grundsystem-Backup erstellen und Archiv/Prüfsumme prüfen.
+- [ ] Samba mit ausdrücklich gewähltem SD-Pfad installieren; feste Freigabe ohne USB prüfen.
+- [ ] Testdatei vom Client schreiben und lesen; Samba-Passwort richtig zuordnen.
+- [ ] USB anschließen, dynamische Freigabe prüfen, sicher auswerfen, erneut anschließen und zugreifen.
+- [ ] Sauber herunterfahren, kalt starten und SSH/Dateizugriff erneut prüfen.
+- [ ] Konfiguriertes SD-Backup erstellen; Wiederherstellung auf Ersatzkarte und Boot separat prüfen.
+
+Ergebnis, tatsächlich verwendete Karten-/Clienttypen und Abweichungen ohne
+private Zugangsdaten protokollieren. Ungeprüfte Punkte bleiben offen; eine
+Prüfsummen- oder Syntaxprüfung zählt nicht als Hardwareabnahme. Dashboard und
+Bluetooth erhalten zusätzlich ihren eigenen Installations-/Rücknahmetest nach
+[Setup-Prüfanleitung](../server/setup/README.md#prüfen-vor-veröffentlichung).

@@ -1,5 +1,18 @@
 # Bluetooth und Musikplayer auf der T95
 
+**Deutsch** | [English](README.en.md)
+
+**Ort: laufende T95, normaler SSH-Benutzer mit `sudo`.** Zuerst
+[Grundsystem, Kernel-Sperre und SD-Backup](../../docs/INSTALLATION.md) abschließen.
+
+Starter-Voraussetzungen: [Bash, curl, tar, Python 3, sudo](../setup/README.md#voraussetzungen).
+
+> [!NOTE]
+> **Prüfbranch:** Audio und Kopfhörertasten sind an der manuellen
+> Ausgangseinrichtung geprüft. Die neuen Installer sind mit simulierten
+> Systemdiensten getestet; vollständige Installation, Rücknahme und Kaltstart
+> auf einer frischen T95-SD stehen noch aus.
+
 Diese Einrichtung nutzt das **interne BCM43342-UART-Modul** der T95 mit
 AXP313A. Ein USB-Bluetooth-Dongle ist dafür nicht erforderlich. Der Player
 sendet Musik an Bluetooth-Kopfhörer; deren Wiedergabetasten steuern MPD über
@@ -22,7 +35,8 @@ Quellstand von GitHub, installiert die Pakete und richtet die Benutzerdienste
 ein. Es startet keine Musik und koppelt kein unbekanntes Gerät automatisch.
 Standard-Musikordner ist `~/Music`; vorhandene Musik wird nicht verändert.
 
-Aus einem bereits heruntergeladenen Checkout auf der T95:
+Aus einem [Checkout des Prüfbranches](../setup/README.md#lokaler-checkout)
+auf der T95, im Repository-Hauptverzeichnis als normaler SSH-Benutzer mit `sudo`:
 
 ```bash
 sudo python3 server/setup/t95_setup.py bluetooth install --user "$USER"

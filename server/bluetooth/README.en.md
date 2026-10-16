@@ -51,43 +51,153 @@ Usernames, UIDs, and Bluetooth addresses are not copied from the reference box.
 
 ## Pair headphones and choose their output
 
-Put headphones into pairing mode; prevent their automatic connection to a
-phone/PC temporarily. **T95 · normal SSH user:**
+**Worked example: discover MX42H, select it, connect, and later disconnect.**
+Run all steps **on the T95 as the normal SSH user** after Bluetooth setup.
+The names and addresses below are fictional examples. Replace
+`AA:BB:CC:DD:EE:01` everywhere with your actual audio device's discovered address.
+
+### 1. Scan the Bluetooth surroundings
+
+Put the headphones into **pairing mode** and disconnect them from phones/PCs.
+In the normal SSH terminal:
 
 ```bash
 t95-bluetooth pair
 ```
 
-This opens `bluetoothctl`. Enter the following **inside that Bluetooth prompt**;
-replace `AA:BB:CC:DD:EE:FF` with the headphone address found during the scan.
-Allow about 15–30 seconds for discovery before using the discovered address:
+The helper turns Bluetooth on and opens an interactive `bluetoothctl`
+session. Enter the next commands **inside that session**, indicated by a
+prompt such as `[bluetooth]#`. Do not type the prompt itself:
 
 ```text
 power on
 agent on
 default-agent
 scan on
-devices
-pair AA:BB:CC:DD:EE:FF
-trust AA:BB:CC:DD:EE:FF
-connect AA:BB:CC:DD:EE:FF
-info AA:BB:CC:DD:EE:FF
+```
+
+Wait about 15–30 seconds. Scanning finds discoverable Bluetooth devices in
+range. Example output — not a recording of a new hardware test:
+
+```text
+Discovery started
+[NEW] Device AA:BB:CC:DD:EE:01 MX42H
+[NEW] Device AA:BB:CC:DD:EE:02 Work-PC
+[NEW] Device AA:BB:CC:DD:EE:03 Living-Room-Speaker
+```
+
+Enter `devices` in the same session to list discovered and known devices
+again. Results may include devices without audio support. If your headphones
+are missing, check pairing mode and existing connections; see
+[Bluetooth troubleshooting](../../docs/BLUETOOTH_CHEATSHEET.en.md#5-no-devices-discovered).
+
+### 2. Select and connect the desired audio device
+
+This example chooses **MX42H**. Use the address from that exact result;
+names alone are not unique. Enter sequentially **in the still-open
+`bluetoothctl` session**:
+
+```text
+pair AA:BB:CC:DD:EE:01
+trust AA:BB:CC:DD:EE:01
+connect AA:BB:CC:DD:EE:01
+info AA:BB:CC:DD:EE:01
+```
+
+Confirm any pairing request. `pair` establishes pairing, `trust` permits
+later known-device connections, and `connect` establishes the link. `info`
+should then include:
+
+```text
+Paired: yes
+Trusted: yes
+Connected: yes
+```
+
+Only after a successful connection, stop discovery and return to the normal
+SSH shell. **Still inside `bluetoothctl`:**
+
+```text
 scan off
 quit
 ```
 
-**Expected:** `info` shows `Paired: yes`, `Trusted: yes`, `Connected: yes`.
-Back in the **normal T95 SSH shell**, select the actual audio output:
+The address supplied to `pair`/`connect` selects the remote device. BlueZ's
+`select` command chooses the local Bluetooth controller, not the headphones.
+
+### 3. Use the connected headphones as the audio output
+
+**Back in the normal T95 SSH terminal:**
 
 ```bash
-t95-bluetooth audio AA:BB:CC:DD:EE:FF
+t95-bluetooth audio AA:BB:CC:DD:EE:01
+wpctl status
+mpc outputs
 ```
 
-It sets MPD to those headphones, sets PipeWire volume to 20%, and stops
-playback. Until the first selection, MPD uses a placeholder output. After a
-profile change that changes the output name, run `audio` again. For devices
-already paired, use `connect`; `pair` can renew an existing pairing.
-Continue with the [music player guide](../../docs/MUSIKPLAYER_CHEATSHEET.en.md).
+The helper selects and remembers those headphones for MPD, sets PipeWire
+volume to 20%, and stops playback. Expect the headphones under audio `Sinks`
+in `wpctl status`, and the MPD output `T95 Bluetooth` in `mpc outputs`.
+Names and numeric PipeWire IDs may vary. If no audio output is found, check
+the connection and [audio status](../../docs/MUSIKPLAYER_CHEATSHEET.en.md#no-sound-or-button-response)
+first.
+
+If the MPD queue already contains music, run `mpc play` in the normal SSH
+terminal. Otherwise prepare the library using the
+[music player guide](../../docs/MUSIKPLAYER_CHEATSHEET.en.md#scan-and-play-music).
+After a profile change that changes the output name, run `audio` again.
+
+### 4. Reconnect already paired headphones
+
+Power on the headphones and disconnect other devices first.
+**Normal T95 SSH terminal:**
+
+```bash
+t95-bluetooth on
+sudo bluetoothctl connect AA:BB:CC:DD:EE:01
+bluetoothctl info AA:BB:CC:DD:EE:01
+```
+
+**Expected:** `Connected: yes`. Use `connect` for an existing pairing;
+`pair` can renew it. The MPD output remains saved. To use different
+headphones, connect their address and then choose it with `t95-bluetooth audio`.
+
+### 5. Temporarily disconnect
+
+**Normal T95 SSH terminal:**
+
+```bash
+mpc stop
+sudo bluetoothctl disconnect AA:BB:CC:DD:EE:01
+bluetoothctl info AA:BB:CC:DD:EE:01
+```
+
+**Expected immediately afterward:** `Connected: no`, while `Paired: yes`
+remains. Reconnect using step 4 later. Automatic reconnection is possible.
+To use headphones on the PC, alternatively run `t95-bluetooth off` on the
+T95; it disables radio for all box controllers. Samba and the server keep running.
+
+### 6. Permanently remove pairing from the T95
+
+To forget this device on the box, run **in the normal T95 SSH terminal**:
+
+```bash
+mpc stop
+sudo bluetoothctl remove AA:BB:CC:DD:EE:01
+bluetoothctl devices Paired
+```
+
+**Expected:** its address is absent from the paired-device list. A new scan
+can discover the headphones again, but using them requires pairing again.
+You may also need to forget the old connection on the headphones. The player
+remains installed; music and other pairings are preserved.
+
+| Goal | Command in the normal SSH terminal |
+| --- | --- |
+| Disconnect these headphones only | `sudo bluetoothctl disconnect AA:BB:CC:DD:EE:01` |
+| Forget these headphones on the T95 | `sudo bluetoothctl remove AA:BB:CC:DD:EE:01` |
+| Temporarily disable box Bluetooth | `t95-bluetooth off` |
+| Remove player and disable Bluetooth | `t95-bluetooth remove --remove-packages` — see removal below |
 
 ## Temporarily use the headphones on a PC
 

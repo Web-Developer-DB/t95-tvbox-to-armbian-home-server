@@ -56,41 +56,161 @@ aus der ursprünglichen Box übernommen.
 
 ## Kopfhörer verbinden und als Ausgang wählen
 
-Kopfhörer in den Kopplungsmodus versetzen; die automatische Verbindung zum
-Handy oder PC vorübergehend verhindern. Dann:
+**Praxisbeispiel: MX42H finden, auswählen, verbinden und später wieder trennen.**
+Alle Schritte laufen **auf der T95 als normaler SSH-Benutzer** nach der
+Bluetooth-Installation. Die folgenden Namen und Adressen sind erfundene
+Beispieldaten. Ersetze `AA:BB:CC:DD:EE:01` in allen Befehlen durch die
+Adresse deines tatsächlich gefundenen Audiogeräts.
+
+### 1. Bluetooth-Umgebung scannen
+
+Versetze den Kopfhörer in den **Kopplungsmodus** und trenne seine Verbindung
+zum Handy oder PC. Starte im normalen SSH-Terminal:
 
 ```bash
 t95-bluetooth pair
 ```
 
-Dieser Befehl öffnet `bluetoothctl` und zeigt die notwendigen Schritte an.
-`AA:BB:CC:DD:EE:FF` durch die gefundene Kopfhöreradresse ersetzen:
+Der Helfer schaltet Bluetooth ein und öffnet eine interaktive
+`bluetoothctl`-Sitzung. Die nächsten Befehle gehören **in diese Sitzung**,
+erkennbar beispielsweise an `[bluetooth]#`. Den Prompt selbst nicht mit eingeben:
 
 ```text
 power on
 agent on
 default-agent
 scan on
-devices
-pair AA:BB:CC:DD:EE:FF
-trust AA:BB:CC:DD:EE:FF
-connect AA:BB:CC:DD:EE:FF
+```
+
+Warte etwa 15–30 Sekunden. Ein Scan sucht nach erkennbaren Bluetooth-Geräten
+in Reichweite. Beispielausgabe — kein Mitschnitt eines neuen Hardwaretests:
+
+```text
+Discovery started
+[NEW] Device AA:BB:CC:DD:EE:01 MX42H
+[NEW] Device AA:BB:CC:DD:EE:02 Arbeits-PC
+[NEW] Device AA:BB:CC:DD:EE:03 Wohnzimmer-Lautsprecher
+```
+
+Mit `devices` in derselben Sitzung kannst du gefundene und bekannte Geräte
+noch einmal auflisten. Es können auch Geräte ohne Audiofunktion erscheinen.
+Wenn dein Kopfhörer fehlt, Kopplungsmodus und bestehende Verbindungen prüfen;
+siehe [Bluetooth-Fehlerhilfe](../../docs/BLUETOOTH_CHEATSHEET.md#5-wenn-kein-gerät-gefunden-wird).
+
+### 2. Gewünschtes Audiogerät auswählen und verbinden
+
+Im Beispiel soll **MX42H** verwendet werden. Übernimm die Adresse aus genau
+dieser Zeile; der Name allein ist nicht eindeutig. **In der noch offenen
+`bluetoothctl`-Sitzung**, nacheinander:
+
+```text
+pair AA:BB:CC:DD:EE:01
+trust AA:BB:CC:DD:EE:01
+connect AA:BB:CC:DD:EE:01
+info AA:BB:CC:DD:EE:01
+```
+
+Bestätige gegebenenfalls die angezeigte Kopplungsabfrage. `pair` richtet die
+Kopplung ein, `trust` erlaubt spätere Verbindungen zum bekannten Gerät und
+`connect` stellt die Verbindung her. `info` sollte danach unter anderem zeigen:
+
+```text
+Paired: yes
+Trusted: yes
+Connected: yes
+```
+
+Erst nach erfolgreicher Verbindung den Suchlauf beenden und zur normalen
+SSH-Shell zurückkehren. **Noch in `bluetoothctl`:**
+
+```text
 scan off
 quit
 ```
 
-Anschließend den tatsächlich vorhandenen Audio-Ausgang auswählen:
+Die Geräteadresse wird bei `pair` und `connect` angegeben. Der BlueZ-Befehl
+`select` wählt dagegen den lokalen Bluetooth-Controller; er wählt keinen Kopfhörer.
+
+### 3. Den verbundenen Kopfhörer als Audio-Ausgang verwenden
+
+**Zurück im normalen SSH-Terminal auf der T95:**
 
 ```bash
-t95-bluetooth audio AA:BB:CC:DD:EE:FF
+t95-bluetooth audio AA:BB:CC:DD:EE:01
+wpctl status
+mpc outputs
 ```
 
-Das setzt den MPD-Ausgang auf genau diesen Kopfhörer und die PipeWire-Lautstärke
-auf 20 %. Es stoppt die Wiedergabe. Bis zur ersten Auswahl verwendet MPD einen
-Platzhalter, damit keine Musik ungewollt an einen anderen Ausgang geschickt
-wird. Nach einem Profilwechsel mit geändertem Ausgangsnamen den `audio`-Befehl
-erneut ausführen. Für schon gekoppelte Geräte reicht später `connect`;
-`pair` kann eine vorhandene Kopplung erneuern.
+Der Helfer wählt den Audio-Ausgang dieses Kopfhörers für MPD, merkt sich ihn,
+setzt die PipeWire-Lautstärke auf 20 % und stoppt die Wiedergabe. In
+`wpctl status` sollte der Kopfhörer unter den Audio-Ausgängen (`Sinks`)
+erscheinen; `mpc outputs` zeigt den MPD-Ausgang `T95 Bluetooth`.
+Name und numerische PipeWire-ID können abweichen. Meldet der Helfer keinen
+Audio-Ausgang, zuerst Verbindung und [Audio-Status](../../docs/MUSIKPLAYER_CHEATSHEET.md#kein-ton-oder-keine-tastenreaktion)
+prüfen.
+
+Wenn bereits Musik in der MPD-Warteschlange liegt, kannst du im normalen
+SSH-Terminal mit `mpc play` starten. Eine Musiksammlung zuerst nach der
+[Musikplayer-Anleitung](../../docs/MUSIKPLAYER_CHEATSHEET.md#musiksammlung-einlesen-und-abspielen)
+vorbereiten. Nach einem Profilwechsel mit geändertem Ausgangsnamen den
+`audio`-Befehl erneut ausführen.
+
+### 4. Einen bereits gekoppelten Kopfhörer erneut verbinden
+
+Kopfhörer einschalten und seine Verbindung zu anderen Geräten trennen.
+**Normales SSH-Terminal auf der T95:**
+
+```bash
+t95-bluetooth on
+sudo bluetoothctl connect AA:BB:CC:DD:EE:01
+bluetoothctl info AA:BB:CC:DD:EE:01
+```
+
+**Ergebnis:** `Connected: yes`. Für eine vorhandene Kopplung genügt `connect`;
+`pair` kann eine bestehende Kopplung erneuern. Der gewählte MPD-Ausgang bleibt
+gespeichert. Wenn du einen anderen Kopfhörer verwenden möchtest, dessen
+Adresse verbinden und anschließend mit `t95-bluetooth audio` auswählen.
+
+### 5. Verbindung vorübergehend trennen
+
+**Normales SSH-Terminal auf der T95:**
+
+```bash
+mpc stop
+sudo bluetoothctl disconnect AA:BB:CC:DD:EE:01
+bluetoothctl info AA:BB:CC:DD:EE:01
+```
+
+**Ergebnis direkt nach dem Trennen:** `Connected: no`, die Kopplung
+(`Paired: yes`) bleibt erhalten. Später kannst du Schritt 4 verwenden.
+Das Gerät kann sich automatisch wieder verbinden. Für die Nutzung des
+Kopfhörers am PC kannst du stattdessen auf der T95 `t95-bluetooth off`
+verwenden; das schaltet den Bluetooth-Funk aller Controller der Box aus.
+Samba und der Home-Server laufen weiter.
+
+### 6. Kopplung dauerhaft von der T95 entfernen
+
+Wenn dieses Gerät auf der Box vergessen werden soll, **im normalen
+SSH-Terminal auf der T95** ausführen:
+
+```bash
+mpc stop
+sudo bluetoothctl remove AA:BB:CC:DD:EE:01
+bluetoothctl devices Paired
+```
+
+**Ergebnis:** Die Adresse steht nicht mehr in der Liste gekoppelter Geräte.
+Ein neuer Scan kann den Kopfhörer wieder finden; zur Nutzung ist dann eine
+neue Kopplung nötig. Gegebenenfalls auch am Kopfhörer die alte Verbindung
+löschen. Der Player bleibt installiert; Musikdateien und andere Kopplungen
+bleiben erhalten.
+
+| Ziel | Passender Befehl im normalen SSH-Terminal |
+| --- | --- |
+| Nur den Kopfhörer trennen | `sudo bluetoothctl disconnect AA:BB:CC:DD:EE:01` |
+| Kopfhörer auf der T95 vergessen | `sudo bluetoothctl remove AA:BB:CC:DD:EE:01` |
+| Bluetooth auf der Box vorübergehend ausschalten | `t95-bluetooth off` |
+| Player entfernen und Bluetooth deaktivieren | `t95-bluetooth remove --remove-packages` — siehe Deinstallation weiter unten |
 
 ## Kurzzeitig ausschalten: Kopfhörer am PC verwenden
 

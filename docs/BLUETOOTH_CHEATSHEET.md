@@ -9,6 +9,11 @@ Für die T95 über SSH. Die kurzen `t95-bluetooth`-Befehle setzen die
 [Bluetooth-Installation](../server/bluetooth/README.md) voraus.
 `AA:BB:CC:DD:EE:FF` ist ein Platzhalter für die Adresse deines Geräts.
 
+**Praxisbeispiel mit Scan-Ausgabe und konkreter Kopfhörerwahl:**
+[Gerät finden → verbinden → Audio auswählen → trennen oder vergessen](../server/bluetooth/README.md#kopfhörer-verbinden-und-als-ausgang-wählen).
+Das Beispiel trennt Befehle im interaktiven Bluetooth-Prompt von Befehlen
+im normalen SSH-Terminal.
+
 ## 1. Adapter und USB-Geräte finden
 
 ```bash
@@ -36,7 +41,8 @@ done
 
 Bei mehreren Controllern in einer interaktiven `sudo bluetoothctl`-Sitzung mit
 `list` auflisten und `select CONTROLLER-ADRESSE` auswählen. Controller-Adresse
-und Kopfhörer-Adresse sind zwei verschiedene Adressen.
+und Kopfhörer-Adresse sind zwei verschiedene Adressen. Das Zielgerät wird
+über seine Adresse bei `pair`/`connect` ausgewählt; `select` wählt den lokalen Adapter.
 
 ## 2. Neue Kopfhörer koppeln
 

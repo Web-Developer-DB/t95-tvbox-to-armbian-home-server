@@ -7,6 +7,11 @@ helpers handle required elevation. Short `t95-bluetooth` commands require
 [Bluetooth installation](../server/bluetooth/README.en.md).
 `AA:BB:CC:DD:EE:FF` represents your device's actual address.
 
+**Worked example with scan results and a concrete headphone selection:**
+[Discover → connect → choose audio → disconnect or forget](../server/bluetooth/README.en.md#pair-headphones-and-choose-their-output).
+The example distinguishes commands in the interactive Bluetooth prompt from
+commands in the normal SSH shell.
+
 ## 1. Find adapters and USB devices
 
 ```bash
@@ -33,7 +38,8 @@ done
 ```
 
 For multiple controllers, open `sudo bluetoothctl`, use `list`, then
-`select CONTROLLER-ADDRESS`. Controller and headphone addresses are different.
+`select CONTROLLER-ADDRESS`. Controller and headphone addresses are different. The remote device
+is chosen by its address in `pair`/`connect`; `select` chooses the local adapter.
 
 ## 2. Pair new headphones
 

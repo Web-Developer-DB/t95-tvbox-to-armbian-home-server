@@ -2,16 +2,6 @@
 
 **Deutsch** | [English](README.en.md)
 
-> [!CAUTION]
-> **⛔ PFLICHT: KERNEL UND DTB SPERREN**
->
-> **Nach der Ersteinrichtung, vor weiterer Softwareinstallation oder Systemupdates:**
-> Kernel und DTB sperren und **die Sperre im normalen Betrieb nicht aufheben**.
-> Ein Kernel-/DTB-Update kann die T95-Anpassungen überschreiben —
-> **die Box startet danach möglicherweise nicht mehr.**
->
-> **[→ Jetzt den Pflichtschritt zur Kernel-/DTB-Sperre lesen](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)**
-
 Eine T95 mit **Allwinner H616 und der Platine `H616-T95MAX-AXP313A-V3.0`**
 als kleinen Datei- und Medienserver weiterverwenden: Armbian startet von
 microSD, Ethernet verbindet die Box mit dem Heimnetz, SSH dient zur Bedienung.
@@ -35,6 +25,16 @@ und in der [Docker-Anleitung von Armbian](https://docs.armbian.com/software/dock
 > Nur `H616-T95MAX-AXP313A-V3.0` ist für dieses Image geprüft. Bei anderer
 > oder unbekannter Platine hier stoppen: [Hardware identifizieren](docs/HARDWARE_IDENTIFICATION.md)
 > und [Entwicklerpfad](docs/PORTING.md).
+
+> [!CAUTION]
+> **⛔ PFLICHT: KERNEL UND DTB SPERREN**
+>
+> **Nach der Ersteinrichtung, vor weiterer Softwareinstallation oder Systemupdates:**
+> Kernel und DTB sperren und **die Sperre im normalen Betrieb nicht aufheben**.
+> Ein Kernel-/DTB-Update kann die T95-Anpassungen überschreiben —
+> **die Box startet danach möglicherweise nicht mehr.**
+>
+> **[→ Jetzt den Pflichtschritt zur Kernel-/DTB-Sperre lesen](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)**
 
 ## Home-Server installieren
 

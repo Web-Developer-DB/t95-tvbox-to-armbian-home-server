@@ -1,4 +1,6 @@
-# Boot troubleshooting with UART
+<a id="boot-troubleshooting-with-uart"></a>
+
+# 🛟 Boot troubleshooting with UART
 
 [Deutsch](BOOT_TROUBLESHOOTING.md) | **English**
 
@@ -6,7 +8,9 @@ This sequence prevents an early boot failure from being mistaken for a
 kernel, network, or Samba problem. Visible HDMI output does not replace a UART
 log.
 
-## Failure chain
+<a id="failure-chain"></a>
+
+## 🔎 Failure chain
 
 | Last visible marker | Classification | Check | Do not do |
 | --- | --- | --- | --- |
@@ -18,7 +22,9 @@ log.
 | Kernel starts, root filesystem missing | root device or filesystem | `root=`, PARTUUID/UUID, ext4 integrity | investigate DHCP or Samba |
 | Login visible, no network | PHY/DTB/userspace | `end0`, link, DHCP journal | replace the bootloader |
 
-## Capture a log
+<a id="capture-a-log"></a>
+
+## 📝 Capture a log
 
 The RP2040 adapter and capture program belong to the separate
 [`rp2040-zero-uart-adapter`](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
@@ -33,13 +39,17 @@ Power on the target only after recording has started. Save the log as text;
 before publishing it, remove IP and MAC addresses, UUIDs, serial numbers,
 local paths, and credentials.
 
-## Reference
+<a id="reference"></a>
+
+## 📚 Reference
 
 Sanitized expected markers are available under
 [`docs/reference-logs/`](reference-logs/README.en.md). They classify the boot
 stage but do not replace measurements on the actual board.
 
-## Stop and return path
+<a id="stop-and-return-path"></a>
+
+## ↩️ Stop and return path
 
 Do not combine multiple changes when the failure is unknown. Insert the known-
 good SD card, preserve the original firmware backup, leave eMMC unchanged, and

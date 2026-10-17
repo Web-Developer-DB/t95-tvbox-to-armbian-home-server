@@ -1,4 +1,6 @@
-# Play your own music on the T95
+<a id="play-your-own-music-on-the-t95"></a>
+
+# 🎵 Play your own music on the T95
 
 <a id="music-player-cheat-sheet-mpd-on-the-t95"></a>
 
@@ -10,9 +12,17 @@ The [Bluetooth player must be installed](../server/bluetooth/README.en.md).
 Use the normal T95 account for which you installed the player.
 Run `mpc`, `wpctl`, and `systemctl --user` as this user, without `sudo`.
 
-[Daily commands](#daily-commands) · [Troubleshooting](#no-sound-or-button-response) · [Everyday use](DAILY_USE.en.md)
+| Your goal | Go here |
+| --- | --- |
+| 🎧 Hear your first file | [Prepare headphones and music](#prepare-headphones-and-music) → [Play](#scan-and-play-music) |
+| ▶️ Control playback | [Daily commands](#daily-commands) |
+| 🛟 No sound or button response | [Targeted checks](#no-sound-or-button-response) |
 
-## Prepare headphones and music
+[🧭 Everyday overview](DAILY_USE.en.md)
+
+<a id="prepare-headphones-and-music"></a>
+
+## 🎧 Prepare headphones and music
 
 ### A. Connect the headphones and check the folder
 
@@ -138,7 +148,9 @@ ls -l -- "$HOME/$T95_TEST_NAME" &&
 copy errors. For an error, stop here. If you closed the first window, repeat
 A to set the folder again before copying.
 
-## Scan and play music
+<a id="scan-and-play-music"></a>
+
+## ▶️ Scan and play music
 
 For the test file transferred above, run the next block. Use the same T95
 window so `T95_TEST_NAME` still names your uploaded file. `clear` clears the
@@ -162,7 +174,11 @@ use [sound help](#no-sound-or-button-response). For music already in the library
 use the path from `mpc ls` with `mpc add`, or `mpc add /` for the whole library.
 Old playlists from a previous manual player setup are not imported automatically.
 
-## Daily commands
+<a id="daily-commands"></a>
+
+## 🎛️ Daily commands
+
+### ▶️ Playback
 
 | Action | Command |
 | --- | --- |
@@ -173,10 +189,20 @@ Old playlists from a previous manual player setup are not imported automatically
 | Stop | `mpc stop` |
 | Next / previous | `mpc next` / `mpc prev` |
 | Play queue item 2 | `mpc play 2` |
+
+### 🎚️ Volume and playback modes
+
+| Action | Command |
+| --- | --- |
 | Player volume | `mpc volume 30` |
 | Louder / softer | `mpc volume +5` / `mpc volume -5` |
 | Repeat on / off | `mpc repeat on` / `mpc repeat off` |
 | Shuffle on / off | `mpc random on` / `mpc random off` |
+
+### 💾 Saved playlists
+
+| Action | Command |
+| --- | --- |
 | Save playlist | `mpc save MyList` |
 | List saved playlists | `mpc lsplaylists` |
 | Add saved playlist to queue | `mpc load MyList` |
@@ -201,7 +227,9 @@ wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
 inspect `wpctl status` first; MPD uses the separately stored headphone output
 from `t95-bluetooth audio`.
 
-## Headphone buttons
+<a id="headphone-buttons"></a>
+
+## 🎧 Headphone buttons
 
 Play/pause/next/previous were verified with MX42H on the documented manual
 setup. MPD continues after SSH closes. Button assignments vary by model;
@@ -216,7 +244,9 @@ systemctl --user is-active mpd mpdris2 mpris-proxy
 
 If they need restarting, run `systemctl --user restart mpd mpdris2 mpris-proxy`.
 
-## No sound or button response
+<a id="no-sound-or-button-response"></a>
+
+## 🛟 No sound or button response
 
 **On the T95, normal player user:**
 

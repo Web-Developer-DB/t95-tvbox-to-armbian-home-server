@@ -1,4 +1,8 @@
-# Restore-Checkliste
+<a id="restore-checkliste"></a>
+
+# ↩️ Restore-Checkliste
+
+**Deutsch** | [English](RESTORE-CHECKLIST.en.md)
 
 Technische Checkliste für die bereits vorbereitete eMMC-Referenzinstallation.
 Für eine neue SD-Installation den [Samba-Schnellstart](../README.md) verwenden;
@@ -10,6 +14,19 @@ ersetzt werden. Ein bloßes Kopieren der unveränderten Polkit-/Samba-Vorlagen
 übernimmt keine Werte aus den Shell-Variablen. `/srv/T95-DATA` muss für den
 hier beschriebenen eMMC-Pfad bereits dauerhaft eingehängt und geprüft sein.
 
+| Teil | Kontrolle |
+| --- | --- |
+| 🔎 Vor Beginn | Vorhandener Benutzer, geprüfter eMMC-Mount und ersetzte Vorlagenplatzhalter |
+| 📦 Schritte 1–5 | Pakete, Samba-Konto, Gruppe, Datenpfad und Freigabekonfiguration |
+| ⚙️ Schritte 6–11 | Helfer, Polkit, udiskie und dauerhafter Benutzerdienst |
+| ✅ Schritt 12 | Konfiguration, Clientzugriff, USB-Automount und sicherer Auswurf |
+
+<a id="vorbereiten"></a>
+
+## 📋 Vorbereiten
+
+**Auf der T95 als Administrator; technische Beispiele vor dem Ausführen anpassen.**
+
 Die folgenden Beispiele setzen einen vorhandenen Linux-Benutzer voraus. Ersetze
 `serveruser` durch den gewünschten Namen:
 
@@ -17,6 +34,10 @@ Die folgenden Beispiele setzen einen vorhandenen Linux-Benutzer voraus. Ersetze
 export T95_USER=serveruser
 export T95_UID="$(id -u "$T95_USER")"
 ```
+
+<a id="manuelle-wiederherstellung-prüfen"></a>
+
+## ✅ Manuelle Wiederherstellung prüfen
 
 1. Pakete installieren: `samba`, `samba-common-bin`, `udisks2`, `udiskie`, `dbus-user-session`, `polkitd`, `exfatprogs`, `ntfs-3g`.
 2. Linux-Benutzer `$T95_USER` muss existieren; Samba-Passwort mit `smbpasswd -a $T95_USER` setzen.

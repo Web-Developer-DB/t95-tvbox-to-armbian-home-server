@@ -1,10 +1,14 @@
-# Public sources for H616 porting
+<a id="public-sources-for-h616-porting"></a>
+
+# 📚 Public sources for H616 porting
 
 [Deutsch](PORTING_SOURCES.md) | **English**
 
 This file separates reproducible sources from local laboratory artifacts. The
 tools download only into `build/sources/` and `build/work/`; both directories
 are intentionally excluded from version control.
+
+[🛠️ Build chain](README.en.md) · [🧭 Porting path](../docs/PORTING.en.md)
 
 | Component | Source | Pinned revision / checksum | Purpose |
 | --- | --- | --- | --- |

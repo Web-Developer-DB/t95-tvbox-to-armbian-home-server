@@ -1,4 +1,6 @@
-# Technical reference for the tested T95
+<a id="technical-reference-for-the-tested-t95"></a>
+
+# 📚 Technical reference for the tested T95
 
 [Deutsch](TECHNICAL_REFERENCE.md) | **English**
 
@@ -7,7 +9,15 @@ the former README. For setup, use [installation](INSTALLATION.en.md).
 Measurements describe the reference installation; they are not minimum
 requirements or guarantees for another device.
 
-## Armbian baseline and T95 changes
+| Information needed | Read next |
+| --- | --- |
+| 📦 Image and layout | [Release guide](RELEASE.en.md) |
+| ✅ Test results and open acceptance | [Test matrix](VALIDATION.en.md) |
+| 🧭 Different hardware | [Porting path](PORTING.en.md) |
+
+<a id="armbian-baseline-and-t95-changes"></a>
+
+## 🧩 Armbian baseline and T95 changes
 
 The baseline is the official Tanix TX6s/AXP313 Armbian image: Armbian 26.8.4,
 Debian 13 Trixie, kernel `6.18.48-current-sunxi64`. Kernel, initramfs, and rootfs
@@ -31,7 +41,9 @@ For another board, use [porting](PORTING.en.md). Prepare UART **before**
 experiments: 3.3 V TTL, 115200 baud, 8N1, common ground; never 5 V TTL or RS-232.
 Early loader/RAM faults cannot be repaired by changing Samba or the rootfs.
 
-## Tested hardware and software
+<a id="tested-hardware-and-software"></a>
+
+## 🔎 Tested hardware and software
 
 | Area | Reference |
 | --- | --- |
@@ -45,7 +57,9 @@ Early loader/RAM faults cannot be repaired by changing Samba or the rootfs.
 | DTB | `sun50i-h616-t95-axp313-tanix-6.18.dtb` |
 | Boot layout | microSD, TOC0 at byte 8192, one ext4 partition from byte 4 MiB |
 
-## Documented measurements and tests
+<a id="documented-measurements-and-tests"></a>
+
+## ✅ Documented measurements and tests
 
 | Test | Recorded result |
 | --- | --- |
@@ -63,7 +77,9 @@ The base image's DRAM fix was cold-boot verified on two boxes with the exact
 PCB revision. The [validation matrix](VALIDATION.en.md) separates these
 existing results and confirmed module steps from the remaining individual checks.
 
-## eMMC as an internal data drive
+<a id="emmc-as-an-internal-data-drive"></a>
+
+## 💽 eMMC as an internal data drive
 
 The reference eMMC exposes about 29.1 GiB (nominal 32 GB), plus 4 MiB boot
 regions `/dev/mmcblk2boot0` and `/dev/mmcblk2boot1`. Its user region was
@@ -113,7 +129,9 @@ The unsuccessful eMMC boot attempt concerned the boot path, not a demonstrated
 filesystem-health failure. The public SD route does not overwrite Android
 eMMC or make it bootable. Use SD diagnostics for boot faults.
 
-## Example SSH session
+<a id="example-ssh-session"></a>
+
+## 🖥️ Example SSH session
 
 ![Redacted example of the reference T95 SSH status](images/t95-ssh-status-redacted.png)
 

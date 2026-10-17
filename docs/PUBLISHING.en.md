@@ -1,11 +1,23 @@
-# GitHub publishing checklist
+<a id="github-publishing-checklist"></a>
+
+# 🌐 GitHub publishing checklist
 
 [Deutsch](PUBLISHING.md) | **English**
 
 This checklist separates public tools and documentation from forensic data,
 private artifacts, and personalized system states.
 
-## Public source set
+| Phase | Required result |
+| --- | --- |
+| 🔎 [Review sources](#public-source-set) | Approved files only; private images and keys remain local |
+| 📦 [Check release assets](#approve-a-release-asset) | Hardening, hashes, and documented hardware acceptance |
+| 🌐 [Publish](#publish-documentation-and-release-description-together) | Merge → check public links → apply release text |
+
+**Run on:** the Linux PC, in the local repository copy; for maintainers. Adapt paths and private inputs before running examples.
+
+<a id="public-source-set"></a>
+
+## 📁 Public source set
 
 A new, clean repository should contain:
 
@@ -30,7 +42,9 @@ the excluded TOC0 signing key. Do not publish usernames, local paths,
 passwords, private keys, SSH host keys, IP/MAC captures, or personalized image
 files.
 
-## Never publish
+<a id="never-publish"></a>
+
+## 🔒 Never publish
 
 - `build/keys/`, `backups/`, `captures/`, `evidence/`, `Archiv/`, `.agents/`,
   `.codex/`, `AGENTS.md`, `T95_Armbian.txt`, or private laboratory journals;
@@ -43,7 +57,9 @@ files.
 `.gitignore` prevents common mistakes but does not replace checking
 `git status --ignored`.
 
-## Approve a release asset
+<a id="approve-a-release-asset"></a>
+
+## ✅ Approve a release asset
 
 1. Audit the hardened artifact against the private source artifact:
 
@@ -75,7 +91,9 @@ files.
    peripheral tests are optional follow-up work, not requirements for the
    stable tested baseline.
 
-## Publish documentation and release description together
+<a id="publish-documentation-and-release-description-together"></a>
+
+## 🌐 Publish documentation and release description together
 
 The documentation update is delivered on its existing working branch.
 Merging and editing the public release description are separate publication steps.
@@ -101,7 +119,9 @@ Image assets, release versions, and image hashes are unchanged by this
 documentation update. Keep the maintainer's confirmed module results and
 separately tracked hardware checks distinct in the validation matrix.
 
-## License and upstream review
+<a id="license-and-upstream-review"></a>
+
+## 📄 License and upstream review
 
 Before publishing, select a suitable license and separately review licensing
 obligations for Armbian, Linux, TF-A, U-Boot, and reused patch fragments. This

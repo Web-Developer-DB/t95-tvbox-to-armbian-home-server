@@ -1,4 +1,6 @@
-# Porting an H616 TV box: safe bring-up path
+<a id="porting-an-h616-tv-box-safe-bring-up-path"></a>
+
+# 🧭 Porting an H616 TV box: safe bring-up path
 
 [Deutsch](PORTING.md) | **English**
 
@@ -23,7 +25,9 @@ H616 TV box. The v1.0.1 image is approved only for
 | 7 | Kernel and DTB | kernel reaches the root filesystem | [DTB](DTB_PORTING.en.md) |
 | 8 | Network and services | PHY, DHCP, and SSH | add Samba only afterwards |
 
-## Public build chain
+<a id="public-build-chain"></a>
+
+## 🛠️ Public build chain
 
 ```bash
 bash build/setup-h616-porting-host.sh --check

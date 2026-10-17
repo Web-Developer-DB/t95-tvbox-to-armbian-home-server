@@ -1,4 +1,6 @@
-# Set up the SSH dashboard
+<a id="set-up-the-ssh-dashboard"></a>
+
+# 📊 Set up the SSH dashboard
 
 <a id="ssh-login-dashboard-install-and-restore"></a>
 
@@ -7,18 +9,27 @@
 The script-installed custom dashboard adds storage information to Armbian's
 login display. At each SSH login, alongside load and memory information, you see:
 
-- **`SD-Writes`:** the amount written to the SD card since the last boot.
-  This counter starts over after a reboot.
-- **Drive overview:** mounted filesystems, including connected and mounted
-  USB sticks, SSDs, and external hard drives. Each entry shows its device name
-  (such as `sda1`), total capacity, free space, usage percentage, and mount path.
-  Usage of 90% or more is highlighted in red.
+| Display | What it tells you |
+| --- | --- |
+| ✍️ **`SD-Writes`** | Amount written to SD since the last boot; starts over after a reboot. |
+| 🔌 **Drives** | Mounted filesystems, including mounted USB sticks, SSDs, and hard drives: device name (e.g. `sda1`) and mount path. |
+| 📊 **Storage** | Total capacity, free space, and usage per filesystem; **90% or more** is highlighted in red. |
 
 The overview refreshes at a new SSH login. You do not need a separate web interface.
 
-[Set up](#set-up) · [Verify](#verify-success) · [Remove](#remove) · [Daily use](DAILY_USE.en.md)
+> [!TIP]
+> **Already installed?** Open a new SSH connection to refresh the values. An already open window does not update automatically.
 
-## Requirements
+| Your goal | Go here |
+| --- | --- |
+| 🚀 First setup | [Requirements](#requirements) → [Set up](#set-up) |
+| ✅ Check the display | [Check status and log in again](#verify-success) |
+| 🧭 Already installed | [Use it](#use-it) |
+| ↩️ Return to the previous state | [Remove dashboard](#remove) |
+
+<a id="requirements"></a>
+
+## 📋 Requirements
 
 The T95 is running and you are logged in over SSH as a normal user.
 Complete [base setup and kernel holds](INSTALLATION.en.md) first.
@@ -31,7 +42,9 @@ launcher installs display packages.
 
 <a id="install-and-remove"></a>
 
-## Set up
+<a id="set-up"></a>
+
+## 🚀 Set up
 
 **On the T95, normal SSH user with `sudo`:**
 
@@ -43,7 +56,9 @@ Enter your T95 user's Linux password if asked. No letters or stars appear.
 **Success:** setup finishes with `Fertig.`. For errors, use
 [module help](TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails) first.
 
-## Verify success
+<a id="verify-success"></a>
+
+## ✅ Verify success
 
 **On the T95, normal SSH user:**
 
@@ -67,12 +82,16 @@ ssh alex@192.168.178.50
 [redacted example](images/t95-ssh-status-redacted.png) illustrates its layout;
 values and available drives vary.
 
-## Use it
+<a id="use-it"></a>
+
+## 🧭 Use it
 
 The dashboard appears automatically at later SSH logins. It does not continuously
 refresh an already open window. Continue with normal shell commands after the display.
 
-## Remove
+<a id="remove"></a>
+
+## ↩️ Remove
 
 Run this only to undo setup.
 
@@ -103,7 +122,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-t
 <details>
 <summary>Archive, technical details, and manual restoration</summary>
 
-## Archive and display contents
+<a id="archive-and-display-contents"></a>
+
+## 📦 Archive and display contents
 
 The **2026-10-16** archive at `server/ssh-dashboard/2026-10-16/` contains
 14 actual source files, SHA-256 hashes, and Unix modes from the running T95.
@@ -152,7 +173,9 @@ For later removal, instead of the local helper:
 sudo python3 server/setup/t95_setup.py dashboard remove
 ```
 
-## Manual restore alternative with preview
+<a id="manual-restore-alternative-with-preview"></a>
+
+## 🛠️ Manual restore alternative with preview
 
 This alternative is not an extra step after launcher installation. From the
 local repository root, preview **as normal user on the Linux PC or T95**:
@@ -197,7 +220,9 @@ Previous content/mode/ownership is restored; files newly introduced by the
 installation are removed. SSH need not restart; the next login runs MOTD.
 This manual tool uses its own backup location, separate from the new setup journal.
 
-## Requirements and limits
+<a id="requirements-and-limits"></a>
+
+## ℹ️ Requirements and limits
 
 The target requires Armbian with `/etc/armbian-release`, Bash, Python 3.9+,
 and standard SSH/PAM-MOTD integration. The reference already contains
@@ -218,7 +243,9 @@ are not installed. Recorded formatting quirks remain; the origin of a `28GB`
 line seen only in the private full capture was not identified and is not
 hardcoded by the restore tool.
 
-## Verification
+<a id="verification"></a>
+
+## 🧪 Verification
 
 Temporary-filesystem checks covered preview, byte/mode-exact installation,
 idempotence, rollback, rejected redirected targets, rejected modified

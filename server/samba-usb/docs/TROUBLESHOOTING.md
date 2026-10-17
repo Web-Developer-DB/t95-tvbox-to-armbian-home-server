@@ -1,4 +1,20 @@
-# Troubleshooting
+<a id="troubleshooting"></a>
+
+# 🛟 Troubleshooting
+
+**Deutsch** | [English](TROUBLESHOOTING.en.md)
+
+> [!NOTE]
+> **Technische Diagnose auf der T95.** Beginne als Einsteiger mit der [einfachen USB-Fehlerhilfe](../../../docs/TROUBLESHOOTING.md#usb-laufwerk-fehlt-oder-ist-belegt). Die Beispiele hier erfordern den tatsächlichen Benutzer sowie passende Geräte-, Mount- und Freigabenamen; Hook-Tests verändern Usershares.
+
+| Dein Symptom | Hier beginnen |
+| --- | --- |
+| 📂 USB gemountet, Freigabe fehlt | [Event und Dienst prüfen](#usb-wird-gemountet-aber-keine-samba-freigabe-erscheint) |
+| 🔁 Doppelte Freigabe | [Mountpunkte vergleichen](#doppelte-extern-usb-n-freigabe) |
+| 🛠️ Befehle im Skript fehlen | [PATH prüfen](#command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts) |
+| 🔒 Laufwerk belegt | [DeviceBusy untersuchen](#devicebusy-beim-auswerfen) |
+| 🔌 Laufwerk kommt sofort zurück | [udiskie beim Auswurf prüfen](#gerät-wird-direkt-nach-unmount-wieder-gemountet) |
+| ✅ Auswurf kontrollieren | [Mount, Freigabe und Gerät prüfen](#auswurf-erfolgreich-prüfen) |
 
 Die Befehle verwenden die anonymisierten Shell-Variablen `$T95_USER` und
 `$T95_UID`. Vor dem Test setzen:
@@ -8,7 +24,9 @@ export T95_USER=serveruser
 export T95_UID="$(id -u "$T95_USER")"
 ```
 
-## USB wird gemountet, aber keine Samba-Freigabe erscheint
+<a id="usb-wird-gemountet-aber-keine-samba-freigabe-erscheint"></a>
+
+## 📂 USB wird gemountet, aber keine Samba-Freigabe erscheint
 
 ```bash
 sudo -u $T95_USER net usershare list
@@ -24,7 +42,9 @@ sudo -u $T95_USER /usr/local/bin/t95-usb-share \
   device_mounted /dev/sda1 /media/$T95_USER/NAME LABEL UUID
 ```
 
-## Doppelte `Extern-USB-N`-Freigabe
+<a id="doppelte-extern-usb-n-freigabe"></a>
+
+## 🔁 Doppelte `Extern-USB-N`-Freigabe
 
 Prüfen, ob mehrere Shares auf denselben Pfad zeigen:
 
@@ -36,7 +56,9 @@ done
 
 Die Referenzversion von `t95-usb-share` ist idempotent und darf denselben Mountpunkt nicht doppelt veröffentlichen.
 
-## `command not found` für rm/logger/head/sync innerhalb eines Skripts
+<a id="command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts"></a>
+
+## 🛠️ `command not found` für rm/logger/head/sync innerhalb eines Skripts
 
 Prüfen, ob die Shell-Systemvariable `PATH` überschrieben wurde:
 
@@ -47,7 +69,9 @@ grep -n '\bPATH\b' /usr/local/bin/usb-eject
 
 `PATH` darf nur der Kommando-Suchpfad sein. Für Dateipfade Namen wie `SAVED_PATH` verwenden.
 
-## `DeviceBusy` beim Auswerfen
+<a id="devicebusy-beim-auswerfen"></a>
+
+## 🔒 `DeviceBusy` beim Auswerfen
 
 ```bash
 fuser -vm /media/$T95_USER/MOUNTNAME
@@ -62,11 +86,15 @@ sudo smbcontrol smbd close-share SHARENAME
 
 Die Referenzversion von `usb-eject` führt diesen Schritt automatisch aus.
 
-## Gerät wird direkt nach Unmount wieder gemountet
+<a id="gerät-wird-direkt-nach-unmount-wieder-gemountet"></a>
+
+## 🔌 Gerät wird direkt nach Unmount wieder gemountet
 
 `udiskie` darf während der Unmount/Power-Off-Sequenz nicht weiterlaufen. Die Referenzversion von `usb-eject` stoppt den User-Service temporär und startet ihn anschließend wieder.
 
-## Auswurf erfolgreich prüfen
+<a id="auswurf-erfolgreich-prüfen"></a>
+
+## ✅ Auswurf erfolgreich prüfen
 
 ```bash
 findmnt /media/$T95_USER/MOUNTNAME

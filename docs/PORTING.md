@@ -1,4 +1,8 @@
-# H616-TV-Box portieren: sicherer Bring-up-Pfad
+<a id="h616-tv-box-portieren-sicherer-bring-up-pfad"></a>
+
+# 🧭 H616-TV-Box portieren: sicherer Bring-up-Pfad
+
+**Deutsch** | [English](PORTING.en.md)
 
 Diese Anleitung ist für Entwickler mit einer ähnlichen, nicht exakt getesteten
 H616-TV-Box. Das v1.0.1-Image ist ausschließlich für
@@ -22,7 +26,9 @@ H616-TV-Box. Das v1.0.1-Image ist ausschließlich für
 | 7 | Kernel und DTB | Kernel erreicht Rootfs | [DTB](DTB_PORTING.md) |
 | 8 | Netzwerk und Dienste | PHY, DHCP, SSH | erst danach Samba |
 
-## Öffentliche Buildkette
+<a id="öffentliche-buildkette"></a>
+
+## 🛠️ Öffentliche Buildkette
 
 ```bash
 bash build/setup-h616-porting-host.sh --check

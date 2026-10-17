@@ -1,4 +1,6 @@
-# Complete guide: Samba + dynamic USB shares on T95/Armbian
+<a id="complete-guide-samba--dynamic-usb-shares-on-t95armbian"></a>
+
+# 📚 Complete guide: Samba + dynamic USB shares on T95/Armbian
 
 [Deutsch](SAMBA-USB-SETUP.md) | **English**
 
@@ -7,7 +9,19 @@ Use the installation script in [../README.en.md](../README.en.md) for the
 normal supported path; use this document to understand, audit, adapt, or
 restore the components.
 
-## 1. Target design
+| Component | Purpose and detail section |
+| --- | --- |
+| 📂 Samba | [Fixed share and usershares](#4-samba-configuration) |
+| 🔌 UDisks + Polkit + udiskie | [Mount permissions and user service](#5-udisks-polkit-and-udiskie-service) |
+| ⚙️ Event hook + usb-eject | [Dynamic shares and safe eject](#6-dynamic-share-and-eject-scripts) |
+| ✅ Validation | [Check the configured system](#7-validation) |
+| 🛟 Understand errors | [Common failure patterns](#8-common-failure-patterns) |
+
+**Run on:** the T95, using an existing account and `sudo` for administration. Configuration blocks are templates; historical failure examples are explanatory.
+
+<a id="1-target-design"></a>
+
+## 🎯 1. Target design
 
 The running Armbian T95 publishes a fixed internal `T95-DATA` share and one
 dynamic Samba usershare for each mounted USB/SSD filesystem. UDisks2 performs
@@ -20,14 +34,18 @@ There is deliberately no static `[USB]` share. Per-volume shares correctly
 show capacity/free space and make safe eject targetable. The preferred client
 entry point is `smb://<SERVER-IP>/`.
 
-## 2. Verified server state
+<a id="2-verified-server-state"></a>
+
+## 🔎 2. Verified server state
 
 The reference is T95 `H616-T95MAX-AXP313A-V3.0`, Armbian 26.8.4/Debian 13,
 kernel 6.18, `end0` Ethernet with DHCP, and an optional ext4 eMMC data mount at
 `/srv/T95-DATA`. eMMC is a data medium here, not a supported Armbian boot
 device. Ensure Linux, SD boot, Ethernet, and SSH work before installing Samba.
 
-## 3. Packages and account
+<a id="3-packages-and-account"></a>
+
+## 📦 3. Packages and account
 
 Install the package set used by the restore script:
 
@@ -57,7 +75,9 @@ sudo install -d -o "$T95_USER" -g "$T95_USER" -m 2770 /srv/T95-DATA/Share
 When the data path is on eMMC, mount it permanently before this step and verify
 with `findmnt`; do not format/partition eMMC from this module.
 
-## 4. Samba configuration
+<a id="4-samba-configuration"></a>
+
+## 📂 4. Samba configuration
 
 Use `config/samba/smb.conf.fragment` as the known reference. It configures
 standalone Samba, SMB2 minimum protocol, usershares below
@@ -72,7 +92,9 @@ sudo systemctl enable --now smbd nmbd
 Back up an existing `/etc/samba/smb.conf` before replacement. Do not create a
 static `[USB]` share.
 
-## 5. UDisks, Polkit, and udiskie service
+<a id="5-udisks-polkit-and-udiskie-service"></a>
+
+## 🔌 5. UDisks, Polkit, and udiskie service
 
 Install `config/polkit/50-t95-udisks.rules` as
 `/etc/polkit-1/rules.d/50-t95-udisks.rules`. Copy
@@ -94,7 +116,9 @@ sudo -u "$T95_USER" XDG_RUNTIME_DIR="/run/user/$T95_UID" \
 The service's pre-start hook runs `t95-usb-share startup` to restore valid
 usershares after service restart.
 
-## 6. Dynamic share and eject scripts
+<a id="6-dynamic-share-and-eject-scripts"></a>
+
+## ⏏️ 6. Dynamic share and eject scripts
 
 Install `scripts/t95-usb-share` and `scripts/usb-eject` as
 `/usr/local/bin/t95-usb-share` and `/usr/local/bin/usb-eject`, mode `0755`.
@@ -108,7 +132,9 @@ share connections, runs `sync`, unmounts all device partitions, removes state
 only after success, calls UDisks power-off, then restarts udiskie. Use the
 share name, not a guessed `/dev/sdX`.
 
-## 7. Validation
+<a id="7-validation"></a>
+
+## ✅ 7. Validation
 
 ```bash
 sudo testparm -s
@@ -124,7 +150,9 @@ authenticated client connection at `smb://<SERVER-IP>/`, upload/download a
 small file, then eject it using `sudo usb-eject SHARENAME`. Confirm the mount,
 usershare, and physical device have disappeared; reinserting recreates it.
 
-## 8. Common failure patterns
+<a id="8-common-failure-patterns"></a>
+
+## 🛟 8. Common failure patterns
 
 | Symptom | First check | Relevant fix |
 | --- | --- | --- |
@@ -137,7 +165,9 @@ usershare, and physical device have disappeared; reinserting recreates it.
 See [TROUBLESHOOTING.en.md](TROUBLESHOOTING.en.md) for commands and recovery
 details.
 
-## 9. Security and publication
+<a id="9-security-and-publication"></a>
+
+## 🔒 9. Security and publication
 
 Do not publish Samba passwords, `passdb.tdb`, `/etc/shadow`, private SSH keys,
 complete system images, local UART captures, or personal configuration. The
@@ -145,7 +175,9 @@ module templates contain no Samba credentials; `smbpasswd` creates them only
 on the target T95. Verify `MANIFEST.sha256` after checkout and regenerate it
 after intentional public module changes.
 
-## 10. Restore limits
+<a id="10-restore-limits"></a>
+
+## ↩️ 10. Restore limits
 
 The script backs up an existing Samba configuration as
 `/etc/samba/smb.conf.before-t95.<TIMESTAMP>`. Restore a selected file with

@@ -1,4 +1,6 @@
-# File sharing and USB drives on the T95
+<a id="file-sharing-and-usb-drives-on-the-t95"></a>
+
+# 📂 File sharing and USB drives on the T95
 
 <a id="t95-samba--usb-automount"></a>
 
@@ -15,11 +17,21 @@ The recommended fixed **`T95-DATA` share uses the system SD** at
 `/srv/t95-sd-data/Share`, independently of the USB shares.
 Internal eMMC is not formatted or configured.
 
-[Set up](#set-up-file-sharing) · [Open files](#client-and-vlc-access) · [Eject USB](#safely-eject-usb-storage)
+| Your goal | Go here |
+| --- | --- |
+| 🚀 Set up once | [Requirements](#requirements) → [Set up file sharing](#set-up-file-sharing) |
+| 📂 Open and save files | [Connect PC, phone, or VLC](#client-and-vlc-access) |
+| 🔌 Unplug a USB drive | [Safely eject that drive](#safely-eject-usb-storage) |
+| ↩️ Restore configuration | [Undo setup](#undo-setup) |
 
 [Base installation](../../docs/INSTALLATION.en.md#7-set-up-file-sharing) · [Daily use](../../docs/DAILY_USE.en.md) · [Troubleshooting](../../docs/TROUBLESHOOTING.en.md)
 
-## Requirements
+> [!TIP]
+> **Set up once, then use USB storage day to day.** Supported drives are mounted and shared individually without manual setup. Always [eject safely](#safely-eject-usb-storage) before unplugging.
+
+<a id="requirements"></a>
+
+## 📋 Requirements
 
 - T95 runs from the verified SD and you are logged in over SSH as a normal user.
 - [Kernel/DTB holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates) are enabled.
@@ -34,7 +46,9 @@ A [full SD backup](../../docs/BACKUP.en.md) is optional.
 
 <a id="quick-start-reproducible-restore"></a>
 
-## Set up file sharing
+<a id="set-up-file-sharing"></a>
+
+## 🚀 Set up file sharing
 
 Run installation commands **on the T95**, not the PC, in the same SSH window.
 Install Git first if it is missing:
@@ -96,7 +110,9 @@ Samba password. Write and reopen a small test file; no USB drive is needed yet.
 **File writes and reads work?** Continue with everyday controls below.
 For errors, [check shares and authentication](../../docs/TROUBLESHOOTING.en.md#share-missing-or-access-denied).
 
-## Client and VLC access
+<a id="client-and-vlc-access"></a>
+
+## 📂 Client and VLC access
 
 Use the server root first:
 
@@ -110,7 +126,9 @@ Linux file managers use `smb://<SERVER-IP>/`; Windows Explorer uses
 share and selects a compatible file. Use the Samba password of `T95_USER`; no
 guest account or clear-text credentials are configured.
 
-## Safely eject USB storage
+<a id="safely-eject-usb-storage"></a>
+
+## ⏏️ Safely eject USB storage
 
 An attached USB drive appears as a separate share. Close client files and
 finish transfers before unplugging it. List USB shares first:
@@ -172,7 +190,9 @@ State is removed only after successful unmount, then udiskie starts again.
 
 </details>
 
-## Undo setup
+<a id="undo-setup"></a>
+
+## ↩️ Undo setup
 
 An earlier Samba configuration can be restored from its backup. The module
 has no full uninstaller for all packages and user files. Instructions are
@@ -185,14 +205,18 @@ All following shell commands run on the T95 as your normal SSH user; `sudo`
 is shown where needed. Customization examples replace the recommended
 installation command; they are not additional required steps.
 
-## Result at a glance
+<a id="result-at-a-glance"></a>
+
+## 📊 Result at a glance
 
 The server root `smb://<SERVER-IP>/` displays both the fixed
 `T95-DATA` share and all currently attached USB/SSD shares. There is purposely
 no static `[USB]` aggregate share: every volume retains its real capacity and
 free-space information.
 
-## What does the Samba module set up?
+<a id="what-does-the-samba-module-set-up"></a>
+
+## ⚙️ What does the Samba module set up?
 
 The module turns the running T95 into an authenticated file server:
 
@@ -313,7 +337,9 @@ backups are kept at `/etc/samba/smb.conf.before-t95.*`.
 
 Use [safe USB ejection](#safely-eject-usb-storage) to select the actual drive.
 
-## Verify after installation
+<a id="verify-after-installation"></a>
+
+## ✅ Verify after installation
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -350,7 +376,9 @@ A labelled volume uses a sanitized label such as `SunDiskUSB`; unlabelled
 media use `Extern-USB-1`, then `Extern-USB-2`, and so on. A published mount
 point must not create a duplicate share.
 
-## Restore configuration and keep secrets private
+<a id="restore-configuration-and-keep-secrets-private"></a>
+
+## 🔒 Restore configuration and keep secrets private
 
 Before replacement, the script saves `/etc/samba/smb.conf.before-t95.<TIMESTAMP>`.
 Restore a selected backup using `cp -a`, then `testparm -s` and restart `smbd`.
@@ -362,7 +390,9 @@ Never publish Samba passwords, `/var/lib/samba/private/passdb.tdb`,
 or personal configuration. Templates contain no Samba password; `smbpasswd`
 sets it only on the T95.
 
-## Further documentation
+<a id="further-documentation"></a>
+
+## 📚 Further documentation
 
 - [Complete technical setup](docs/SAMBA-USB-SETUP.en.md)
 - [Restore checklist](docs/RESTORE-CHECKLIST.en.md)

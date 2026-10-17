@@ -1,4 +1,6 @@
-# Bluetooth made simple
+<a id="bluetooth-made-simple"></a>
+
+# 🎧 Bluetooth made simple
 
 [Deutsch](BLUETOOTH_CHEATSHEET.md) | **English**
 
@@ -6,7 +8,9 @@ This guide covers everyday headphone and Bluetooth-speaker tasks on your
 T95. You do not need to memorize Linux commands. The box must already be set
 up and the [Bluetooth player installed](../server/bluetooth/README.en.md).
 
-## Start here: connect to the box
+<a id="start-here-connect-to-the-box"></a>
+
+## 🔑 Start here: connect to the box
 
 1. Search your computer's application menu for **Terminal** and open it.
    On Windows, search the Start menu for **PowerShell** instead.
@@ -45,29 +49,34 @@ Using these examples:
   [first-time pairing](#connect-new-headphones-for-the-first-time) explicitly
   keeps you inside that program.
 
-## Choose your task
+<a id="choose-your-task"></a>
+
+## 🧭 Choose your task
 
 | You want to | Go here |
 | --- | --- |
-| See devices remembered by the box | [Show paired devices](#show-paired-devices) |
-| See what is connected now | [Show connected devices](#show-connected-devices) |
-| Use familiar headphones again | [Reconnect and choose music output](#reconnect-and-choose-music-output) |
-| End today's connection | [Disconnect only](#disconnect-only) |
-| Use headphones with a PC or phone | [Pause box Bluetooth](#use-headphones-with-a-pc-or-phone) |
-| Find new headphones | [Discover and pair](#connect-new-headphones-for-the-first-time) |
-| Delete headphones from the box | [Forget a device permanently](#forget-a-device-permanently) |
-| Solve a problem | [If something goes wrong](#if-something-goes-wrong) |
+| 💾 See devices remembered by the box | [Show paired devices](#show-paired-devices) |
+| 🔗 See what is connected now | [Show connected devices](#show-connected-devices) |
+| 🎧 Use familiar headphones again | [Reconnect and choose music output](#reconnect-and-choose-music-output) |
+| ⏸️ End today's connection | [Disconnect only](#disconnect-only) |
+| 💻 Use headphones with a PC or phone | [Pause box Bluetooth](#use-headphones-with-a-pc-or-phone) |
+| 🔎 Find new headphones | [Discover and pair](#connect-new-headphones-for-the-first-time) |
+| 🗑️ Delete headphones from the box | [Forget a device permanently](#forget-a-device-permanently) |
+| 🛟 Solve a problem | [If something goes wrong](#if-something-goes-wrong) |
 
-**Paired** means the box remembers the device. **Connected** means the radio
-link is active now. Paired headphones can be switched off and still appear
-in the remembered-device list.
+| Term | Meaning |
+| --- | --- |
+| 💾 **Paired** | The box remembers the device even when the headphones are off. |
+| 🔗 **Connected** | The radio link is active now. For music, also select the headphones as the output. |
 
 Paused Bluetooth with `t95-bluetooth off`? Run `t95-bluetooth on` before
 listing, discovering, or connecting devices again.
 
 <a id="3-manage-known-devices"></a>
 
-## Show paired devices
+<a id="show-paired-devices"></a>
+
+## 💾 Show paired devices
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -91,7 +100,9 @@ not the T95's IP address.
 Use [discovery and pairing](#connect-new-headphones-for-the-first-time) for
 new headphones. For an error message instead, open [help](#if-something-goes-wrong).
 
-## Show connected devices
+<a id="show-connected-devices"></a>
+
+## 🔗 Show connected devices
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -131,7 +142,9 @@ bluetoothctl info "$BT_GERAET"
 | `Connected: no` | Device is disconnected now |
 | `Trusted: yes` | The box trusts this configured device |
 
-## Reconnect and choose music output
+<a id="reconnect-and-choose-music-output"></a>
+
+## 🎧 Reconnect and choose music output
 
 1. Power on the headphones. Disconnect their phone/PC connection there to
    make them available to the box.
@@ -176,7 +189,9 @@ The prompted address is remembered only for subsequent commands in this
 window. When you open a new connection to the box later, start this section
 again at step 1. Remembered headphones do not need pairing again.
 
-## Disconnect only
+<a id="disconnect-only"></a>
+
+## ⏸️ Disconnect only
 
 Use this when the box should keep remembering the headphones. Find their
 address under [connected devices](#show-connected-devices).
@@ -201,7 +216,9 @@ reconnect, use the Bluetooth pause below.
 
 <a id="4-use-headphones-on-the-pc-instead"></a>
 
-## Use headphones with a PC or phone
+<a id="use-headphones-with-a-pc-or-phone"></a>
+
+## 💻 Use headphones with a PC or phone
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -219,7 +236,9 @@ turns radio back on. After reboot, radio state may differ; turn it on if needed.
 
 <a id="2-pair-new-headphones"></a>
 
-## Connect new headphones for the first time
+<a id="connect-new-headphones-for-the-first-time"></a>
+
+## 🔎 Connect new headphones for the first time
 
 ### A. Prepare the headphones
 
@@ -302,7 +321,9 @@ The helper confirms the choice and initially stops playback. Prepare music
 using the [player guide](MUSIKPLAYER_CHEATSHEET.en.md). Next time,
 [reconnect](#reconnect-and-choose-music-output) is sufficient.
 
-## Forget a device permanently
+<a id="forget-a-device-permanently"></a>
+
+## 🗑️ Forget a device permanently
 
 Use this when the box should stop remembering those headphones.
 Find their address under [paired devices](#show-paired-devices) first.
@@ -329,7 +350,9 @@ separate [uninstallation guide](../server/bluetooth/README.en.md#remove-the-play
 
 <a id="5-no-devices-discovered"></a>
 
-## If something goes wrong
+<a id="if-something-goes-wrong"></a>
+
+## 🛟 If something goes wrong
 
 | You see | What to do |
 | --- | --- |

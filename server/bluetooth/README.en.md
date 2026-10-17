@@ -1,4 +1,6 @@
-# Bluetooth and music player on the T95
+<a id="bluetooth-and-music-player-on-the-t95"></a>
+
+# 🎧 Bluetooth and music player on the T95
 
 [Deutsch](README.md) | **English**
 
@@ -6,7 +8,16 @@ Send music from the box to headphones or Bluetooth speakers.
 **Already installed?** Open [Bluetooth made simple](../../docs/BLUETOOTH_CHEATSHEET.en.md)
 for showing, connecting, disconnecting, and forgetting devices.
 
-## Requirements
+| Your goal | Go here |
+| --- | --- |
+| 🚀 Set up the player once | [Requirements](#requirements) → [Install](#install) |
+| 🎧 Everyday headphone tasks | [Find, connect, and disconnect devices](../../docs/BLUETOOTH_CHEATSHEET.en.md) |
+| 🎵 Play your first music | [Transfer and play a file](../../docs/MUSIKPLAYER_CHEATSHEET.en.md) |
+| ↩️ Disable the player | [Removal and retained data](#remove-the-player-and-disable-bluetooth) |
+
+<a id="requirements"></a>
+
+## 📋 Requirements
 
 For initial setup, the T95 must be running and you must be logged in as your
 normal user. [Open your connection to the box](../../docs/BLUETOOTH_CHEATSHEET.en.md#start-here-connect-to-the-box).
@@ -23,7 +34,9 @@ For missing tools, see [preparation](../setup/README.en.md#requirements).
 The matching T95 uses built-in Bluetooth; this setup does not require an
 additional USB Bluetooth adapter.
 
-## Install
+<a id="install"></a>
+
+## 🚀 Install
 
 The download commands and installer obtain their files from `main`.
 
@@ -43,7 +56,9 @@ installs the player. After `Fertig.`, setup is finished; continue with
 selected and paired deliberately. Music is expected in your user's `Music`
 folder; existing music is preserved.
 
-## Verify setup
+<a id="verify-setup"></a>
+
+## ✅ Verify setup
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -82,7 +97,9 @@ Usernames, UIDs, and Bluetooth addresses are not copied from the reference box.
 
 </details>
 
-## Pair headphones and choose their output
+<a id="pair-headphones-and-choose-their-output"></a>
+
+## 🎧 Pair headphones and choose their output
 
 <a id="1-scan-the-bluetooth-surroundings"></a><a id="2-select-and-connect-the-desired-audio-device"></a><a id="3-use-the-connected-headphones-as-the-audio-output"></a><a id="4-reconnect-already-paired-headphones"></a><a id="5-temporarily-disconnect"></a><a id="6-permanently-remove-pairing-from-the-t95"></a>
 
@@ -99,14 +116,18 @@ without prior terminal knowledge.
 | End one connection | [Disconnect, keep pairing](../../docs/BLUETOOTH_CHEATSHEET.en.md#disconnect-only) |
 | Delete one device from the box | [Forget a device](../../docs/BLUETOOTH_CHEATSHEET.en.md#forget-a-device-permanently) |
 
-## Temporarily use the headphones on a PC
+<a id="temporarily-use-the-headphones-on-a-pc"></a>
+
+## ⏸️ Temporarily use the headphones on a PC
 
 `t95-bluetooth off` on the T95 pauses all box Bluetooth radio. Pairings are
 remembered; the home server and Samba keep running. The
 [everyday guide](../../docs/BLUETOOTH_CHEATSHEET.en.md#use-headphones-with-a-pc-or-phone)
 walks through switching to a PC/phone and back.
 
-## Remove the player and disable Bluetooth
+<a id="remove-the-player-and-disable-bluetooth"></a>
+
+## ↩️ Remove the player and disable Bluetooth
 
 This section removes the player setup. To disconnect or forget only one
 headphone device, use [device controls](../../docs/BLUETOOTH_CHEATSHEET.en.md#disconnect-only).
@@ -158,7 +179,9 @@ overwrites those edits with the saved files.
 <details>
 <summary>Technical background and test evidence</summary>
 
-## Technical requirements and evidence
+<a id="technical-requirements-and-evidence"></a>
+
+## 🛠️ Technical requirements and evidence
 
 - Target: Armbian 26.8.4/Debian Trixie, `6.18.48-current-sunxi64`, T95 H616,
   AXP313A, internal BCM43342. Board, firmware, and UART driver path are checked.

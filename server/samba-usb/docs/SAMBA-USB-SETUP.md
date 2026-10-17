@@ -1,4 +1,8 @@
-# Vollständige Dokumentation: Samba + dynamische USB-Freigaben auf T95/Armbian
+<a id="vollständige-dokumentation-samba--dynamische-usb-freigaben-auf-t95armbian"></a>
+
+# 📚 Vollständige Dokumentation: Samba + dynamische USB-Freigaben auf T95/Armbian
+
+**Deutsch** | [English](SAMBA-USB-SETUP.en.md)
 
 Stand des Referenzaufbaus: **2026-09-16**
 
@@ -20,7 +24,19 @@ export T95_UID="$(id -u "$T95_USER")"
 `$T95_USER` oder `/media/$T95_USER` sind Vorlagen; das Restore-Skript erzeugt
 die konkreten Werte automatisch.
 
-## 1. Zielbild
+| Baustein | Aufgabe und Detailabschnitt |
+| --- | --- |
+| 📂 Samba | [Feste Freigabe und Usershares](#5-samba-konfiguration) |
+| 🔌 UDisks + Polkit | [Mounten und Auswerfen erlauben](#7-udiskspolkit-usb-ohne-passwort-mounten-und-auswerfen) |
+| ⚙️ udiskie + Event-Hook | [Benutzerdienst](#8-udiskie-als-dauerhafter-benutzer-service) und [dynamische Freigaben](#10-dynamisches-share-skript) |
+| ⏏️ usb-eject | [Sicher auswerfen](#11-sicheres-auswerfen) und [Auswurf prüfen](#12-vollständig-validierter-auswurf-test) |
+| 🛟 Fehler verstehen | [Gefundene und behobene Fehler](#14-gefundene-und-behobene-fehler) |
+
+**Ausführungsort:** T95, vorhandenes Benutzerkonto; Verwaltungsaktionen mit `sudo`. Konfigurationsblöcke sind Vorlagen, historische Fehlerbeispiele nur zur Erklärung.
+
+<a id="1-zielbild"></a>
+
+## 🎯 1. Zielbild
 
 Der T95 dient als leichter Datei- und Medienserver. Samba stellt die interne Datenpartition sowie wechselbare USB-Datenträger im LAN bereit.
 
@@ -54,7 +70,9 @@ Das war funktional, hatte aber einen wichtigen Nachteil: Die freie/gesamte Kapaz
 
 Die endgültige Lösung verwendet deshalb pro USB-Dateisystem einen eigenen Samba-Usershare. Dadurch verweist jede Freigabe direkt auf den echten Mountpunkt des Datenträgers.
 
-## 2. Relevanter Serverzustand
+<a id="2-relevanter-serverzustand"></a>
+
+## 🔎 2. Relevanter Serverzustand
 
 Getestete Installation:
 
@@ -88,7 +106,9 @@ Samba veröffentlicht nur:
 /srv/T95-DATA/Share
 ```
 
-## 3. Benötigte Pakete
+<a id="3-benötigte-pakete"></a>
+
+## 📦 3. Benötigte Pakete
 
 ```bash
 sudo apt update
@@ -111,7 +131,9 @@ logger
 systemctl --user
 ```
 
-## 4. Samba-Benutzer und Usershare-Gruppe
+<a id="4-samba-benutzer-und-usershare-gruppe"></a>
+
+## 🔑 4. Samba-Benutzer und Usershare-Gruppe
 
 Der Linux-Benutzer `$T95_USER` muss existieren.
 
@@ -146,7 +168,9 @@ sudo chown root:sambashare /var/lib/samba/usershares
 sudo chmod 1770 /var/lib/samba/usershares
 ```
 
-## 5. Samba-Konfiguration
+<a id="5-samba-konfiguration"></a>
+
+## 📂 5. Samba-Konfiguration
 
 Die wichtigen Einstellungen in `/etc/samba/smb.conf` sind:
 
@@ -192,7 +216,9 @@ smb://<SERVER-IP>/
 
 NetBIOS-Namensauflösung kann je nach Client/Netzwerk unzuverlässig sein. Der Zugriff per IP war in dieser Installation zuverlässig.
 
-## 6. Interne T95-DATA-Berechtigungen
+<a id="6-interne-t95-data-berechtigungen"></a>
+
+## 💽 6. Interne T95-DATA-Berechtigungen
 
 Empfohlene Rechte:
 
@@ -203,7 +229,9 @@ sudo chmod 2770 /srv/T95-DATA/Share
 
 Der Backup-Bereich bleibt lokal und wird nicht als Samba-Share angelegt.
 
-## 7. UDisks/Polkit: USB ohne Passwort mounten und auswerfen
+<a id="7-udiskspolkit-usb-ohne-passwort-mounten-und-auswerfen"></a>
+
+## 🔌 7. UDisks/Polkit: USB ohne Passwort mounten und auswerfen
 
 Datei:
 
@@ -221,7 +249,9 @@ Die Regel erlaubt ausschließlich dem Benutzer `$T95_USER` die für UDisks benö
 
 Hinweis: `polkit.service` ist auf Debian typischerweise statisch. Ein `systemctl enable polkit` ist daher nicht nötig. Polkit wird über D-Bus aktiviert.
 
-## 8. udiskie als dauerhafter Benutzer-Service
+<a id="8-udiskie-als-dauerhafter-benutzer-service"></a>
+
+## ⚙️ 8. udiskie als dauerhafter Benutzer-Service
 
 Damit der Automounter auch ohne interaktive SSH-/Desktop-Sitzung läuft:
 
@@ -284,7 +314,9 @@ sudo -u $T95_USER XDG_RUNTIME_DIR=/run/user/$T95_UID \
   systemctl --user status udiskie.service --no-pager
 ```
 
-## 9. udiskie Event-Hook
+<a id="9-udiskie-event-hook"></a>
+
+## 🔗 9. udiskie Event-Hook
 
 Datei:
 
@@ -312,7 +344,9 @@ Datei:
 
 Bei `device_mounted` bekommt das Share-Skript u. a. Gerät, Mountpunkt, Label und UUID übergeben.
 
-## 10. Dynamisches Share-Skript
+<a id="10-dynamisches-share-skript"></a>
+
+## 📂 10. Dynamisches Share-Skript
 
 Installationspfad:
 
@@ -372,7 +406,9 @@ Getestet:
 
 Dadurch entsteht kein falsches `Extern-USB-2` für dasselbe physische Medium.
 
-## 11. Sicheres Auswerfen
+<a id="11-sicheres-auswerfen"></a>
+
+## ⏏️ 11. Sicheres Auswerfen
 
 Installationspfad:
 
@@ -439,7 +475,9 @@ smbcontrol smbd close-share Extern-USB-1
 
 Das trennt nur aktive Verbindungen zu dieser Freigabe. Andere Samba-Freigaben bleiben bestehen.
 
-## 12. Vollständig validierter Auswurf-Test
+<a id="12-vollständig-validierter-auswurf-test"></a>
+
+## ✅ 12. Vollständig validierter Auswurf-Test
 
 Vorher:
 
@@ -489,7 +527,9 @@ udiskie mountet automatisch
 -> Samba-Usershare wird automatisch neu angelegt
 ```
 
-## 13. Unterstützte Namenslogik
+<a id="13-unterstützte-namenslogik"></a>
+
+## 🏷️ 13. Unterstützte Namenslogik
 
 ### Medium mit Label
 
@@ -529,7 +569,9 @@ Extern-USB-2
 
 Wird `Extern-USB-1` entfernt, kann die Nummer später wieder frei werden.
 
-## 14. Gefundene und behobene Fehler
+<a id="14-gefundene-und-behobene-fehler"></a>
+
+## 🛟 14. Gefundene und behobene Fehler
 
 ### Fehler 1: Endlosschleife bei Usershare-Prüfung
 
@@ -600,7 +642,9 @@ Eine frühe Version löschte Usershare und State **vor** dem Unmount. Schlug das
 
 Endgültige Lösung: Usershare und State erst **nach erfolgreichem Unmount** löschen.
 
-## 15. Tests nach Wiederherstellung
+<a id="15-tests-nach-wiederherstellung"></a>
+
+## ✅ 15. Tests nach Wiederherstellung
 
 Samba:
 
@@ -651,7 +695,9 @@ sudo -u $T95_USER net usershare list
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
 ```
 
-## 16. Client-Zugriff
+<a id="16-client-zugriff"></a>
+
+## 🖥️ 16. Client-Zugriff
 
 Bevorzugt:
 
@@ -669,7 +715,9 @@ smb://<SERVER-IP>/Extern-USB-1
 
 Die Serverwurzel ist jedoch die gewünschte Standardbedienung, weil alle aktuell verfügbaren Freigaben dort zusammen angezeigt werden.
 
-## 17. Was nicht ins öffentliche GitHub-Repository gehört
+<a id="17-was-nicht-ins-öffentliche-github-repository-gehört"></a>
+
+## 🔒 17. Was nicht ins öffentliche GitHub-Repository gehört
 
 Nicht committen:
 

@@ -1,4 +1,6 @@
-# Hilfe bei Installations- und Alltagsproblemen
+<a id="hilfe-bei-installations--und-alltagsproblemen"></a>
+
+# 🛟 Hilfe bei Installations- und Alltagsproblemen
 
 **Deutsch** | [English](TROUBLESHOOTING.en.md)
 
@@ -8,18 +10,23 @@ Platine nicht mit dem T95-Image weiterarbeiten: [Hardware prüfen](HARDWARE_IDEN
 
 [Alltag](DAILY_USE.md) · [Zur Installation](INSTALLATION.md) · [Startseite](../README.md)
 
+> [!TIP]
+> **Beginne mit deinem sichtbaren Problem.** Wähle unten das Symptom und prüfe zuerst die einfachen Ursachen. Der jeweilige Abschnitt nennt PC oder T95 als Ausführungsort.
+
 | Symptom | Einstieg |
 | --- | --- |
-| Werkzeug fehlt oder Download bricht ab | [PC-Vorbereitung](#werkzeug-fehlt) |
-| Kartenleser erscheint nicht in der Auswahl | [SD-Erkennung](#sd-karte-wird-nicht-erkannt) |
-| Box hat keine Adresse im Router | [Netzwerk und Start](#keine-ip-adresse) |
-| SSH meldet Timeout, Ablehnung oder Schlüsselwarnung | [SSH-Zugang](#ssh-anmeldung-scheitert) |
-| Kernelversion oder Paketsperren passen nicht | [Kernelstand](#kernelstand-weicht-ab) |
-| Freigabe fehlt oder Passwort wird abgelehnt | [Samba](#freigabe-fehlt-oder-zugriff-wird-abgelehnt) |
-| USB-Laufwerk fehlt oder lässt sich nicht auswerfen | [USB](#usb-laufwerk-fehlt-oder-ist-belegt) |
-| Dashboard oder Bluetooth funktioniert nicht | [Zusatzmodule](#dashboard-oder-bluetooth-funktioniert-nicht) |
+| 🛠️ Werkzeug fehlt oder Download bricht ab | [PC-Vorbereitung](#werkzeug-fehlt) |
+| 💾 Kartenleser erscheint nicht in der Auswahl | [SD-Erkennung](#sd-karte-wird-nicht-erkannt) |
+| 🌐 Box hat keine Adresse im Router | [Netzwerk und Start](#keine-ip-adresse) |
+| 🔑 SSH meldet Timeout, Ablehnung oder Schlüsselwarnung | [SSH-Zugang](#ssh-anmeldung-scheitert) |
+| 🔒 Kernelversion oder Paketsperren passen nicht | [Kernelstand](#kernelstand-weicht-ab) |
+| 📂 Freigabe fehlt oder Passwort wird abgelehnt | [Samba](#freigabe-fehlt-oder-zugriff-wird-abgelehnt) |
+| 🔌 USB-Laufwerk fehlt oder lässt sich nicht auswerfen | [USB](#usb-laufwerk-fehlt-oder-ist-belegt) |
+| 🧩 Dashboard oder Bluetooth funktioniert nicht | [Zusatzmodule](#dashboard-oder-bluetooth-funktioniert-nicht) |
 
-## Werkzeug fehlt
+<a id="werkzeug-fehlt"></a>
+
+## 🛠️ Werkzeug fehlt
 
 **Linux-PC · normaler Benutzer mit `sudo`.** Bei `Werkzeug fehlt: ...` zuerst
 die [PC-Pakete installieren](INSTALLATION.md#1-hardware-und-pc-vorbereiten).
@@ -35,7 +42,9 @@ Fehlermeldungen zum TLS-Zertifikat nicht mit `curl -k` umgehen.
 **Ergebnis:** Alle Werkzeuge sind vorhanden und das Image besteht die
 Prüfsummenprüfung. Danach den abgebrochenen Installationsweg fortsetzen.
 
-## SD-Karte wird nicht erkannt
+<a id="sd-karte-wird-nicht-erkannt"></a>
+
+## 💾 SD-Karte wird nicht erkannt
 
 **Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
@@ -57,7 +66,9 @@ kein Ziel. `/dev/sdX` ist ein Platzhalter und kein tatsächlicher Gerätename.
 **Ergebnis:** Größe und Gerätekennung passen zur Karte. Im Installer erneut
 wählen; nach jedem Einstecken kann sich der Gerätename ändern.
 
-## Keine IP-Adresse
+<a id="keine-ip-adresse"></a>
+
+## 🌐 Keine IP-Adresse
 
 **Ort: Box, Router und PC; noch keine Änderungen am Bootsystem.**
 
@@ -80,7 +91,9 @@ zurückkehren. Bleibt die Box ohne Adresse, den
 Verdrahtung müssen zuerst nach [UART-Anleitung](UART_BRINGUP.md) geprüft sein.
 Die eMMC wird zur Reparatur nicht gelöscht.
 
-## SSH-Anmeldung scheitert
+<a id="ssh-anmeldung-scheitert"></a>
+
+## 🔑 SSH-Anmeldung scheitert
 
 **Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
@@ -121,7 +134,9 @@ Deaktivierung der SSH-Schlüsselprüfung ist kein Reparaturschritt.
 **Ergebnis:** Login als vorgesehener Benutzer und `sudo -v` funktionieren.
 Passwörter, private Schlüssel und unbereinigte Diagnoseausgaben nicht veröffentlichen.
 
-## Kernelstand weicht ab
+<a id="kernelstand-weicht-ab"></a>
+
+## 🔒 Kernelstand weicht ab
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -140,7 +155,9 @@ zufälligen DTB-Wechsel durchführen. Ein bekannt funktionierendes
 oder eine separate SD aus dem geprüften Release vorbereiten. Vorher benötigte
 Dateien sichern.
 
-## Freigabe fehlt oder Zugriff wird abgelehnt
+<a id="freigabe-fehlt-oder-zugriff-wird-abgelehnt"></a>
+
+## 📂 Freigabe fehlt oder Zugriff wird abgelehnt
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -179,7 +196,9 @@ Für weitere Prüfungen siehe [Samba-Modul](../server/samba-usb/README.md#nach-d
 Eine Neuinstallation des Moduls ersetzt dessen Samba-Konfiguration und ist
 kein erster Diagnoseschritt.
 
-## USB-Laufwerk fehlt oder ist belegt
+<a id="usb-laufwerk-fehlt-oder-ist-belegt"></a>
+
+## 🔌 USB-Laufwerk fehlt oder ist belegt
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -220,7 +239,9 @@ wiederholen. Kein erzwungenes Aushängen und kein Abziehen während Schreibzugri
 erzeugt die Freigabe erneut. Weitere Diagnose:
 [Samba-/USB-Fehlerhilfe](../server/samba-usb/docs/TROUBLESHOOTING.md).
 
-## Dashboard oder Bluetooth funktioniert nicht
+<a id="dashboard-oder-bluetooth-funktioniert-nicht"></a>
+
+## 🧩 Dashboard oder Bluetooth funktioniert nicht
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 

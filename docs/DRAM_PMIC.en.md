@@ -1,4 +1,6 @@
-# DRAM and PMIC: determine values, do not guess
+<a id="dram-and-pmic-determine-values-do-not-guess"></a>
+
+# ⚡ DRAM and PMIC: determine values, do not guess
 
 [Deutsch](DRAM_PMIC.md) | **English**
 
@@ -9,6 +11,8 @@ In the stable tested `v1.0.1` release, both SPL and the Linux DTB set the
 `dcdc3` minimum and maximum to `1360000` µV. This prevents Linux from lowering
 the DRAM rail to 1.20 V after successful SPL training. The change was verified
 with complete cold boots on two T95 boxes with the same PCB revision.
+
+[🧭 Porting path](PORTING.en.md) · [🧩 Continue to DTB](DTB_PORTING.en.md)
 
 | T95 parameter | Verify for other boards |
 | --- | --- |

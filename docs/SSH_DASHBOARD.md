@@ -1,4 +1,6 @@
-# SSH-Dashboard einrichten
+<a id="ssh-dashboard-einrichten"></a>
+
+# 📊 SSH-Dashboard einrichten
 
 <a id="ssh-anmeldedashboard-archivieren-und-wiederherstellen"></a>
 
@@ -8,20 +10,28 @@ Das per Skript installierte, benutzerdefinierte Dashboard ergänzt die
 Armbian-Anmeldeanzeige um zusätzliche Speicherinformationen. Bei jeder
 SSH-Anmeldung siehst du neben Auslastung und Arbeitsspeicher:
 
-- **`SD-Writes`:** die seit dem letzten Systemstart auf die SD-Karte geschriebene
-  Datenmenge. Nach einem Neustart beginnt dieser Zähler von vorn.
-- **Laufwerksübersicht:** die eingebundenen Dateisysteme, einschließlich der
-  angeschlossenen und gemounteten USB-Sticks, SSDs und externen Festplatten.
-  Pro Eintrag erscheinen Gerätename (etwa `sda1`), Gesamtgröße, freier Platz,
-  prozentuale Belegung und Einhängepfad (Mountpfad). Ab 90 % Belegung wird der
-  Prozentwert rot hervorgehoben.
+| Anzeige | Was du daran erkennst |
+| --- | --- |
+| ✍️ **`SD-Writes`** | Seit dem letzten Start auf die SD geschriebene Datenmenge; beginnt nach einem Neustart von vorn. |
+| 🔌 **Laufwerke** | Eingebundene Dateisysteme, auch gemountete USB-Sticks, SSDs und Festplatten: Gerätename (z. B. `sda1`) und Einhängepfad (Mountpfad). |
+| 📊 **Speicherplatz** | Gesamtgröße, freier Platz und Belegung pro Dateisystem; **ab 90 %** wird der Prozentwert rot. |
 
 Die Übersicht wird bei einer neuen SSH-Anmeldung aktualisiert. Du brauchst
 keine zusätzliche Weboberfläche zu öffnen.
 
-[Einrichten](#einrichten) · [Prüfen](#erfolg-prüfen) · [Entfernen](#entfernen) · [Alltag](DAILY_USE.md)
+> [!TIP]
+> **Schon installiert?** Öffne eine neue SSH-Verbindung, um die Werte neu einzulesen. Ein bereits offenes Fenster aktualisiert sich nicht automatisch.
 
-## Voraussetzungen
+| Dein Ziel | Hier geht es weiter |
+| --- | --- |
+| 🚀 Zum ersten Mal einrichten | [Voraussetzungen](#voraussetzungen) → [Einrichten](#einrichten) |
+| ✅ Anzeige kontrollieren | [Status prüfen und neu anmelden](#erfolg-prüfen) |
+| 🧭 Bereits installiert | [Im Alltag benutzen](#benutzen) |
+| ↩️ Vorherigen Stand zurückholen | [Dashboard entfernen](#entfernen) |
+
+<a id="voraussetzungen"></a>
+
+## 📋 Voraussetzungen
 
 Die T95 läuft und du bist als normaler Benutzer per SSH angemeldet.
 [Grundsystem und Kernel-Sperre](INSTALLATION.md) müssen abgeschlossen sein.
@@ -35,7 +45,9 @@ am **17.10.2026** als funktionsfähig bestätigt. [Testnachweise](VALIDATION.md#
 <a id="ein-befehl-wiederherstellung"></a>
 <a id="github-starter-mit-installation-und-deinstallation"></a>
 
-## Einrichten
+<a id="einrichten"></a>
+
+## 🚀 Einrichten
 
 **Auf der T95, normaler SSH-Benutzer mit `sudo`:**
 
@@ -48,7 +60,9 @@ Es erscheinen keine Zeichen oder Sternchen. **Ergebnis:** Der Starter beendet
 die Einrichtung mit `Fertig.`. Bei einem Fehler zuerst die
 [Modul-Fehlerhilfe](TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) öffnen.
 
-## Erfolg prüfen
+<a id="erfolg-prüfen"></a>
+
+## ✅ Erfolg prüfen
 
 **Auf der T95, normaler SSH-Benutzer:**
 
@@ -73,13 +87,17 @@ ssh alex@192.168.178.50
 [Eine bereinigte Beispielansicht](images/t95-ssh-status-redacted.png) zeigt den
 Aufbau; Zahlen und angezeigte Laufwerke unterscheiden sich je nach Box.
 
-## Benutzen
+<a id="benutzen"></a>
+
+## 🧭 Benutzen
 
 Das Dashboard erscheint automatisch bei späteren SSH-Anmeldungen. Ein laufendes
 Fenster wird dadurch nicht ständig aktualisiert. Für normales Arbeiten kannst
 du nach der Anzeige deine weiteren Befehle eingeben.
 
-## Entfernen
+<a id="entfernen"></a>
+
+## ↩️ Entfernen
 
 Nur ausführen, wenn du die Einrichtung zurücknehmen möchtest.
 
@@ -198,7 +216,9 @@ sudo python3 tools/restore-ssh-dashboard.py --rollback "$T95_DASHBOARD_BACKUP"
 
 Dabei werden vorher vorhandene Dateien einschließlich Modus und Eigentümer wiederhergestellt; durch die Installation neu angelegte Dateien werden entfernt. Andere Dateien bleiben erhalten. Ein SSH-Neustart ist nicht erforderlich. Die nächste SSH-Anmeldung erzeugt das Dashboard über die vorhandene PAM-MOTD-Einbindung.
 
-## Voraussetzungen und Grenzen
+<a id="voraussetzungen-und-grenzen"></a>
+
+## ℹ️ Voraussetzungen und Grenzen
 
 Das Ziel benötigt eine bestehende Armbian-Installation mit `/etc/armbian-release`, Bash, Python 3.9 oder neuer und der üblichen SSH/PAM-MOTD-Einbindung. Im Ausgangssystem enthält `/etc/pam.d/sshd` bereits `pam_motd.so motd=/run/motd.dynamic` und `pam_motd.so noupdate`; diese Authentifizierungsdatei wird vom Werkzeug nicht verändert. Bei abweichenden Distributionen muss die Einbindung vorher separat geprüft werden.
 
@@ -208,7 +228,9 @@ Die archivierte Konfiguration deaktiviert `clear`, verbirgt typische virtuelle N
 
 Andere, bereits zusätzlich installierte MOTD-Module werden nicht entfernt. Die nicht ausgeführte Sicherungskopie `95-sd-card-stats+`, Betriebssystem-/Boardidentitäten und Laufzeit-Caches werden nicht installiert. Der vollständige private Ausgangsmitschnitt bleibt getrennt vom GitHub-Quellsatz. Die im Mitschnitt sichtbaren Prozent-/Escape-Formatierungsauffälligkeiten sind als Ausgangsbefund erhalten. Eine zusätzliche Zeile `28GB` war nur im vollständigen Anmeldemitschnitt sichtbar; ihre Quelle ist in den gesicherten MOTD-Modulen nicht identifiziert. Sie ist kein fest hinterlegter Bestandteil des Restore-Werkzeugs.
 
-## Durchgeführte Prüfung
+<a id="durchgeführte-prüfung"></a>
+
+## 🧪 Durchgeführte Prüfung
 
 Auf einem temporären Test-Dateisystem geprüft: unverändernde Vorschau, Installation aller 14 Dateien bytegleich zu den erfassten Originalen und mit korrekten Modi, erneutes Anwenden ohne Änderung, vollständige Rücknahme, Ablehnung umgeleiteter Ziele, Ablehnung veränderter Nutzdaten und automatische Rücknahme bei unterbrochener Installation. Bash-Syntax und Manifest-Prüfsummen werden zusätzlich geprüft.
 

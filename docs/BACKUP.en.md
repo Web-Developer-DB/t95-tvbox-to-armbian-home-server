@@ -1,4 +1,6 @@
-# Complete Armbian SD backup
+<a id="complete-armbian-sd-backup"></a>
+
+# 🗂️ Complete Armbian SD backup
 
 [Deutsch](BACKUP.md) | **English**
 
@@ -20,7 +22,15 @@ Keep all PC steps in the same terminal window so selected paths remain available
 
 [Back to installation](INSTALLATION.en.md#6-back-up-the-base-system) · [Help](TROUBLESHOOTING.en.md)
 
-## Requirements
+| Your goal | Where and how? |
+| --- | --- |
+| 🗂️ Back up the configured SD | [Requirements](#requirements) → [1. Shut down](#1-shut-down-the-box) → steps 2–5 on the Linux PC |
+| ↩️ Recover the saved state | [Restore a card](#restore-a-card) on the Linux PC; overwrites the target |
+| 🛟 Start fresh without a full SD backup | [Base installation](INSTALLATION.en.md); keep personal files separately |
+
+<a id="requirements"></a>
+
+## 📋 Requirements
 
 - Shut down the T95 before removing its SD card.
 - Use a Linux PC with a USB card reader and a **different** destination drive.
@@ -32,7 +42,9 @@ Keep all PC steps in the same terminal window so selected paths remain available
 
 <a id="create-the-backup"></a>
 
-## 1. Shut down the box
+<a id="1-shut-down-the-box"></a>
+
+## ⏻ 1. Shut down the box
 
 **On the T95, normal SSH user with `sudo`:**
 
@@ -42,7 +54,9 @@ sudo poweroff
 
 Wait until the box is fully off, then move its SD to the PC's USB card reader.
 
-## 2. Identify the source card
+<a id="2-identify-the-source-card"></a>
+
+## 🔎 2. Identify the source card
 
 **On the Linux PC, normal user:**
 
@@ -64,7 +78,9 @@ Choose the **whole card**, not a partition. Check `TYPE=disk`, `TRAN=usb`,
 export SD_DEVICE=/dev/sdX
 ```
 
-## 3. Unmount partitions
+<a id="3-unmount-partitions"></a>
+
+## ⏏️ 3. Unmount partitions
 
 Release `v1.0.1` has one ext4 partition. Check your card's layout first.
 
@@ -76,7 +92,9 @@ sudo umount "${SD_DEVICE}1"
 
 “Not mounted” is harmless. Unmount additional partitions if your actual card has any.
 
-## 4. Create the compressed backup
+<a id="4-create-the-compressed-backup"></a>
+
+## 🗂️ 4. Create the compressed backup
 
 **On the Linux PC, normal user with `sudo`; install zstd once:**
 
@@ -108,7 +126,9 @@ sudo dd if="$SD_DEVICE" bs=16M iflag=fullblock status=progress \
 This reads the entire SD card without writing to it or to T95 eMMC.
 It may take a long time. Stop here if the command reports an error.
 
-## 5. Verify and retain the backup
+<a id="5-verify-and-retain-the-backup"></a>
+
+## ✅ 5. Verify and retain the backup
 
 **On the Linux PC, normal user:**
 
@@ -132,7 +152,9 @@ Both checks must succeed: no zstd error, and a checksum result ending in `OK`.
 Keep the image, matching `.sha256` file, and original card's byte size together.
 Copy this complete backup set to a second protected drive.
 
-## Restore a card
+<a id="restore-a-card"></a>
+
+## ↩️ Restore a card
 
 Restoration erases the selected target card. Follow these steps only to replace
 an SD card or restore a saved system state.
@@ -240,7 +262,9 @@ while the T95 is off. Check DHCP and SSH using
 [installation](INSTALLATION.en.md#3-boot-the-box-and-find-its-network-address).
 UART is an additional diagnostic option for boot problems.
 
-## Recovery boundaries
+<a id="recovery-boundaries"></a>
+
+## ℹ️ Recovery boundaries
 
 - The backup restores one point in time; separately back up changing data regularly.
 - A smaller or defective replacement card cannot hold the image.

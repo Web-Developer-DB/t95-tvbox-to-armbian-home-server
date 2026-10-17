@@ -1,4 +1,6 @@
-# Host-side build chain
+<a id="host-side-build-chain"></a>
+
+# 🛠️ Host-side build chain
 
 [Deutsch](README.md) | **English**
 
@@ -13,7 +15,17 @@ The current hardware-validated boot path is described in
 evidence. That status describes the host build at that time, not the later
 hardware test of the assembled image.
 
-## Public porting start for other H616 boxes
+| Your task | Starting point |
+| --- | --- |
+| 🧭 Bring up a different H616 board | [Public porting start](#public-porting-start-for-other-h616-boxes) and [bring-up path](../docs/PORTING.en.md) |
+| 🛠️ Construct the T95 release on the host | [Build sequence](#relevant-build-sequence); check private inputs and signing limits |
+| 🚀 Install a home server | [Installation guide](../docs/INSTALLATION.en.md); no custom build needed |
+
+**Run on:** the Linux PC, from the repository root, as a normal user; `sudo` only where shown. These examples create host files.
+
+<a id="public-porting-start-for-other-h616-boxes"></a>
+
+## 🧭 Public porting start for other H616 boxes
 
 Do not use the historical T95 assembly recipes for a different, similar H616
 board. The public starting path is entirely host-side, requires no private key,
@@ -38,7 +50,9 @@ Source commits and security boundaries are documented in
 [PORTING_SOURCES.en.md](PORTING_SOURCES.en.md) and
 [../docs/PORTING.en.md](../docs/PORTING.en.md).
 
-## Relevant build sequence
+<a id="relevant-build-sequence"></a>
+
+## 🛠️ Relevant build sequence
 
 ```bash
 export REPO=/path/to/t95-h616-axp313a-project
@@ -80,7 +94,9 @@ the TOC0 loader are documented in `docs/RELEASE.en.md`. The loader is based on
 U-Boot `v2024.04`/`25049ad560826f7dc1c4740883b0016014a59789` and TF-A
 `v2.10`/`b6c0948400594e3cc4dbb5a4ef04b815d2675808`.
 
-## Private signing key
+<a id="private-signing-key"></a>
+
+## 🔒 Private signing key
 
 `build/keys/` is never published. The existing TOC0 loader was signed with a
 local experimental key. This key is not required to use the supplied release
@@ -88,7 +104,9 @@ image and must not become part of a GitHub repository. A bit-identical rebuild
 of the signed binary is impossible without it. Do not use a replacement key
 without a separate analysis of the Secure Boot trust chain.
 
-## Historical diagnostic tools
+<a id="historical-diagnostic-tools"></a>
+
+## 🗃️ Historical diagnostic tools
 
 The remaining `build/build-t95-*.sh` scripts and notes document the gradual
 path through FEL, U-Boot, AC300, and older kernel experiments. They are not an

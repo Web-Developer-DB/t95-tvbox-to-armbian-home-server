@@ -1,4 +1,6 @@
-# Release guide: T95 H616 / AXP313A
+<a id="release-guide-t95-h616--axp313a"></a>
+
+# 📦 Release guide: T95 H616 / AXP313A
 
 [Deutsch](RELEASE.md) | **English**
 
@@ -9,7 +11,9 @@ Android eMMC. See [hardware photos](../README.en.md#hardware-photos).
 **For setup:** [step-by-step installation](INSTALLATION.en.md).
 This handbook covers release artifacts and maintenance.
 
-## Release identity
+<a id="release-identity"></a>
+
+## 📋 Release identity
 
 | Property | Value |
 |---|---|
@@ -38,7 +42,9 @@ disabled so these keys remain in use.
 matches SPL DRAM initialization and was verified by complete cold boots on two
 boxes with the exact PCB revision.
 
-## Verified status and boundaries
+<a id="verified-status-and-boundaries"></a>
+
+## ✅ Verified status and boundaries
 
 UART verified TOC0 SPL, 2 GiB DRAM, AXP313/AC300 pre-initialization, ext4 boot,
 kernel, systemd, `end0`, link, DHCP, and SSH. A RP2040-Zero 3.3 V TTL adapter
@@ -52,7 +58,9 @@ shutdown, SSH, and file-access testing. This does not guarantee other T95
 revisions, long-term operation, Wi-Fi, audio, remote control, HDMI server use,
 or kernel/bootloader updates.
 
-## Create public release assets
+<a id="create-public-release-assets"></a>
+
+## 📦 Create public release assets
 
 Only package a hardened image audited against its private source artifact. All
 commands operate on host files only and open no block device, FEL, or eMMC.
@@ -84,7 +92,9 @@ sha256sum -c SHA256SUMS
 xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 ```
 
-## Local personalization and SD writing
+<a id="local-personalization-and-sd-writing"></a>
+
+## 🔑 Local personalization and SD writing
 
 The public image has locked root and no password login before personalization.
 The installer asks twice for a nonempty personal password and writes only its
@@ -103,7 +113,9 @@ T95 eMMC nor FEL. After `ERFOLG`, insert SD only with the box fully off. Initial
 SSH login uses root and the locally chosen password; complete Armbian first-run
 setup and reconnect as a normal user afterward.
 
-## Protect kernel and DTB
+<a id="protect-kernel-and-dtb"></a>
+
+## 🔒 Protect kernel and DTB
 
 ```bash
 sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
@@ -123,7 +135,9 @@ sudo apt full-upgrade
 The hold protects this verified state; it does not replace security assessment
 or disable general Debian security updates.
 
-## Rebuild boundary
+<a id="rebuild-boundary"></a>
+
+## 🛠️ Rebuild boundary
 
 The source uses U-Boot `v2024.04`/`25049ad560826f7dc1c4740883b0016014a59789`
 and TF-A `v2.10`/`b6c0948400594e3cc4dbb5a4ef04b815d2675808`. The final TOC0

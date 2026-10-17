@@ -1,7 +1,13 @@
-# Hardware-Identifikation vor dem ersten Boottest
+<a id="hardware-identifikation-vor-dem-ersten-boottest"></a>
+
+# 🔎 Hardware-Identifikation vor dem ersten Boottest
+
+**Deutsch** | [English](HARDWARE_IDENTIFICATION.en.md)
 
 Fotografiere die geöffnete Platine bei gutem Licht und notiere den exakten
 PCB-Aufdruck. Bauteilmarkierungen sind wichtiger als Gehäusenamen.
+
+[🧭 Portierungspfad](PORTING.md) · [🔌 UART vorbereiten](UART_BRINGUP.md)
 
 | Bereich | Ermitteln | T95-Referenz | Nicht blind übernehmen |
 | --- | --- | --- | --- |

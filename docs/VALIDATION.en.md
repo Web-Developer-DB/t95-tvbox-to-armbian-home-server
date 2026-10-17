@@ -1,4 +1,6 @@
-# Public test matrix: stable tested T95 state
+<a id="public-test-matrix-stable-tested-t95-state"></a>
+
+# ✅ Public test matrix: stable tested T95 state
 
 [Deutsch](VALIDATION.md) | **English**
 
@@ -9,7 +11,12 @@ This summary contains generic results only. Raw UART logs, local IP and MAC
 addresses, router data, SD backups, and Android forensics stay outside the
 public repository.
 
-## Hardware and boot path
+> [!NOTE]
+> **Reading the results:** “passed” applies to the stated hardware and scope. Open fresh-installation and individual checks remain listed below; they are not implied to have passed.
+
+<a id="hardware-and-boot-path"></a>
+
+## 🔎 Hardware and boot path
 
 | Test | Result | Meaning |
 |---|---|---|
@@ -37,7 +44,9 @@ UART capture used an external
 [RP2040-Zero UART adapter project](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 at 3.3 V TTL and 115200 baud/8N1.
 
-## Hardening the public image
+<a id="hardening-the-public-image"></a>
+
+## 🔒 Hardening the public image
 
 | Offline check | Result |
 |---|---|
@@ -54,7 +63,9 @@ The result is a generic image that cannot be logged into directly. A local
 password hash is inserted before writing; that resulting copy is not a release
 asset.
 
-## Release files
+<a id="release-files"></a>
+
+## 📦 Release files
 
 | File | SHA-256 |
 |---|---|
@@ -67,7 +78,9 @@ The loader was compared at byte 8192 with the separate loader file. The
 release asset was compressed with `xz --check=sha256`; its six files are
 verified through `SHA256SUMS`.
 
-## Dashboard and Bluetooth
+<a id="dashboard-and-bluetooth"></a>
+
+## 🧩 Dashboard and Bluetooth
 
 **Verified and tested, confirmed on 2026-10-17.** The project maintainer
 personally tested the documented Bluetooth and dashboard steps and confirmed
@@ -90,7 +103,9 @@ Preserve the working production SD as recovery for these checks. The feedback
 does not specify a replacement SD or these individual checks, so they are
 tracked separately from the confirmed steps.
 
-## Optional future work
+<a id="optional-future-work"></a>
+
+## 🔭 Optional future work
 
 - Additional USB/SMB stress testing, cold boots, and long-term stability.
 - Wi-Fi, HDMI, other audio outputs, and infrared remote control.
@@ -101,7 +116,9 @@ The documented baseline may be described as a **stable tested home-server
 release** for the verified board. The open items are extensions, not known bugs
 in the accepted functional scope.
 
-## Installation guide acceptance
+<a id="installation-guide-acceptance"></a>
+
+## ✅ Installation guide acceptance
 
 **2026-10-17 status: open.** The reorganized guide received editorial/static
 checks; a full run of this exact user path on a separate SD is outstanding.

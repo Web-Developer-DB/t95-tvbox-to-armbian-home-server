@@ -1,4 +1,6 @@
-# Restore checklist
+<a id="restore-checklist"></a>
+
+# ↩️ Restore checklist
 
 [Deutsch](RESTORE-CHECKLIST.md) | **English**
 
@@ -11,6 +13,19 @@ username and `/media/<username>` before applying them. Copying unchanged
 Polkit/Samba templates does not expand shell variables. For this eMMC path,
 `/srv/T95-DATA` must already be mounted persistently and verified.
 
+| Part | Check |
+| --- | --- |
+| 🔎 Before starting | Existing user, verified eMMC mount, replaced template placeholders |
+| 📦 Steps 1–5 | Packages, Samba account, group, data path, and share configuration |
+| ⚙️ Steps 6–11 | Helpers, Polkit, udiskie, and persistent user service |
+| ✅ Step 12 | Configuration, client access, USB automount, and safe eject |
+
+<a id="prepare"></a>
+
+## 📋 Prepare
+
+**On the T95 as administrator; adapt technical examples before running them.**
+
 These examples assume an existing Linux user;
 replace `serveruser` with the desired name:
 
@@ -18,6 +33,10 @@ replace `serveruser` with the desired name:
 export T95_USER=serveruser
 export T95_UID="$(id -u "$T95_USER")"
 ```
+
+<a id="check-manual-restoration"></a>
+
+## ✅ Check manual restoration
 
 1. Install `samba`, `samba-common-bin`, `udisks2`, `udiskie`,
    `dbus-user-session`, `polkitd`, `exfatprogs`, and `ntfs-3g`.

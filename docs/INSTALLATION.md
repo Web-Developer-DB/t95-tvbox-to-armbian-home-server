@@ -1,4 +1,6 @@
-# Home-Server installieren
+<a id="home-server-installieren"></a>
+
+# 🚀 Home-Server installieren
 
 **Deutsch** | [English](INSTALLATION.en.md)
 
@@ -7,11 +9,23 @@ Terminalbedienung und die Verbindung zur Box werden erklärt. Verwende den
 empfohlenen Skriptweg; die [manuelle Alternative](#manuelle-alternative-zur-sd-vorbereitung)
 ersetzt ausschließlich die SD-Vorbereitung in Schritt 2.
 
-**Ablauf:** Hardware → Linux-PC → SD → SSH → Kernel-Schutz → optionales Backup → Samba.
+| Phase | Wo? | Ziel |
+| --- | --- | --- |
+| 🔎 [1. Vorbereiten](#1-hardware-und-pc-vorbereiten) | Box + Linux-PC | Platine, Werkzeug und Platz prüfen |
+| 💾 [2. SD erstellen](#2-persönliche-sd-karte-erstellen) | Linux-PC | Eigenes Passwort und geprüfte SD |
+| 🌐 [3–4. Verbinden](#3-box-starten-und-netzwerkadresse-finden) | Box, Router + PC | IP finden und Benutzer einrichten |
+| 🔒 [5. Kernel schützen](#5-kernel-und-dtb-vor-updates-schützen) | T95 per SSH | Kernel und DTB vor Updates sperren |
+| 🗂️ [6. Optional sichern](#6-grundsystem-sichern) | T95 → Linux-PC | Eingerichteten SD-Stand aufbewahren |
+| 📂 [7–8. Nutzen](#7-dateiserver-einrichten) | T95 + Client-PC | Dateizugriff und optionale Erweiterungen |
 
 [Startseite](../README.md) · [Hilfe nach Symptomen](TROUBLESHOOTING.md)
 
-## So benutzt du die Befehle
+> [!TIP]
+> **Zum ersten Mal im Terminal?** Lies zuerst „So benutzt du die Befehle“. Danach die nummerierten Schritte der Reihe nach ausführen. Die manuelle SD-Vorbereitung ist eine Alternative, kein Zusatzschritt.
+
+<a id="so-benutzt-du-die-befehle"></a>
+
+## ⌨️ So benutzt du die Befehle
 
 Öffne auf dem Linux-PC im Anwendungsmenü **Terminal**. Einen Befehl kopierst
 du in das Fenster und führst ihn mit **Enter** aus. Auswendiglernen ist nicht nötig.
@@ -28,7 +42,9 @@ du in das Fenster und führst ihn mit **Enter** aus. Auswendiglernen ist nicht n
 - Bei Fehlern vor dem Weiterarbeiten die verlinkte Hilfe lesen. Zusammengehörige
   Schritte im selben Fenster ausführen, damit Adressen und Pfade erhalten bleiben.
 
-## 1. Hardware und PC vorbereiten
+<a id="1-hardware-und-pc-vorbereiten"></a>
+
+## 🔎 1. Hardware und PC vorbereiten
 
 **Ort: ausgeschaltete Box und Linux-PC, noch keine Schreibbefehle.**
 
@@ -86,7 +102,9 @@ Nach dem SD-Schreiben kann der SSH-Client auch unter Windows verwendet werden.
 UART/FEL benötigen jeweils gesonderten USB-/Seriellzugriff; siehe
 [UART-Anleitung](UART_BRINGUP.md). macOS ist für die PC-Skripte nicht dokumentiert.
 
-## 2. Persönliche SD-Karte erstellen
+<a id="2-persönliche-sd-karte-erstellen"></a>
+
+## 💾 2. Persönliche SD-Karte erstellen
 
 > [!CAUTION]
 > Das ausgewählte USB-Medium wird vollständig überschrieben. Ziehe andere
@@ -126,7 +144,9 @@ nicht erforderlich. Das Passwort der wiederverwendeten Kopie bleibt dasselbe.
 > nicht unverändert mit einem anderen Flashprogramm auf SD. Persönliche
 > `.img`- und `.t95-provisioned-manifest`-Dateien bleiben privat.
 
-## 3. Box starten und Netzwerkadresse finden
+<a id="3-box-starten-und-netzwerkadresse-finden"></a>
+
+## 🌐 3. Box starten und Netzwerkadresse finden
 
 **Ort: ausgeschaltete T95 und PC im selben Heimnetz.**
 
@@ -211,7 +231,9 @@ Die Stromversorgung bleibt dabei angeschlossen.
 Bleibt die Box unsichtbar, zuerst [Netzwerk und Start prüfen](TROUBLESHOOTING.md#keine-ip-adresse).
 Hintergrund: [offizielle Nmap-Anleitung zur Gerätesuche](https://nmap.org/book/man-host-discovery.html).
 
-## 4. Erstes SSH-Login und normalen Benutzer einrichten
+<a id="4-erstes-ssh-login-und-normalen-benutzer-einrichten"></a>
+
+## 🔑 4. Erstes SSH-Login und normalen Benutzer einrichten
 
 **Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
@@ -283,7 +305,9 @@ nach dessen Linux-Passwort. Bei Problemen [Zugang prüfen](TROUBLESHOOTING.md#ss
 | `sudo` als normaler Benutzer | dasselbe Linux-Passwort |
 | Dateifreigaben über Samba | eigenes Samba-Passwort, später im Samba-Setup gesetzt |
 
-## 5. Kernel und DTB vor Updates schützen
+<a id="5-kernel-und-dtb-vor-updates-schützen"></a>
+
+## 🔒 5. Kernel und DTB vor Updates schützen
 
 > [!CAUTION]
 > Führe vor diesem Schritt kein `apt upgrade`, `apt full-upgrade` oder
@@ -306,7 +330,9 @@ Hardwareprüfung; siehe [Release-Handbuch](RELEASE.md#den-geprüften-kernel-dtb-
 
 <a id="6-grundsystem-sichern"></a>
 
-## 6. Grundsystem sichern (optional)
+<a id="6-grundsystem-sichern-optional"></a>
+
+## 🗂️ 6. Grundsystem sichern (optional)
 
 **Dieser Schritt ist freiwillig.** Du kannst das Grundsystem über diese
 Installationsanleitung jederzeit neu auf SD installieren und Konten sowie
@@ -338,7 +364,9 @@ starten und wie in Schritt 4 als normaler Benutzer per SSH anmelden.
 
 </details>
 
-## 7. Dateiserver einrichten
+<a id="7-dateiserver-einrichten"></a>
+
+## 📂 7. Dateiserver einrichten
 
 **T95 · normaler SSH-Benutzer mit `sudo`:** Folge jetzt der Anleitung
 [Dateiserver einrichten](../server/samba-usb/README.md#schnellstart-reproduzierbare-wiederherstellung).
@@ -356,7 +384,9 @@ Benutzernamen und dem Samba-Passwort an und schreibe und lies eine Testdatei.
 Die Adresse ist ein Dateimanagerpfad, kein Terminalbefehl.
 Bei Problemen [Freigaben und Anmeldung prüfen](TROUBLESHOOTING.md#freigabe-fehlt-oder-zugriff-wird-abgelehnt).
 
-## 8. Alltag und optionale Erweiterungen
+<a id="8-alltag-und-optionale-erweiterungen"></a>
+
+## 🧭 8. Alltag und optionale Erweiterungen
 
 Die [Alltagsanleitung](DAILY_USE.md) erklärt erneutes Anmelden, Neustart und Herunterfahren.
 
@@ -374,7 +404,9 @@ Ein vollständiger Durchlauf genau dieser neu geordneten Anleitung auf einer
 separaten SD ist noch offen. Die [Abnahme-Checkliste](VALIDATION.md#abnahme-der-installationsanleitung)
 benennt die erforderlichen Nachweise.
 
-## Manuelle Alternative zur SD-Vorbereitung
+<a id="manuelle-alternative-zur-sd-vorbereitung"></a>
+
+## 🛠️ Manuelle Alternative zur SD-Vorbereitung
 
 **Linux-PC · normaler Benutzer mit `sudo` für den Schreibschritt.**
 Diese Alternative ersetzt **nur Schritt 2**. Verwende sie bei einer neuen

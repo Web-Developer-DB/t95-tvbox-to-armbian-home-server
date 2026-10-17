@@ -1,4 +1,6 @@
-# Installation and daily-use troubleshooting
+<a id="installation-and-daily-use-troubleshooting"></a>
+
+# 🛟 Installation and daily-use troubleshooting
 
 [Deutsch](TROUBLESHOOTING.md) | **English**
 
@@ -8,18 +10,23 @@ Stop using the T95 image for an unknown/different board:
 
 [Installation](INSTALLATION.en.md) · [Everyday use](DAILY_USE.en.md) · [Home](../README.en.md)
 
+> [!TIP]
+> **Start with the problem you see.** Choose a symptom below and check simple causes first. Each section identifies whether to work on the PC or T95.
+
 | Symptom | Start here |
 | --- | --- |
-| Missing command or failed download | [PC preparation](#missing-tool) |
-| Card reader absent from the selection | [SD detection](#sd-card-not-detected) |
-| No router address for the box | [Network and boot](#no-ip-address) |
-| SSH timeout, rejection, or changed key | [SSH access](#ssh-login-fails) |
-| Unexpected kernel or missing holds | [Kernel state](#kernel-version-mismatch) |
-| Missing share or rejected password | [Samba](#share-missing-or-access-denied) |
-| USB drive absent or busy | [USB](#usb-drive-missing-or-busy) |
-| Dashboard or Bluetooth problem | [Optional modules](#dashboard-or-bluetooth-fails) |
+| 🛠️ Missing command or failed download | [PC preparation](#missing-tool) |
+| 💾 Card reader absent from the selection | [SD detection](#sd-card-not-detected) |
+| 🌐 No router address for the box | [Network and boot](#no-ip-address) |
+| 🔑 SSH timeout, rejection, or changed key | [SSH access](#ssh-login-fails) |
+| 🔒 Unexpected kernel or missing holds | [Kernel state](#kernel-version-mismatch) |
+| 📂 Missing share or rejected password | [Samba](#share-missing-or-access-denied) |
+| 🔌 USB drive absent or busy | [USB](#usb-drive-missing-or-busy) |
+| 🧩 Dashboard or Bluetooth problem | [Optional modules](#dashboard-or-bluetooth-fails) |
 
-## Missing tool
+<a id="missing-tool"></a>
+
+## 🛠️ Missing tool
 
 **Linux PC · normal user with `sudo`.** For `Werkzeug fehlt: ...`, install the
 [PC packages](INSTALLATION.en.md#1-prepare-the-hardware-and-pc).
@@ -34,7 +41,9 @@ different names, and downloads again. Do not bypass TLS errors with `curl -k`.
 **Expected:** all tools exist and image verification passes. Resume the
 installation path that stopped.
 
-## SD card not detected
+<a id="sd-card-not-detected"></a>
+
+## 💾 SD card not detected
 
 **On the Linux PC, normal user; `sudo` where shown:**
 
@@ -56,7 +65,9 @@ target. `/dev/sdX` is a placeholder, not an actual device path.
 **Expected:** size and identity match the card. Reselect it in the installer;
 device names can change whenever storage is reconnected.
 
-## No IP address
+<a id="no-ip-address"></a>
+
+## 🌐 No IP address
 
 **Location: box, router, and PC; no boot-system changes yet.**
 
@@ -74,7 +85,9 @@ with the address. If none appears, [diagnose boot over UART](BOOT_TROUBLESHOOTIN
 after verifying the adapter and wiring using [UART setup](UART_BRINGUP.en.md).
 Do not erase eMMC to repair booting.
 
-## SSH login fails
+<a id="ssh-login-fails"></a>
+
+## 🔑 SSH login fails
 
 **On the Linux PC, normal user; `sudo` where shown:**
 
@@ -114,7 +127,9 @@ Reconnect and check the confirmed key. Do not disable SSH host-key checking.
 **Expected:** login as the intended user and `sudo -v` work. Keep passwords,
 private keys, and unredacted diagnostic output private.
 
-## Kernel version mismatch
+<a id="kernel-version-mismatch"></a>
+
+## 🔒 Kernel version mismatch
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -130,7 +145,9 @@ For a different kernel, stop updates and avoid arbitrary DTB changes.
 [Restore a working SD backup](BACKUP.en.md#restore-a-card) or prepare a
 separate card from the verified release. Preserve needed files beforehand.
 
-## Share missing or access denied
+<a id="share-missing-or-access-denied"></a>
+
+## 📂 Share missing or access denied
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -167,7 +184,9 @@ problems, continue below.
 for further checks. Reinstalling the module replaces its Samba configuration;
 it is not the first diagnostic step.
 
-## USB drive missing or busy
+<a id="usb-drive-missing-or-busy"></a>
+
+## 🔌 USB drive missing or busy
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -206,7 +225,9 @@ during writes.
 **Expected:** unplug only after successful ejection. Reinsertion creates the
 share again. Further help: [Samba/USB troubleshooting](../server/samba-usb/docs/TROUBLESHOOTING.en.md).
 
-## Dashboard or Bluetooth fails
+<a id="dashboard-or-bluetooth-fails"></a>
+
+## 🧩 Dashboard or Bluetooth fails
 
 **On the T95, normal SSH user; `sudo` where shown:**
 

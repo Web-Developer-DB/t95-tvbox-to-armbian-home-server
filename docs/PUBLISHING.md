@@ -1,11 +1,23 @@
-# GitHub-Veröffentlichungscheckliste
+<a id="github-veröffentlichungscheckliste"></a>
+
+# 🌐 GitHub-Veröffentlichungscheckliste
 
 **Deutsch** | [English](PUBLISHING.en.md)
 
 Diese Checkliste trennt öffentliche Werkzeuge und Dokumentation von
 forensischen Daten, privaten Artefakten und personalisierten Systemzuständen.
 
-## Öffentlicher Quellsatz
+| Phase | Was muss feststehen? |
+| --- | --- |
+| 🔎 [Quellsatz prüfen](#öffentlicher-quellsatz) | Nur freigegebene Dateien; private Images und Schlüssel bleiben lokal |
+| 📦 [Release-Assets prüfen](#freigabe-des-release-assets) | Härtung, Prüfsummen und dokumentierte Hardwareabnahme |
+| 🌐 [Veröffentlichen](#dokumentation-und-releasebeschreibung-synchron-veröffentlichen) | Merge → öffentliche Links prüfen → Release-Text übernehmen |
+
+**Ausführungsort:** Linux-PC, lokale Repository-Kopie; für Maintainer. Pfade und private Eingaben vor dem Ausführen anpassen.
+
+<a id="öffentlicher-quellsatz"></a>
+
+## 📁 Öffentlicher Quellsatz
 
 In ein neues, sauberes Repository gehören:
 
@@ -34,7 +46,9 @@ Benutzernamen, lokalen Projektpfade, Passwörter, private Schlüssel, SSH-
 Hostschlüssel, IP-/MAC-Aufzeichnungen oder personalisierte Image-Dateien
 enthalten sein.
 
-## Niemals veröffentlichen
+<a id="niemals-veröffentlichen"></a>
+
+## 🔒 Niemals veröffentlichen
 
 - `build/keys/`, `backups/`, `captures/`, `evidence/`, `Archiv/`, `.agents/`,
   `.codex/`, `AGENTS.md`, `T95_Armbian.txt` und private Laborjournale;
@@ -47,7 +61,9 @@ enthalten sein.
 Die `.gitignore` schützt vor üblichen Versehen, ersetzt aber nicht die
 Prüfung von `git status --ignored`.
 
-## Freigabe des Release-Assets
+<a id="freigabe-des-release-assets"></a>
+
+## ✅ Freigabe des Release-Assets
 
 1. Das gehärtete Artefakt gegen das private Quellartefakt auditieren:
 
@@ -81,7 +97,9 @@ Prüfung von `git status --ignored`.
    Weiterentwicklung und sind keine Voraussetzung für den stabil getesteten
    Grundstand.
 
-## Dokumentation und Releasebeschreibung synchron veröffentlichen
+<a id="dokumentation-und-releasebeschreibung-synchron-veröffentlichen"></a>
+
+## 🌐 Dokumentation und Releasebeschreibung synchron veröffentlichen
 
 Die Dokumentationsüberarbeitung wird auf dem bestehenden Arbeitsbranch geliefert.
 Merge und Änderung der öffentlichen Releasebeschreibung sind eigene Veröffentlichungsschritte.
@@ -107,7 +125,9 @@ Image-Assets, Release-Version und Image-Prüfsummen bleiben bei dieser
 Dokumentationsänderung erhalten. Bestätigte Modul-Funktionen und gesonderte
 Hardwareprüfungen in der Testmatrix getrennt dokumentieren.
 
-## Lizenz- und Upstream-Prüfung
+<a id="lizenz--und-upstream-prüfung"></a>
+
+## 📄 Lizenz- und Upstream-Prüfung
 
 Vor Veröffentlichung eine passende Lizenz auswählen und Lizenzpflichten von
 Armbian, Linux, TF-A, U-Boot und übernommenen Patchanteilen separat prüfen.

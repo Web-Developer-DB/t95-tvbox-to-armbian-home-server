@@ -1,4 +1,6 @@
-# Install the home server
+<a id="install-the-home-server"></a>
+
+# 🚀 Install the home server
 
 [Deutsch](INSTALLATION.md) | **English**
 
@@ -7,11 +9,23 @@ The steps explain terminal use and the connection to your box. Use the recommend
 [manual alternative](#manual-alternative-for-sd-preparation) replaces only
 step 2. Do not perform both paths in sequence.
 
-**Route:** hardware → Linux PC → SD → SSH → kernel holds → optional backup → Samba.
+| Phase | Where? | Goal |
+| --- | --- | --- |
+| 🔎 [1. Prepare](#1-prepare-the-hardware-and-pc) | Box + Linux PC | Check board, tools, and space |
+| 💾 [2. Create SD](#2-create-your-personal-sd-card) | Linux PC | Own password and verified SD |
+| 🌐 [3–4. Connect](#3-boot-the-box-and-find-its-network-address) | Box, router + PC | Find IP and create user |
+| 🔒 [5. Protect kernel](#5-protect-the-kernel-and-dtb-before-updates) | T95 over SSH | Hold kernel and DTB before updates |
+| 🗂️ [6. Optional backup](#6-back-up-the-base-system) | T95 → Linux PC | Preserve configured SD state |
+| 📂 [7–8. Use it](#7-set-up-file-sharing) | T95 + client PC | File access and optional extensions |
 
 [Home](../README.en.md) · [Troubleshooting by symptom](TROUBLESHOOTING.en.md)
 
-## How to use the commands
+> [!TIP]
+> **New to the terminal?** Read “How to use the commands” first, then follow the numbered steps in order. Manual SD preparation is an alternative, not an extra step.
+
+<a id="how-to-use-the-commands"></a>
+
+## ⌨️ How to use the commands
 
 Open **Terminal** from the Linux PC's application menu. A command is one line
 you paste and run with **Enter**. You do not need to memorize it.
@@ -27,7 +41,9 @@ you paste and run with **Enter**. You do not need to memorize it.
 - After an error, use the linked help before continuing. Keep related commands
   in the same window so selected addresses and paths remain available.
 
-## 1. Prepare the hardware and PC
+<a id="1-prepare-the-hardware-and-pc"></a>
+
+## 🔎 1. Prepare the hardware and PC
 
 **Location: powered-off box and Linux PC; no writing yet.**
 
@@ -83,7 +99,9 @@ perform SD preparation on native Linux. After writing SD, Windows can be an
 SSH client. UART/FEL require their own serial/USB access; see
 [UART setup](UART_BRINGUP.en.md). The PC scripts are not documented for macOS.
 
-## 2. Create your personal SD card
+<a id="2-create-your-personal-sd-card"></a>
+
+## 💾 2. Create your personal SD card
 
 > [!CAUTION]
 > The selected USB medium is overwritten completely. Disconnect other USB
@@ -120,7 +138,9 @@ copy. Reusing a copy preserves its password; a new directory is unnecessary.
 > before personalization. Do not flash the unchanged `.img.xz` with a generic
 > flashing program. Keep personal `.img` and `.t95-provisioned-manifest` files private.
 
-## 3. Boot the box and find its network address
+<a id="3-boot-the-box-and-find-its-network-address"></a>
+
+## 🌐 3. Boot the box and find its network address
 
 **Location: powered-off T95 and PC on the same home network.**
 
@@ -203,7 +223,9 @@ supply connected throughout.
 box remains absent, [check networking and boot](TROUBLESHOOTING.en.md#no-ip-address) first.
 Background: [official Nmap host-discovery guide](https://nmap.org/book/man-host-discovery.html).
 
-## 4. First SSH login and normal user
+<a id="4-first-ssh-login-and-normal-user"></a>
+
+## 🔑 4. First SSH login and normal user
 
 **On the Linux PC, normal user; `sudo` where shown:**
 
@@ -274,7 +296,9 @@ user's Linux password. For problems, [check access](TROUBLESHOOTING.en.md#ssh-lo
 | `sudo` as normal user | The same Linux password |
 | Samba file shares | Separate Samba password, set during Samba setup |
 
-## 5. Protect the kernel and DTB before updates
+<a id="5-protect-the-kernel-and-dtb-before-updates"></a>
+
+## 🔒 5. Protect the kernel and DTB before updates
 
 > [!CAUTION]
 > Do not run `apt upgrade`, `apt full-upgrade`, or `armbian-upgrade` first.
@@ -297,7 +321,9 @@ updates require a backup and renewed hardware checks; see the
 
 <a id="6-back-up-the-base-system"></a>
 
-## 6. Back up the base system (optional)
+<a id="6-back-up-the-base-system-optional"></a>
+
+## 🗂️ 6. Back up the base system (optional)
 
 **This step is optional.** You can reinstall the base system on SD at any
 time using this installation guide, then set up accounts and services again.
@@ -327,7 +353,9 @@ normal SSH user from step 4.
 
 </details>
 
-## 7. Set up file sharing
+<a id="7-set-up-file-sharing"></a>
+
+## 📂 7. Set up file sharing
 
 **T95 · normal SSH user with `sudo`:** follow the
 [File server setup](../server/samba-usb/README.en.md#quick-start-reproducible-restore).
@@ -344,7 +372,9 @@ username and Samba password, and write/read a small test file. The address is
 a file-manager location, not a terminal command. For problems,
 [check shares and authentication](TROUBLESHOOTING.en.md#share-missing-or-access-denied).
 
-## 8. Daily use and optional extensions
+<a id="8-daily-use-and-optional-extensions"></a>
+
+## 🧭 8. Daily use and optional extensions
 
 Use [everyday use](DAILY_USE.en.md) to reconnect, reboot, or shut down.
 
@@ -362,7 +392,9 @@ Use [everyday use](DAILY_USE.en.md) to reconnect, reboot, or shut down.
 A complete run of this newly organized guide on a separate SD is still open.
 Use the [acceptance checklist](VALIDATION.en.md#installation-guide-acceptance).
 
-## Manual alternative for SD preparation
+<a id="manual-alternative-for-sd-preparation"></a>
+
+## 🛠️ Manual alternative for SD preparation
 
 **Linux PC · normal user with `sudo` for writing.** This replaces **step 2
 only**, for a new preparation. Do not repeat it after a successful installer

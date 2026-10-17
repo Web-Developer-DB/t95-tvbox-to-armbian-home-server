@@ -1,4 +1,6 @@
-# Eigene Musik auf der T95 abspielen
+<a id="eigene-musik-auf-der-t95-abspielen"></a>
+
+# 🎵 Eigene Musik auf der T95 abspielen
 
 <a id="musikplayer-cheat-sheet-mpd-auf-der-t95"></a>
 
@@ -10,9 +12,17 @@ mit `mpc` bedienst du ihn. Der [Bluetooth-Musikplayer muss installiert sein](../
 Verwende das normale T95-Konto, für das du den Player eingerichtet hast.
 `mpc`, `wpctl` und `systemctl --user` als dieser Benutzer ohne `sudo` ausführen.
 
-[Bedienung](#tägliche-bedienung) · [Fehlerhilfe](#kein-ton-oder-keine-tastenreaktion) · [Alltag](DAILY_USE.md)
+| Dein Ziel | Hier geht es weiter |
+| --- | --- |
+| 🎧 Erste eigene Datei hören | [Kopfhörer und Musik vorbereiten](#start-kopfhörer-und-musik-bereitstellen) → [Abspielen](#musiksammlung-einlesen-und-abspielen) |
+| ▶️ Laufende Musik steuern | [Befehle für den Alltag](#tägliche-bedienung) |
+| 🛟 Kein Ton oder keine Tastenreaktion | [Gezielt prüfen](#kein-ton-oder-keine-tastenreaktion) |
 
-## Start: Kopfhörer und Musik bereitstellen
+[🧭 Alltagsübersicht](DAILY_USE.md)
+
+<a id="start-kopfhörer-und-musik-bereitstellen"></a>
+
+## 🎧 Start: Kopfhörer und Musik bereitstellen
 
 ### A. Kopfhörer verbinden und Ordner prüfen
 
@@ -140,7 +150,9 @@ ls -l -- "$HOME/$T95_TEST_NAME" &&
 Bei einem Fehler hier stoppen. Falls das erste Fenster geschlossen wurde,
 zuerst A wiederholen, um den Musikordner erneut festzulegen.
 
-## Musiksammlung einlesen und abspielen
+<a id="musiksammlung-einlesen-und-abspielen"></a>
+
+## ▶️ Musiksammlung einlesen und abspielen
 
 Für die oben übertragene Testdatei den folgenden Block ausführen. Im selben
 T95-Fenster bleiben, damit `T95_TEST_NAME` noch den übertragenen Namen enthält.
@@ -165,7 +177,11 @@ Für bereits vorhandene Musik den Pfad aus `mpc ls` bei `mpc add` verwenden,
 oder `mpc add /` für die ganze Sammlung. Alte Playlists einer vorherigen
 manuellen Player-Einrichtung werden nicht automatisch übernommen.
 
-## Tägliche Bedienung
+<a id="tägliche-bedienung"></a>
+
+## 🎛️ Tägliche Bedienung
+
+### ▶️ Wiedergabe
 
 | Aktion | Befehl |
 |---|---|
@@ -179,10 +195,20 @@ manuellen Player-Einrichtung werden nicht automatisch übernommen.
 | Nächster Titel | `mpc next` |
 | Vorheriger Titel | `mpc prev` |
 | Titel Nr. 2 aus der Warteschlange | `mpc play 2` |
+
+### 🎚️ Lautstärke und Wiedergabemodus
+
+| Aktion | Befehl |
+|---|---|
 | Playerlautstärke 30 % | `mpc volume 30` |
 | Etwas lauter / leiser | `mpc volume +5` / `mpc volume -5` |
 | Wiederholen an / aus | `mpc repeat on` / `mpc repeat off` |
 | Zufall an / aus | `mpc random on` / `mpc random off` |
+
+### 💾 Gespeicherte Playlists
+
+| Aktion | Befehl |
+|---|---|
 | Warteschlange als Playlist speichern | `mpc save MeineListe` |
 | Gespeicherte Playlists anzeigen | `mpc lsplaylists` |
 | Playlist zur Warteschlange hinzufügen | `mpc load MeineListe` |
@@ -208,7 +234,9 @@ wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
 zuerst `wpctl status` prüfen; MPD verwendet den separat gespeicherten
 Kopfhörerausgang aus `t95-bluetooth audio`.
 
-## Tasten am Kopfhörer
+<a id="tasten-am-kopfhörer"></a>
+
+## 🎧 Tasten am Kopfhörer
 
 Pause/Wiedergabe und Nächster/Vorheriger wurden mit den MX42H am beschriebenen
 Softwareaufbau praktisch geprüft. MPD läuft weiter, wenn SSH geschlossen wird.
@@ -224,7 +252,9 @@ systemctl --user is-active mpd mpdris2 mpris-proxy
 systemctl --user restart mpd mpdris2 mpris-proxy
 ```
 
-## Kein Ton oder keine Tastenreaktion?
+<a id="kein-ton-oder-keine-tastenreaktion"></a>
+
+## 🛟 Kein Ton oder keine Tastenreaktion?
 
 **Auf der T95, normaler Player-Benutzer:**
 

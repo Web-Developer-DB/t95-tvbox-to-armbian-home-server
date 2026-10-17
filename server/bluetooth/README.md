@@ -1,4 +1,6 @@
-# Bluetooth und Musikplayer auf der T95
+<a id="bluetooth-und-musikplayer-auf-der-t95"></a>
+
+# 🎧 Bluetooth und Musikplayer auf der T95
 
 **Deutsch** | [English](README.en.md)
 
@@ -6,7 +8,16 @@ Musik von der Box an Kopfhörer oder Bluetooth-Lautsprecher senden.
 **Schon installiert?** Öffne direkt [Bluetooth einfach bedienen](../../docs/BLUETOOTH_CHEATSHEET.md):
 dort stehen Geräte anzeigen, verbinden, trennen und vergessen im Vordergrund.
 
-## Voraussetzungen
+| Dein Ziel | Hier geht es weiter |
+| --- | --- |
+| 🚀 Player einmalig einrichten | [Voraussetzungen](#voraussetzungen) → [Installieren](#schnell-installieren) |
+| 🎧 Kopfhörer im Alltag benutzen | [Geräte finden, verbinden und trennen](../../docs/BLUETOOTH_CHEATSHEET.md) |
+| 🎵 Erste eigene Musik hören | [Datei übertragen und abspielen](../../docs/MUSIKPLAYER_CHEATSHEET.md) |
+| ↩️ Player stilllegen | [Entfernung und erhaltene Daten](#player-entfernen-und-bluetooth-deaktivieren) |
+
+<a id="voraussetzungen"></a>
+
+## 📋 Voraussetzungen
 
 Für die einmalige Einrichtung muss die T95 laufen und du musst mit deinem
 normalen Benutzer angemeldet sein. [So öffnest du die Verbindung zur Box](../../docs/BLUETOOTH_CHEATSHEET.md#hier-anfangen-mit-der-box-verbinden).
@@ -23,7 +34,9 @@ Bei fehlenden Werkzeugen hilft die [Vorbereitung](../setup/README.md#voraussetzu
 Die passende T95 verwendet ihr eingebautes Bluetooth. Ein zusätzlicher
 USB-Bluetooth-Adapter ist für diesen Aufbau nicht erforderlich.
 
-## Schnell installieren
+<a id="schnell-installieren"></a>
+
+## 🚀 Schnell installieren
 
 Die Downloadbefehle und der Installer beziehen ihre Dateien von `main`.
 
@@ -43,7 +56,9 @@ Einrichtung beendet; dann mit der [Bedienung](../../docs/BLUETOOTH_CHEATSHEET.md
 fortfahren. Kopfhörer werden anschließend bewusst ausgewählt und gekoppelt.
 Eigene Musik wird im Ordner `Music` deines Benutzers erwartet und bleibt erhalten.
 
-## Erfolg prüfen
+<a id="erfolg-prüfen"></a>
+
+## ✅ Erfolg prüfen
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -84,7 +99,9 @@ aus der ursprünglichen Box übernommen.
 
 </details>
 
-## Kopfhörer verbinden und als Ausgang wählen
+<a id="kopfhörer-verbinden-und-als-ausgang-wählen"></a>
+
+## 🎧 Kopfhörer verbinden und als Ausgang wählen
 
 <a id="1-bluetooth-umgebung-scannen"></a><a id="2-gewünschtes-audiogerät-auswählen-und-verbinden"></a><a id="3-den-verbundenen-kopfhörer-als-audio-ausgang-verwenden"></a><a id="4-einen-bereits-gekoppelten-kopfhörer-erneut-verbinden"></a><a id="5-verbindung-vorübergehend-trennen"></a><a id="6-kopplung-dauerhaft-von-der-t95-entfernen"></a>
 
@@ -101,14 +118,18 @@ Befehle eingibst und die Antworten liest.
 | Nur die Verbindung beenden | [Trennen, Kopplung behalten](../../docs/BLUETOOTH_CHEATSHEET.md#nur-die-verbindung-trennen) |
 | Einzelnes Gerät aus der Box entfernen | [Gerät vergessen](../../docs/BLUETOOTH_CHEATSHEET.md#gerät-dauerhaft-vergessen) |
 
-## Kurzzeitig ausschalten: Kopfhörer am PC verwenden
+<a id="kurzzeitig-ausschalten-kopfhörer-am-pc-verwenden"></a>
+
+## ⏸️ Kurzzeitig ausschalten: Kopfhörer am PC verwenden
 
 Mit `t95-bluetooth off` auf der T95 pausierst du deren gesamten Bluetooth-Funk.
 Die Kopplungen bleiben gespeichert; Home-Server und Samba laufen weiter.
 Die [Alltagsanleitung](../../docs/BLUETOOTH_CHEATSHEET.md#kopfhörer-am-pc-oder-handy-verwenden)
 zeigt den Wechsel zum PC oder Handy und zurück Schritt für Schritt.
 
-## Player entfernen und Bluetooth deaktivieren
+<a id="player-entfernen-und-bluetooth-deaktivieren"></a>
+
+## ↩️ Player entfernen und Bluetooth deaktivieren
 
 Dieser Abschnitt entfernt die Player-Einrichtung. Wenn du nur einen
 Kopfhörer trennen oder vergessen möchtest, verwende die
@@ -167,7 +188,9 @@ wiederherstellen. `--force` überschreibt diese späteren Änderungen.
 <details>
 <summary>Technische Hintergründe und Testnachweise</summary>
 
-## Technischer Umfang und Nachweise
+<a id="technischer-umfang-und-nachweise"></a>
+
+## 🛠️ Technischer Umfang und Nachweise
 
 - Zielstand: Armbian 26.8.4 / Debian Trixie, Kernel
   `6.18.48-current-sunxi64`, T95 H616 mit AXP313A und internem BCM43342.

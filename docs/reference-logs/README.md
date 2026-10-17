@@ -1,8 +1,14 @@
-# Bereinigte Referenzlogs
+<a id="bereinigte-referenzlogs"></a>
+
+# 📝 Bereinigte Referenzlogs
+
+**Deutsch** | [English](README.en.md)
 
 Diese Dateien enthalten nur die relevanten Erfolgsmeldungen aus dem T95-
 Bring-up. Sie sind **keine** vollständigen Rohaufzeichnungen und wurden von
 privaten Netzwerk-, Geräte- und Kontodaten bereinigt.
+
+[🛟 Bootfehler zuordnen](../BOOT_TROUBLESHOOTING.md) · [🧭 Portierungspfad](../PORTING.md)
 
 | Datei | Soll-Marker | Bedeutung |
 | --- | --- | --- |

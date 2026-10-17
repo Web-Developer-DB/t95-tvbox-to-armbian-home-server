@@ -1,10 +1,16 @@
-# Änderungsinventar: Armbian-Basis → T95
+<a id="änderungsinventar-armbian-basis--t95"></a>
+
+# 📋 Änderungsinventar: Armbian-Basis → T95
+
+**Deutsch** | [English](CHANGES_FROM_ARMBIAN.en.md)
 
 Dieses Dokument beschreibt die **öffentlichen, reproduzierbaren Änderungen**
 gegenüber dem verwendeten Armbian-Ausgangsstand. Es ist die technische
 Detailreferenz zur kompakten Übersicht in der [README](../README.md).
 
-## Ausgangsstand
+<a id="ausgangsstand"></a>
+
+## 📌 Ausgangsstand
 
 | Merkmal | Festgelegter Ausgangspunkt |
 | --- | --- |
@@ -22,7 +28,9 @@ Die Eingabe wird durch `build/prepare-t95-tanix-6.18-source.sh` anhand fester
 SHA-256-Prüfsummen verifiziert. Die konkreten Image-Dateien und Build-Artefakte
 bleiben lokal bzw. werden nur als GitHub-Release-Asset veröffentlicht.
 
-## Änderungsmatrix
+<a id="änderungsmatrix"></a>
+
+## 📋 Änderungsmatrix
 
 Die IDs sind stabil. Bei einer neuen Armbian-Version wird eine bestehende ID
 aktualisiert oder eine neue ID ergänzt; die Begründung und der Nachweis müssen
@@ -43,7 +51,9 @@ dabei erhalten bleiben.
 | `SAMBA` | Nicht Bestandteil des Minimalimages | `server/samba-usb/` | Nachgelagerte Samba-/USB-Automount-Schicht | Dateifreigaben erst nach stabilem Linux/Netzwerk | Pakete, Mountregeln, Benutzer und USB-Dateisystem | Installations- und Restore-Checklisten |
 | `PORTING` | Keine neue Armbian-Imageänderung | `docs/PORTING.md`, `build/setup-h616-porting-host.sh`, `build/fetch-h616-porting-sources.sh`, `build/build-h616-toc0-test.sh` | Öffentlicher, hostseitiger Bring-up-Pfad mit optionalem Nutzerschlüssel | Andere H616-Platinen sicher analysieren, bevor SD/eMMC beschrieben wird | UART, FEL, Secure Boot und reale Boardwerte | Host-Check, Quell-Commits, eGON-Manifest und UART-Log |
 
-## Was unverändert bleibt
+<a id="was-unverändert-bleibt"></a>
+
+## ℹ️ Was unverändert bleibt
 
 - Debian-/Armbian-Userspace und der geprüfte 6.18-Kernel werden als Basis
   übernommen; ein Kernel-Neubau ist für das finale 6.18-Image nicht erforderlich.
@@ -56,7 +66,9 @@ dabei erhalten bleiben.
   Captures, Backups, Rohimages, individuellen Hardwarekennungen oder privaten
   Schlüssel.
 
-## Portierung auf eine andere H616-Box
+<a id="portierung-auf-eine-andere-h616-box"></a>
+
+## 🧭 Portierung auf eine andere H616-Box
 
 1. **Baseline prüfen:** Armbian-Version, Kernel, Partitionierung und Rootfs-Hash
    festhalten (`BASE`).
@@ -73,7 +85,9 @@ dabei erhalten bleiben.
 Bei einem Fehler wird nur die betroffene Stufe geändert. Ein neuer Kernel oder
 ein eMMC-Schreibvorgang ist kein Ersatz für fehlende Hardware-Nachweise.
 
-## Marker in den Skripten
+<a id="marker-in-den-skripten"></a>
+
+## 🔎 Marker in den Skripten
 
 Öffentliche Build- und Schreibskripte verwenden kurze, einheitliche Kommentare:
 
@@ -85,7 +99,9 @@ ein eMMC-Schreibvorgang ist kein Ersatz für fehlende Hardware-Nachweise.
 Die Marker sind Navigationshilfen und ersetzen nicht die Prüfsummen- und
 UART-Nachweise in diesem Dokument.
 
-## Pflege bei neuen Releases
+<a id="pflege-bei-neuen-releases"></a>
+
+## 🔄 Pflege bei neuen Releases
 
 1. Neue Armbian-Eingabe mit Version, Commit/Hash und Layout in `BASE` eintragen.
 2. Betroffene Patch-, DTB-, Build- und Release-IDs aktualisieren.

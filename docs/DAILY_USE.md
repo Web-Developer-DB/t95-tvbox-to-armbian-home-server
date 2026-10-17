@@ -1,4 +1,6 @@
-# Die T95 im Alltag benutzen
+<a id="die-t95-im-alltag-benutzen"></a>
+
+# 🧭 Die T95 im Alltag benutzen
 
 **Deutsch** | [English](DAILY_USE.en.md)
 
@@ -8,7 +10,9 @@ du die täglichen Handgriffe. Eine neue Box zuerst nach der
 
 [Startseite](../README.md) · [Hilfe nach Symptomen](TROUBLESHOOTING.md)
 
-## Mit der Box verbinden
+<a id="mit-der-box-verbinden"></a>
+
+## 🔑 Mit der Box verbinden
 
 1. Auf deinem PC im Anwendungsmenü **Terminal** öffnen; unter Windows **PowerShell**.
 2. Im Beispiel `alex` durch deinen normalen T95-Benutzer und `192.168.178.50`
@@ -28,22 +32,35 @@ Es erscheinen keine Zeichen oder Sternchen. Einen neuen SSH-Schlüssel nach der
 obwohl das Fenster auf deinem PC steht. Die folgenden Box-Befehle gehören in
 dieses Fenster. Bei Verbindungsproblemen [SSH-Hilfe öffnen](TROUBLESHOOTING.md#ssh-anmeldung-scheitert).
 
-## Die passende Aufgabe wählen
+<a id="die-passende-aufgabe-wählen"></a>
+
+## 🧭 Die passende Aufgabe wählen
 
 | Du möchtest … | Hier geht es weiter |
 | --- | --- |
-| Dateien auf der Box öffnen oder speichern | [Dateizugriff am PC, Handy oder in VLC](../server/samba-usb/README.md#zugriff-von-clients-und-vlc) |
-| Einen USB-Datenträger abziehen | [Genau dieses Laufwerk sicher auswerfen](../server/samba-usb/README.md#usb-sicher-auswerfen) |
-| Kopfhörer finden, verbinden oder trennen | [Bluetooth einfach bedienen](BLUETOOTH_CHEATSHEET.md) |
-| Eigene Musik übertragen und hören | [Erste Musikdatei abspielen](MUSIKPLAYER_CHEATSHEET.md#start-kopfhörer-und-musik-bereitstellen) |
-| Den eingerichteten Zustand sichern | [Vollständiges SD-Backup](BACKUP.md) |
-| Systeminformationen bei der Anmeldung sehen | [Dashboard einrichten](SSH_DASHBOARD.md) |
+| 📂 Dateien auf der Box öffnen oder speichern | [Dateizugriff am PC, Handy oder in VLC](../server/samba-usb/README.md#zugriff-von-clients-und-vlc) |
+| ⏏️ Einen USB-Datenträger abziehen | [Genau dieses Laufwerk sicher auswerfen](../server/samba-usb/README.md#usb-sicher-auswerfen) |
+| 🎧 Kopfhörer finden, verbinden oder trennen | [Bluetooth einfach bedienen](BLUETOOTH_CHEATSHEET.md) |
+| 🎵 Eigene Musik übertragen und hören | [Erste Musikdatei abspielen](MUSIKPLAYER_CHEATSHEET.md#start-kopfhörer-und-musik-bereitstellen) |
+| 🗂️ Den eingerichteten Zustand sichern | [Vollständiges SD-Backup](BACKUP.md) |
+| 📊 Systeminformationen bei der Anmeldung sehen | [Dashboard einrichten](SSH_DASHBOARD.md) |
 
 Die feste Freigabe `T95-DATA` liegt beim empfohlenen Erststart auf der System-SD.
 USB-Laufwerke haben eigene Freigaben. Ein SD-Backup sichert keine Daten auf
 separaten USB-Laufwerken oder eMMC; diese regelmäßig zusätzlich sichern.
 
-## Nur von SSH abmelden
+> [!TIP]
+> **Nur das Fenster schließen?** Die Box bleibt an. Wähle unten bewusst zwischen Abmelden, Neustarten und Herunterfahren.
+
+| Deine Absicht | Wirkung |
+| --- | --- |
+| 🚪 [SSH abmelden](#nur-von-ssh-abmelden) | Nur deine Verbindung endet; der Server läuft weiter. |
+| 🔄 [Neu starten](#die-box-neu-starten) | Die Box startet neu; danach wieder per SSH anmelden. |
+| ⏻ [Herunterfahren](#die-box-sauber-herunterfahren) | Das System wird beendet; erst danach SD oder Strom trennen. |
+
+<a id="nur-von-ssh-abmelden"></a>
+
+## 🚪 Nur von SSH abmelden
 
 **Auf der T95, normaler SSH-Benutzer:**
 
@@ -55,7 +72,9 @@ exit
 laufende Musikwiedergabe laufen weiter. Auch das Schließen des Terminalfensters
 schaltet die T95 nicht aus.
 
-## Die Box neu starten
+<a id="die-box-neu-starten"></a>
+
+## 🔄 Die Box neu starten
 
 Offene Dateien auf den Clients speichern und laufende Kopiervorgänge beenden.
 
@@ -69,7 +88,9 @@ sudo reboot
 wieder erreichbar ist, erneut anmelden. Bei einer anderen IP-Adresse den
 SSH-Aufruf anpassen. Bei Problemen die [Start-/Netzwerkhilfe](TROUBLESHOOTING.md#keine-ip-adresse) verwenden.
 
-## Die Box sauber herunterfahren
+<a id="die-box-sauber-herunterfahren"></a>
+
+## ⏻ Die Box sauber herunterfahren
 
 Offene Dateien speichern und Kopiervorgänge beenden.
 
@@ -85,7 +106,9 @@ Stromversorgung trennst. Der Verbindungsabbruch allein beweist noch nicht,
 dass alle Schreibvorgänge abgeschlossen sind.
 Zum nächsten Start die Box wieder mit der passenden Stromversorgung einschalten.
 
-## Vor neuen Anwendungen
+<a id="vor-neuen-anwendungen"></a>
+
+## 🔒 Vor neuen Anwendungen
 
 [Kernel-/DTB-Sperre beibehalten](INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen).
 Bei gesetzter Sperre kannst du passende optionale Module oder

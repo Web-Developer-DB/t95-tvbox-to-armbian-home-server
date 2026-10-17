@@ -1,4 +1,8 @@
-# DRAM und PMIC: Werte ermitteln, nicht raten
+<a id="dram-und-pmic-werte-ermitteln-nicht-raten"></a>
+
+# ⚡ DRAM und PMIC: Werte ermitteln, nicht raten
+
+**Deutsch** | [English](DRAM_PMIC.en.md)
 
 Die T95-Referenz nutzt DDR3, 2 GiB, 600 MHz und AXP313A-DCDC3 mit 1,36 V.
 Diese Werte sind nur für die getestete Platine belegt.
@@ -8,6 +12,8 @@ Linux-DTB für `dcdc3` Minimum und Maximum auf `1360000` µV. Das verhindert,
 dass Linux nach erfolgreichem SPL-Training die DRAM-Rail auf 1,20 V absenkt.
 Die Änderung wurde mit vollständigen Kaltstarts auf zwei T95-Boxen mit der
 gleichen Platinenrevision geprüft.
+
+[🧭 Portierungspfad](PORTING.md) · [🧩 Weiter zum DTB](DTB_PORTING.md)
 
 | T95-Parameter | Für andere Platinen prüfen |
 | --- | --- |

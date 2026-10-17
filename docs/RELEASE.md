@@ -1,4 +1,6 @@
-# Release-Handbuch: T95 H616 / AXP313A
+<a id="release-handbuch-t95-h616--axp313a"></a>
+
+# 📦 Release-Handbuch: T95 H616 / AXP313A
 
 **Deutsch** | [English](RELEASE.en.md)
 
@@ -11,7 +13,9 @@ dem Unterseitenfoto sind redigiert.
 **Für die Einrichtung:** [Schritt-für-Schritt-Installation](INSTALLATION.md).
 Dieses Handbuch beschreibt Release-Artefakte und Wartung.
 
-## Release-Identität
+<a id="release-identität"></a>
+
+## 📋 Release-Identität
 
 | Eigenschaft | Wert |
 |---|---|
@@ -45,7 +49,9 @@ die bereits eindeutigen Schlüssel erhalten bleiben.
 entspricht der SPL-DRAM-Initialisierung und wurde mit vollständigen Kaltstarts
 auf zwei Boxen der exakten Platinenrevision geprüft.
 
-## Nachgewiesener Stand und Grenzen
+<a id="nachgewiesener-stand-und-grenzen"></a>
+
+## ✅ Nachgewiesener Stand und Grenzen
 
 Der zugrunde liegende SD-Start wurde auf echter Hardware mit UART geprüft:
 TOC0-SPL, 2 GiB DRAM, AXP313/AC300-Vorinitialisierung, Ext4-Boot, Kernel,
@@ -68,7 +74,9 @@ Nicht Bestandteil der Stabilitätszusage sind WLAN, Audio, Fernbedienung, HDMI
 als Serverfunktion, zusätzliche Langzeitmessungen und Kernel-/Bootloader-
 Aktualisierungen.
 
-## Öffentliche Release-Assets erzeugen
+<a id="öffentliche-release-assets-erzeugen"></a>
+
+## 📦 Öffentliche Release-Assets erzeugen
 
 Nur ein gehärtetes, anschließend gegen das private Quellartefakt geprüftes
 Image darf paketiert werden. Alle Schritte arbeiten ausschließlich auf
@@ -104,7 +112,9 @@ sha256sum -c SHA256SUMS
 xz -t T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
 ```
 
-## Lokale Personalisierung und SD-Schreibvorgang
+<a id="lokale-personalisierung-und-sd-schreibvorgang"></a>
+
+## 🔑 Lokale Personalisierung und SD-Schreibvorgang
 
 Das öffentliche Image ist vor der lokalen Personalisierung nicht per Passwort
 loginfähig. Root ist gesperrt. Der Installer fragt zweimal verdeckt nach einem
@@ -123,7 +133,9 @@ Hash und öffnet weder die T95-eMMC noch FEL. Nach `ERFOLG` die SD nur bei
 vollständig ausgeschalteter Box einsetzen. Erstes SSH-Login: `root` mit dem
 lokal gewählten Passwort, danach Armbian-Ersteinrichtung und normaler Benutzer.
 
-## Den geprüften Kernel-/DTB-Stand schützen
+<a id="den-geprüften-kernel-dtb-stand-schützen"></a>
+
+## 🔒 Den geprüften Kernel-/DTB-Stand schützen
 
 Nach der Ersteinrichtung die Armbian-Metapakete halten, damit ein automatisches
 Upgrade nicht den H616-/DTB-/Ethernet-Stand ersetzt:
@@ -149,7 +161,9 @@ sudo apt full-upgrade
 Die Sperre ersetzt keine Sicherheitsbewertung und ist keine pauschale
 Abschaltung aller Debian-Sicherheitsupdates.
 
-## Rebuild-Grenze
+<a id="rebuild-grenze"></a>
+
+## 🛠️ Rebuild-Grenze
 
 Die Armbian-Quelle, U-Boot `v2024.04`/`25049ad560826f7dc1c4740883b0016014a59789`
 und TF-A `v2.10`/`b6c0948400594e3cc4dbb5a4ef04b815d2675808` sind in lokalen

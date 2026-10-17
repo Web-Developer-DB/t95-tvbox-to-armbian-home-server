@@ -1,4 +1,6 @@
-# Technische Referenz des geprüften T95-Aufbaus
+<a id="technische-referenz-des-geprüften-t95-aufbaus"></a>
+
+# 📚 Technische Referenz des geprüften T95-Aufbaus
 
 **Deutsch** | [English](TECHNICAL_REFERENCE.en.md)
 
@@ -7,12 +9,17 @@ bisherigen README. Für die Einrichtung folge der [Installationsanleitung](INSTA
 Die Messwerte beschreiben den dokumentierten Aufbau; sie sind keine
 Mindestanforderungen oder Zusagen für andere Geräte.
 
-- [Release und Image-Layout](RELEASE.md)
-- [Testmatrix und offene Abnahme](VALIDATION.md)
-- [Portierung anderer Platinen](PORTING.md)
-- [Zur Startseite](../README.md)
+| Gesuchte Information | Weiterlesen |
+| --- | --- |
+| 📦 Image und Layout | [Release-Handbuch](RELEASE.md) |
+| ✅ Prüfergebnisse und offene Abnahme | [Testmatrix](VALIDATION.md) |
+| 🧭 Abweichende Hardware | [Portierungspfad](PORTING.md) |
 
-## Armbian-Standard und T95-Anpassungen
+[Zur Startseite](../README.md)
+
+<a id="armbian-standard-und-t95-anpassungen"></a>
+
+## 🧩 Armbian-Standard und T95-Anpassungen
 
 Als Ausgangspunkt dient ein offizielles Armbian-Image für die verwandte
 Tanix-TX6s-/AXP313-Plattform: Armbian 26.8.4, Debian 13 Trixie und Kernel
@@ -71,7 +78,9 @@ Resultat, Portierungsprüfung und Nachweis steht im
 unveränderten Bestandteile und die Pflegeanforderungen für neue Armbian-Releases
 festgehalten.
 
-## Geprüfte Hardware und Software
+<a id="geprüfte-hardware-und-software"></a>
+
+## 🔎 Geprüfte Hardware und Software
 
 | Bereich | Nachgewiesene Konfiguration |
 | --- | --- |
@@ -87,7 +96,9 @@ festgehalten.
 | DTB | `sun50i-h616-t95-axp313-tanix-6.18.dtb` |
 | Bootmedium | microSD, TOC0-Loader ab Byte 8192 |
 
-## Nachgewiesener Stand
+<a id="nachgewiesener-stand"></a>
+
+## ✅ Nachgewiesener Stand
 
 | Test | Ergebnis | Hinweis |
 | --- | :---: | --- |
@@ -116,7 +127,9 @@ weitere Peripherie und eine endgültige Kernel-/Timer-Konfiguration bleiben
 optionale Weiterentwicklungen und ändern den stabil getesteten Grundstand
 nicht.
 
-## eMMC als internes Datenlaufwerk
+<a id="emmc-als-internes-datenlaufwerk"></a>
+
+## 💽 eMMC als internes Datenlaufwerk
 
 Die T95 besitzt neben dem microSD-Steckplatz einen internen eMMC-Speicher. Unter
 Armbian wird er als `/dev/mmcblk2` mit einer nutzbaren Kapazität von etwa
@@ -194,7 +207,9 @@ Das integrierte Ethernet ist auf 100 Mbit/s begrenzt; gemessen wurden etwa
 Samba-Zugriffen ist daher das Netzwerk und nicht die eMMC der limitierende
 Faktor.
 
-## Beispiel einer erfolgreichen SSH-Sitzung
+<a id="beispiel-einer-erfolgreichen-ssh-sitzung"></a>
+
+## 🖥️ Beispiel einer erfolgreichen SSH-Sitzung
 
 ### SSH-Statusansicht
 

@@ -1,4 +1,6 @@
-# Publishing on GitHub
+<a id="publishing-on-github"></a>
+
+# 🌐 Publishing on GitHub
 
 [Deutsch](GITHUB-PUBLISH.md) | **English**
 
@@ -6,7 +8,17 @@ This module lives in the main repository under `server/samba-usb/` and can be
 published with the T95 Armbian project while retaining reproducible scripts and
 technical documentation.
 
-## Publish the main repository
+| Decision | Matching path |
+| --- | --- |
+| 📁 Maintain within the T95 project | [Main repository](#publish-the-main-repository); existing module location |
+| 🧩 Deliberately maintain separately | [Standalone repository](#standalone-repository-optional) |
+| ✅ Before each push | [Check files and manifest](#check-before-pushing) |
+
+**Run on:** the Linux PC, in the local repository copy, as a user with GitHub push access. Adapt sample paths first.
+
+<a id="publish-the-main-repository"></a>
+
+## 📁 Publish the main repository
 
 ```bash
 cd /path/to/t95-tvbox-to-armbian-home-server
@@ -15,7 +27,9 @@ git commit -m "Document Samba and dynamic USB home-server setup"
 git push
 ```
 
-## Standalone repository (optional)
+<a id="standalone-repository-optional"></a>
+
+## 🧩 Standalone repository (optional)
 
 Only if the module is deliberately maintained separately:
 
@@ -25,7 +39,9 @@ T95-Samba-USB-Setup/
 
 Then run `git init`, `git add .`, and create an appropriate commit.
 
-## Check before pushing
+<a id="check-before-pushing"></a>
+
+## ✅ Check before pushing
 
 ```bash
 git status

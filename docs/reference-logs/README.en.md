@@ -1,10 +1,14 @@
-# Sanitized reference logs
+<a id="sanitized-reference-logs"></a>
+
+# 📝 Sanitized reference logs
 
 [Deutsch](README.md) | **English**
 
 These files contain only the relevant success messages from the T95 bring-up.
 They are **not** complete raw captures and have been sanitized to remove
 private network, device, and account data.
+
+[🛟 Classify boot failures](../BOOT_TROUBLESHOOTING.en.md) · [🧭 Porting path](../PORTING.en.md)
 
 | File | Expected markers | Meaning |
 | --- | --- | --- |

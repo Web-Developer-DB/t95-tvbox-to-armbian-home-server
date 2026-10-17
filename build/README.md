@@ -1,4 +1,8 @@
-# Hostseitige Buildkette
+<a id="hostseitige-buildkette"></a>
+
+# 🛠️ Hostseitige Buildkette
+
+**Deutsch** | [English](README.en.md)
 
 Diese Dateien bilden das Laborprotokoll und die hostseitige Konstruktion des
 funktionierenden T95-Images ab. Keines der Skripte unter `build/` soll eine
@@ -11,7 +15,17 @@ mit `BUILT_NOT_HARDWARE_TESTED` bleiben unverändert als historische,
 hashbare Beweise erhalten: Ihr Status beschreibt den Zeitpunkt des jeweiligen
 Host-Builds, nicht den späteren Hardwaretest des zusammengesetzten Images.
 
-## Öffentlicher Portierungsstart für andere H616-Boxen
+| Dein Vorhaben | Verbindlicher Einstieg |
+| --- | --- |
+| 🧭 Neue, abweichende H616-Platine | [Öffentlicher Portierungsstart](#öffentlicher-portierungsstart-für-andere-h616-boxen) und [Bring-up-Pfad](../docs/PORTING.md) |
+| 🛠️ T95-Release auf dem Host konstruieren | [Buildreihenfolge](#relevante-buildreihenfolge); private Eingaben und Signaturgrenze beachten |
+| 🚀 Nur einen Home-Server einrichten | [Installationsanleitung](../docs/INSTALLATION.md); kein eigener Build nötig |
+
+**Ausführungsort:** Linux-PC, Repository-Hauptverzeichnis; normaler Benutzer, `sudo` nur wo angegeben. Die folgenden Beispiele erzeugen Host-Dateien.
+
+<a id="öffentlicher-portierungsstart-für-andere-h616-boxen"></a>
+
+## 🧭 Öffentlicher Portierungsstart für andere H616-Boxen
 
 Für eine fremde, ähnliche H616-Platine nicht die historischen T95-
 Zusammensetzungsrezepte verwenden. Der öffentliche Startpfad ist vollständig
@@ -35,7 +49,9 @@ bash build/build-h616-toc0-test.sh --key /absoluter/pfad/zum/eigenen-key.pem
 Details, Quell-Commit-Hashes und Sicherheitsgrenzen stehen in
 [PORTING_SOURCES.md](PORTING_SOURCES.md) und [../docs/PORTING.md](../docs/PORTING.md).
 
-## Relevante Buildreihenfolge
+<a id="relevante-buildreihenfolge"></a>
+
+## 🛠️ Relevante Buildreihenfolge
 
 ```bash
 export REPO=/pfad/zum/t95-h616-axp313a-projekt
@@ -78,7 +94,9 @@ des TOC0-Loaders sind in `docs/RELEASE.md` festgehalten. Der Loader basiert
 auf U-Boot `v2024.04`/`25049ad560826f7dc1c4740883b0016014a59789` und TF-A
 `v2.10`/`b6c0948400594e3cc4dbb5a4ef04b815d2675808`.
 
-## Privater Signaturschlüssel
+<a id="privater-signaturschlüssel"></a>
+
+## 🔒 Privater Signaturschlüssel
 
 `build/keys/` wird niemals veröffentlicht. Der vorhandene TOC0-Loader ist
 mit einem lokalen Experimentierschlüssel signiert. Dieser Schlüssel ist weder
@@ -87,7 +105,9 @@ noch darf er Teil eines GitHub-Repositories werden. Ohne ihn ist ein
 bitidentischer Neubau des signierten Binaries nicht möglich. Einen Ersatzschlüssel
 nicht ohne separate Analyse der Secure-Boot-Vertrauenskette verwenden.
 
-## Historische Diagnosewerkzeuge
+<a id="historische-diagnosewerkzeuge"></a>
+
+## 🗃️ Historische Diagnosewerkzeuge
 
 Die übrigen `build/build-t95-*.sh`-Skripte und Unterlagen dokumentieren den
 schrittweisen Weg über FEL, U-Boot, AC300 und ältere Kernelversuche. Sie sind

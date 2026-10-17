@@ -1,11 +1,17 @@
-# DTB-Portierung: erst nach stabilem FEL-/DRAM-Test
+<a id="dtb-portierung-erst-nach-stabilem-fel-dram-test"></a>
+
+# 🧩 DTB-Portierung: erst nach stabilem FEL-/DRAM-Test
+
+**Deutsch** | [English](DTB_PORTING.en.md)
 
 Die Device-Tree-Datei beschreibt die konkrete Platine. Sie ist kein Ersatz
 für einen passenden SPL/U-Boot-Loader: Wenn U-Boot keinen Banner ausgibt oder
 DRAM nicht initialisieren kann, zuerst [FEL](FEL_BRINGUP.md) und
 [DRAM/PMIC](DRAM_PMIC.md) prüfen.
 
-## Sicherer Ablauf
+<a id="sicherer-ablauf"></a>
+
+## 🧭 Sicherer Ablauf
 
 1. Einen möglichst nahen Upstream- oder Armbian-DTB als Ausgangspunkt wählen.
 2. Nur belegte Hardwareknoten ergänzen: UART, SD, eMMC, PMIC, RAM-Parameter,
@@ -17,7 +23,9 @@ DRAM nicht initialisieren kann, zuerst [FEL](FEL_BRINGUP.md) und
 5. Den vollständigen UART-Log sichern und erst bei stabilem Kernelstart
    weitere Komponenten aktivieren.
 
-## Ethernet: besonders platinenabhängig
+<a id="ethernet-besonders-platinenabhängig"></a>
+
+## 🌐 Ethernet: besonders platinenabhängig
 
 Die getestete T95 nutzt den Allwinner-AC300-EPHY über RMII. Bei einer anderen
 H616-Box können PHY-Adresse, Reset-GPIO, Clock, Versorgung und sogar der PHY
@@ -32,7 +40,9 @@ dass die T95-DTS für ein anderes Board korrekt ist.
 | Link up, keine Adresse | Userspace | DHCP mit `ip -br addr`, `journalctl -u NetworkManager` prüfen |
 | USB, Audio oder WLAN fehlerhaft | einzelner Peripherieknoten | Knoten separat deaktivieren oder nach Boardbeleg prüfen |
 
-## Stop-Kriterien
+<a id="stop-kriterien"></a>
+
+## 🛑 Stop-Kriterien
 
 - Keine zufälligen GPIO-, PHY- oder Spannungswerte ausprobieren.
 - Bei Kernel-Panic, Dateisystemfehlern oder wiederholten DRAM-Fehlern zum

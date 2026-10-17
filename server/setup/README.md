@@ -1,4 +1,6 @@
-# Gemeinsamer T95-Setup-Einstieg
+<a id="gemeinsamer-t95-setup-einstieg"></a>
+
+# 🧩 Gemeinsamer T95-Setup-Einstieg
 
 **Deutsch** | [English](README.en.md)
 
@@ -6,9 +8,19 @@ Installiere SSH-Dashboard und Bluetooth-Musikplayer über ein Menü.
 Beides sind optionale Ergänzungen einer bereits laufenden T95. Dieses Menü
 erstellt keine Armbian-SD und richtet Samba nicht ein.
 
-[Einrichten](#schnellstart-auf-der-laufenden-t95) · [Prüfen](#erfolg-prüfen) · [Entfernen](#ein-modul-entfernen) · [Alltag](../../docs/DAILY_USE.md)
+| Dein Ziel | Hier geht es weiter |
+| --- | --- |
+| 🚀 Module auswählen und installieren | [Voraussetzungen](#voraussetzungen) → [Menü starten](#schnellstart-auf-der-laufenden-t95) |
+| ✅ Einrichtung kontrollieren | [Status beider Module prüfen](#erfolg-prüfen) |
+| 🧭 Module benutzen | [Alltagsübersicht](../../docs/DAILY_USE.md) |
+| ↩️ Eine Einrichtung zurücknehmen | [Ein Modul entfernen](#ein-modul-entfernen) |
 
-## Voraussetzungen
+> [!NOTE]
+> **Du wählst den Umfang:** Dashboard, Bluetooth-Player oder beides. Das Menü ergänzt eine laufende T95; die Grundinstallation und Samba haben eigene Anleitungen.
+
+<a id="voraussetzungen"></a>
+
+## 📋 Voraussetzungen
 
 Zuerst [Grundsystem und Kernel-Sperre](../../docs/INSTALLATION.md)
 abschließen und als normaler T95-Benutzer anmelden. Ein
@@ -26,7 +38,9 @@ Die Modul-Pakete installiert das Setup danach. Der Downloadweg benötigt kein Gi
 Der Projektbetreiber hat die dokumentierten Dashboard-/Bluetooth-Schritte am
 **17.10.2026** als funktionsfähig bestätigt. [Nachweise und offene Einzelprüfungen](../../docs/VALIDATION.md#dashboard-und-bluetooth).
 
-## Schnellstart auf der laufenden T95
+<a id="schnellstart-auf-der-laufenden-t95"></a>
+
+## 🚀 Schnellstart auf der laufenden T95
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -48,7 +62,9 @@ wird zuerst das Dashboard eingerichtet, danach Bluetooth. Jedes eingerichtete
 Modul meldet `Fertig.`. Bei Fehlern stoppen und die
 [Modul-Fehlerhilfe](../../docs/TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) lesen.
 
-## Erfolg prüfen
+<a id="erfolg-prüfen"></a>
+
+## ✅ Erfolg prüfen
 
 Für das installierte Dashboard:
 
@@ -71,7 +87,9 @@ Danach mit [Bluetooth einfach bedienen](../../docs/BLUETOOTH_CHEATSHEET.md)
 Kopfhörer koppeln und auswählen, anschließend [erste Musik abspielen](../../docs/MUSIKPLAYER_CHEATSHEET.md).
 Die Installation allein startet keine Musik.
 
-## Ein Modul entfernen
+<a id="ein-modul-entfernen"></a>
+
+## ↩️ Ein Modul entfernen
 
 Nur die benötigte Aktion wählen. Um den vorherigen Dashboard-Stand wiederherzustellen:
 
@@ -96,7 +114,9 @@ lesen, insbesondere bei einer vorhandenen Einrichtung. Die Kernel-Sperre bleibt 
 <details>
 <summary>Technische Abläufe, lokaler Checkout und Prüfungen</summary>
 
-## Funktionsweise und einzelne Starter
+<a id="funktionsweise-und-einzelne-starter"></a>
+
+## ⚙️ Funktionsweise und einzelne Starter
 
 `tools/t95-setup.sh` lädt einen Quellstand von GitHub und ruft
 `server/setup/t95_setup.py` mit Rootrechten auf. Ohne Argumente bietet der
@@ -146,7 +166,9 @@ Anleitungen:
 [Bluetooth-Cheat-Sheet](../../docs/BLUETOOTH_CHEATSHEET.md) ·
 [Musikplayer-Cheat-Sheet](../../docs/MUSIKPLAYER_CHEATSHEET.md).
 
-## Lokaler Checkout
+<a id="lokaler-checkout"></a>
+
+## 📁 Lokaler Checkout
 
 **T95 · normaler SSH-Benutzer mit `sudo` für Pakete, Git als dieser Benutzer.**
 Der Release-Werkzeugeordner auf dem PC enthält die aktuellen Module nicht.
@@ -168,7 +190,9 @@ vorhanden. Wenn der Zielordner bereits existiert, Branch und lokale Änderungen
 prüfen, statt ihn zu überschreiben. Lokale Aufrufe in den Modulanleitungen
 laufen aus diesem Repository-Hauptverzeichnis.
 
-## Zustand und Rücknahme
+<a id="zustand-und-rücknahme"></a>
+
+## ↩️ Zustand und Rücknahme
 
 Informationen zu Sicherungen und Rücknahme gelten für beide Quellzugänge.
 
@@ -197,7 +221,9 @@ existierte; alte Dateien werden trotzdem gesichert/wiederhergestellt.
 Gemeinsam genutztes Linger und zuvor laufende PipeWire-/WirePlumber-Dienste
 bleiben erhalten. Musik und Bluetooth-Kopplungen werden nicht gelöscht.
 
-## Prüfen vor Veröffentlichung
+<a id="prüfen-vor-veröffentlichung"></a>
+
+## 🧪 Prüfen vor Veröffentlichung
 
 Auf dem Linux-PC aus dem Repository ausführen:
 

@@ -1,10 +1,24 @@
-# Veröffentlichung auf GitHub
+<a id="veröffentlichung-auf-github"></a>
+
+# 🌐 Veröffentlichung auf GitHub
+
+**Deutsch** | [English](GITHUB-PUBLISH.en.md)
 
 Das Modul liegt im Hauptrepository unter `server/samba-usb/`. Es kann dort
 gemeinsam mit dem T95-Armbian-Projekt veröffentlicht werden; die technische
 Dokumentation und die Skripte bleiben über diesen Pfad reproduzierbar.
 
-## Hauptrepository veröffentlichen
+| Entscheidung | Passender Weg |
+| --- | --- |
+| 📁 Modul im T95-Projekt pflegen | [Hauptrepository](#hauptrepository-veröffentlichen); empfohlener bestehender Ablageort |
+| 🧩 Modul bewusst separat pflegen | [Eigenständiges Repository](#eigenständiges-repository-optional) |
+| ✅ Vor jedem Push | [Dateien und Manifest prüfen](#vor-dem-push-prüfen) |
+
+**Ausführungsort:** Linux-PC, lokale Repository-Kopie; als Benutzer mit GitHub-Push-Recht. Beispielpfade vorher anpassen.
+
+<a id="hauptrepository-veröffentlichen"></a>
+
+## 📁 Hauptrepository veröffentlichen
 
 ```bash
 cd /pfad/zum/t95-tvbox-to-armbian-home-server
@@ -13,7 +27,9 @@ git commit -m "Document Samba and dynamic USB home-server setup"
 git push
 ```
 
-## Eigenständiges Repository (optional)
+<a id="eigenständiges-repository-optional"></a>
+
+## 🧩 Eigenständiges Repository (optional)
 
 Nur wenn das Modul bewusst separat gepflegt werden soll:
 
@@ -29,7 +45,9 @@ git add .
 git commit -m "Document Samba and dynamic USB share setup"
 ```
 
-## Vor dem Push prüfen
+<a id="vor-dem-push-prüfen"></a>
+
+## ✅ Vor dem Push prüfen
 
 ```bash
 git status

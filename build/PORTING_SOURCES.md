@@ -1,8 +1,14 @@
-# Öffentliche Quellen für H616-Portierung
+<a id="öffentliche-quellen-für-h616-portierung"></a>
+
+# 📚 Öffentliche Quellen für H616-Portierung
+
+**Deutsch** | [English](PORTING_SOURCES.en.md)
 
 Diese Datei trennt reproduzierbare Quellen von lokalen Laborartefakten. Die
 Werkzeuge laden ausschließlich in `build/sources/` und `build/work/`; beide
 Verzeichnisse sind absichtlich nicht versioniert.
+
+[🛠️ Buildkette](README.md) · [🧭 Portierungspfad](../docs/PORTING.md)
 
 | Bestandteil | Quelle | Feste Revision / Prüfsumme | Zweck |
 | --- | --- | --- | --- |

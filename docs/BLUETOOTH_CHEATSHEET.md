@@ -1,4 +1,6 @@
-# Bluetooth einfach bedienen
+<a id="bluetooth-einfach-bedienen"></a>
+
+# 🎧 Bluetooth einfach bedienen
 
 **Deutsch** | [English](BLUETOOTH_CHEATSHEET.en.md)
 
@@ -7,7 +9,9 @@ deiner T95. Du musst dafür keine Linux-Befehle auswendig kennen.
 Die Box muss bereits eingerichtet und der
 [Bluetooth-Musikplayer installiert](../server/bluetooth/README.md) sein.
 
-## Hier anfangen: mit der Box verbinden
+<a id="hier-anfangen-mit-der-box-verbinden"></a>
+
+## 🔑 Hier anfangen: mit der Box verbinden
 
 1. Suche auf deinem PC im Anwendungsmenü nach **Terminal** und öffne es.
    Unter Windows im Startmenü nach **PowerShell** suchen und öffnen.
@@ -47,29 +51,34 @@ So verwendest du die Beispiele:
   zur normalen Eingabe. Nur beim [erstmaligen Koppeln](#neue-kopfhörer-zum-ersten-mal-verbinden)
   bleiben wir ausdrücklich in diesem Programm.
 
-## Die passende Aufgabe wählen
+<a id="die-passende-aufgabe-wählen"></a>
+
+## 🧭 Die passende Aufgabe wählen
 
 | Das möchtest du tun | Hier geht es weiter |
 | --- | --- |
-| Nachsehen, welche Geräte die Box bereits kennt | [Gekoppelte Geräte anzeigen](#gekoppelte-geräte-anzeigen) |
-| Nachsehen, was gerade verbunden ist | [Verbundene Geräte anzeigen](#verbundene-geräte-anzeigen) |
-| Einen bekannten Kopfhörer wieder benutzen | [Wieder verbinden und für Musik auswählen](#wieder-verbinden-und-für-musik-auswählen) |
-| Die Verbindung für heute beenden | [Nur die Verbindung trennen](#nur-die-verbindung-trennen) |
-| Den Kopfhörer am PC oder Handy verwenden | [Bluetooth auf der Box pausieren](#kopfhörer-am-pc-oder-handy-verwenden) |
-| Einen neuen Kopfhörer suchen | [Suchen und erstmals koppeln](#neue-kopfhörer-zum-ersten-mal-verbinden) |
-| Einen Kopfhörer aus der Box löschen | [Gerät dauerhaft vergessen](#gerät-dauerhaft-vergessen) |
-| Ein Problem lösen | [Wenn etwas nicht klappt](#wenn-etwas-nicht-klappt) |
+| 💾 Nachsehen, welche Geräte die Box bereits kennt | [Gekoppelte Geräte anzeigen](#gekoppelte-geräte-anzeigen) |
+| 🔗 Nachsehen, was gerade verbunden ist | [Verbundene Geräte anzeigen](#verbundene-geräte-anzeigen) |
+| 🎧 Einen bekannten Kopfhörer wieder benutzen | [Wieder verbinden und für Musik auswählen](#wieder-verbinden-und-für-musik-auswählen) |
+| ⏸️ Die Verbindung für heute beenden | [Nur die Verbindung trennen](#nur-die-verbindung-trennen) |
+| 💻 Den Kopfhörer am PC oder Handy verwenden | [Bluetooth auf der Box pausieren](#kopfhörer-am-pc-oder-handy-verwenden) |
+| 🔎 Einen neuen Kopfhörer suchen | [Suchen und erstmals koppeln](#neue-kopfhörer-zum-ersten-mal-verbinden) |
+| 🗑️ Einen Kopfhörer aus der Box löschen | [Gerät dauerhaft vergessen](#gerät-dauerhaft-vergessen) |
+| 🛟 Ein Problem lösen | [Wenn etwas nicht klappt](#wenn-etwas-nicht-klappt) |
 
-**Gekoppelt** heißt: Die Box hat sich das Gerät gemerkt. **Verbunden** heißt:
-Die Funkverbindung besteht gerade. Ein gekoppelter Kopfhörer kann also
-ausgeschaltet sein und trotzdem in der Liste stehen.
+| Begriff | Bedeutung |
+| --- | --- |
+| 💾 **Gekoppelt** | Die Box kennt das Gerät, auch wenn der Kopfhörer ausgeschaltet ist. |
+| 🔗 **Verbunden** | Die Funkverbindung besteht gerade. Für Musik muss der Kopfhörer außerdem als Ausgang ausgewählt sein. |
 
 Hast du Bluetooth mit `t95-bluetooth off` pausiert? Dann vor dem Anzeigen,
 Suchen oder Verbinden mit `t95-bluetooth on` wieder einschalten.
 
 <a id="3-bereits-gekoppelte-geräte-bedienen"></a>
 
-## Gekoppelte Geräte anzeigen
+<a id="gekoppelte-geräte-anzeigen"></a>
+
+## 💾 Gekoppelte Geräte anzeigen
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -94,7 +103,9 @@ keine gekoppelten Geräte gelistet. Einen neuen Kopfhörer findest du über
 [Suchen und Koppeln](#neue-kopfhörer-zum-ersten-mal-verbinden).
 Bei einer Fehlermeldung stattdessen [die Hilfe](#wenn-etwas-nicht-klappt) öffnen.
 
-## Verbundene Geräte anzeigen
+<a id="verbundene-geräte-anzeigen"></a>
+
+## 🔗 Verbundene Geräte anzeigen
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -134,7 +145,9 @@ bluetoothctl info "$BT_GERAET"
 | `Connected: no` | Gerät ist gerade getrennt |
 | `Trusted: yes` | Die Box vertraut diesem bereits eingerichteten Gerät |
 
-## Wieder verbinden und für Musik auswählen
+<a id="wieder-verbinden-und-für-musik-auswählen"></a>
+
+## 🎧 Wieder verbinden und für Musik auswählen
 
 1. Kopfhörer einschalten. Eine Verbindung zum Handy oder PC dort trennen,
    damit der Kopfhörer für die Box verfügbar ist.
@@ -180,7 +193,9 @@ vorgemerkt. Wenn du die Verbindung zur Box später neu öffnest, beginne diesen
 Abschnitt wieder bei Schritt 1. Ein erneutes Koppeln ist für einen gespeicherten
 Kopfhörer nicht erforderlich.
 
-## Nur die Verbindung trennen
+<a id="nur-die-verbindung-trennen"></a>
+
+## ⏸️ Nur die Verbindung trennen
 
 Nutze das, wenn der Kopfhörer auf der Box gespeichert bleiben soll.
 Suche seine Adresse bei den [verbundenen Geräten](#verbundene-geräte-anzeigen).
@@ -206,7 +221,9 @@ selbstständig wieder verbindet, verwende die folgende Bluetooth-Pause.
 
 <a id="4-kopfhörer-am-pc-statt-am-server-nutzen"></a>
 
-## Kopfhörer am PC oder Handy verwenden
+<a id="kopfhörer-am-pc-oder-handy-verwenden"></a>
+
+## 💻 Kopfhörer am PC oder Handy verwenden
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -225,7 +242,9 @@ Nach einem Neustart kann der Funkzustand abweichen; bei Bedarf erneut einschalte
 
 <a id="2-neue-kopfhörer-koppeln"></a>
 
-## Neue Kopfhörer zum ersten Mal verbinden
+<a id="neue-kopfhörer-zum-ersten-mal-verbinden"></a>
+
+## 🔎 Neue Kopfhörer zum ersten Mal verbinden
 
 ### A. Kopfhörer vorbereiten
 
@@ -309,7 +328,9 @@ Der Helfer bestätigt die Wahl und hält die Wiedergabe zunächst an.
 Musik nach der [Musikplayer-Anleitung](MUSIKPLAYER_CHEATSHEET.md) vorbereiten.
 Beim nächsten Mal genügt [Wieder verbinden](#wieder-verbinden-und-für-musik-auswählen).
 
-## Gerät dauerhaft vergessen
+<a id="gerät-dauerhaft-vergessen"></a>
+
+## 🗑️ Gerät dauerhaft vergessen
 
 Nutze das, wenn die Box sich diesen Kopfhörer nicht mehr merken soll.
 Suche seine Adresse zuerst bei den [gekoppelten Geräten](#gekoppelte-geräte-anzeigen).
@@ -337,7 +358,9 @@ möchtest, findest du dafür eine eigene [Deinstallationsanleitung](../server/bl
 
 <a id="5-wenn-kein-gerät-gefunden-wird"></a>
 
-## Wenn etwas nicht klappt
+<a id="wenn-etwas-nicht-klappt"></a>
+
+## 🛟 Wenn etwas nicht klappt
 
 | Das siehst du | Das kannst du tun |
 | --- | --- |

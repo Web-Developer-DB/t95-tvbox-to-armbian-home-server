@@ -1,4 +1,6 @@
-# Shared T95 setup entry
+<a id="shared-t95-setup-entry"></a>
+
+# 🧩 Shared T95 setup entry
 
 [Deutsch](README.md) | **English**
 
@@ -6,9 +8,19 @@ Install the SSH dashboard and Bluetooth music player through one menu.
 They are optional additions to an already running T95; this menu does not
 create an Armbian SD card or set up Samba.
 
-[Set up](#quick-start-on-the-running-t95) · [Verify](#verify-success) · [Remove](#remove-a-module) · [Daily use](../../docs/DAILY_USE.en.md)
+| Your goal | Go here |
+| --- | --- |
+| 🚀 Choose and install modules | [Requirements](#requirements) → [Open menu](#quick-start-on-the-running-t95) |
+| ✅ Check setup | [Check module status](#verify-success) |
+| 🧭 Use the modules | [Everyday overview](../../docs/DAILY_USE.en.md) |
+| ↩️ Undo one setup | [Remove a module](#remove-a-module) |
 
-## Requirements
+> [!NOTE]
+> **Choose what to add:** dashboard, Bluetooth player, or both. The menu extends a running T95; base installation and Samba use their own guides.
+
+<a id="requirements"></a>
+
+## 📋 Requirements
 
 Finish [base setup and kernel holds](../../docs/INSTALLATION.en.md)
 and log in as your normal T95 user. A [full SD backup](../../docs/BACKUP.en.md)
@@ -26,7 +38,9 @@ The setup installs module packages afterward; the download method does not requi
 The maintainer confirmed the documented dashboard/Bluetooth steps work on
 **2026-10-17**. [Evidence and individual open checks](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
-## Quick start on the running T95
+<a id="quick-start-on-the-running-t95"></a>
+
+## 🚀 Quick start on the running T95
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -47,7 +61,9 @@ Setup runs the selected action. With option `0`, dashboard finishes first,
 then Bluetooth starts. Each installed module reports `Fertig.`.
 For errors, stop and use [module help](../../docs/TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails).
 
-## Verify success
+<a id="verify-success"></a>
+
+## ✅ Verify success
 
 For the installed dashboard:
 
@@ -70,7 +86,9 @@ Then follow [Bluetooth made simple](../../docs/BLUETOOTH_CHEATSHEET.en.md) to pa
 and select headphones, followed by [first music playback](../../docs/MUSIKPLAYER_CHEATSHEET.en.md).
 Installation alone does not start music.
 
-## Remove a module
+<a id="remove-a-module"></a>
+
+## ↩️ Remove a module
 
 Choose only the action you need. To restore the previous dashboard:
 
@@ -94,7 +112,9 @@ before removing it from an existing setup. Kernel holds remain enabled.
 <details>
 <summary>Technical behavior, local checkout, and verification</summary>
 
-## Behavior and individual launchers
+<a id="behavior-and-individual-launchers"></a>
+
+## ⚙️ Behavior and individual launchers
 
 The launcher downloads one GitHub source archive and runs
 `server/setup/t95_setup.py` with root privileges. Bash, curl, tar, Python 3,
@@ -129,7 +149,9 @@ The default ref is `main`. `T95_SETUP_REF` may select
 another existing branch/tag/commit in the same repository. HTTPS protects
 transport; it is not an independent release signature.
 
-## Local checkout
+<a id="local-checkout"></a>
+
+## 📁 Local checkout
 
 **T95 · normal SSH user with `sudo` for package preparation, then Git as that user.**
 Use a separate checkout of `main`; the PC's `v1.0.1` release tools do
@@ -151,7 +173,9 @@ present. If the directory exists already, inspect its branch and local
 changes instead of overwriting it. Local commands in module guides run from
 this repository root.
 
-## State and removal
+<a id="state-and-removal"></a>
+
+## ↩️ State and removal
 
 Each component keeps a private journal at
 `/var/lib/t95-setup/<component>/state.json`. Existing files are backed up with
@@ -171,7 +195,9 @@ older manual setup existed; old files are restored. Shared linger and
 previously running PipeWire/WirePlumber services remain. Music and pairings
 are retained.
 
-## Verify before publishing
+<a id="verify-before-publishing"></a>
+
+## 🧪 Verify before publishing
 
 **Linux PC · normal user · from the repository root:**
 

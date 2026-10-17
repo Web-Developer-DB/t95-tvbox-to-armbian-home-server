@@ -1,4 +1,6 @@
-# Vollständiges Armbian-SD-Backup
+<a id="vollständiges-armbian-sd-backup"></a>
+
+# 🗂️ Vollständiges Armbian-SD-Backup
 
 **Deutsch** | [English](BACKUP.en.md)
 
@@ -28,7 +30,15 @@ alle übrigen Befehle auf dem Linux-PC als normaler Benutzer mit `sudo`.
 
 [Zur Installation](INSTALLATION.md#6-grundsystem-sichern) · [Hilfe](TROUBLESHOOTING.md)
 
-## Voraussetzungen
+| Dein Ziel | Wo und wie? |
+| --- | --- |
+| 🗂️ Eingerichtete SD sichern | [Voraussetzungen](#voraussetzungen) → [1. Box herunterfahren](#1-box-sauber-herunterfahren) → Schritte 2–5 am Linux-PC |
+| ↩️ Gesicherten Stand zurückholen | [Wiederherstellung](#wiederherstellung-auf-dieselbe-oder-eine-ersatzkarte) am Linux-PC; löscht die Zielkarte |
+| 🛟 Ohne vollständiges SD-Backup neu beginnen | [Grundinstallation](INSTALLATION.md); persönliche Dateien separat bewahren |
+
+<a id="voraussetzungen"></a>
+
+## 📋 Voraussetzungen
 
 - Die T95 läuft noch stabil und kann sauber heruntergefahren werden.
 - Die SD-Karte wird erst nach dem Herunterfahren aus der Box genommen.
@@ -44,7 +54,9 @@ Das Backupziel sollte mindestens die Größe der gesamten SD-Karte als freien
 Platz bereitstellen. Die Komprimierung kann bei schlecht komprimierbaren Daten
 nahe an die Rohgröße herankommen.
 
-## 1. Box sauber herunterfahren
+<a id="1-box-sauber-herunterfahren"></a>
+
+## ⏻ 1. Box sauber herunterfahren
 
 **Auf der T95, normaler SSH-Benutzer mit `sudo`:**
 
@@ -55,7 +67,9 @@ sudo poweroff
 Warten, bis die Box vollständig aus ist. Erst danach die SD-Karte entnehmen
 und am Linux-PC anschließen.
 
-## 2. Quellgerät eindeutig identifizieren
+<a id="2-quellgerät-eindeutig-identifizieren"></a>
+
+## 🔎 2. Quellgerät eindeutig identifizieren
 
 **Auf dem Linux-PC, normaler Benutzer; `sudo` nur wo angegeben:**
 
@@ -87,7 +101,9 @@ Notiere den tatsächlich angezeigten Gerätenamen als `SD_DEVICE`, zum Beispiel:
 export SD_DEVICE=/dev/sdX   # /dev/sdX durch den lsblk-Namen der eigenen SD ersetzen
 ```
 
-## 3. Partitionen aushängen
+<a id="3-partitionen-aushängen"></a>
+
+## ⏏️ 3. Partitionen aushängen
 
 Wenn der Desktop die Karte automatisch eingehängt hat, müssen alle
 SD-Partitionen vor dem Rohbackup ausgehängt werden. Die Partitionsnummern
@@ -103,7 +119,9 @@ Das Release `v1.0.1` hat eine Partition. Eine Meldung wie „nicht eingehängt�
 ist unkritisch. Falls deine Karte weitere Partitionen zeigt, diese ebenfalls
 aushängen; das Gerät selbst wird nicht gemountet.
 
-## 4. Komprimiertes Vollbackup erstellen
+<a id="4-komprimiertes-vollbackup-erstellen"></a>
+
+## 🗂️ 4. Komprimiertes Vollbackup erstellen
 
 Einmalig auf Ubuntu/Debian installieren:
 
@@ -140,7 +158,9 @@ sudo dd if="$SD_DEVICE" bs=16M iflag=fullblock status=progress \
 Partition. Der Vorgang liest die SD-Karte, schreibt aber nicht auf sie oder
 auf die interne eMMC. Je nach Kartenleser kann er längere Zeit dauern.
 
-## 5. Backup prüfen und dokumentieren
+<a id="5-backup-prüfen-und-dokumentieren"></a>
+
+## ✅ 5. Backup prüfen und dokumentieren
 
 Zuerst den zstd-Datenstrom testen:
 
@@ -170,7 +190,9 @@ Dateinamen, keinen fest gebundenen Ordnerpfad.
 Quellkartengröße in Byte. Kopiere diesen Sicherungssatz gemeinsam auf einen
 zweiten, geschützten Datenträger.
 
-## Wiederherstellung auf dieselbe oder eine Ersatzkarte
+<a id="wiederherstellung-auf-dieselbe-oder-eine-ersatzkarte"></a>
+
+## ↩️ Wiederherstellung auf dieselbe oder eine Ersatzkarte
 
 Die Wiederherstellung überschreibt die Zielkarte vollständig. Sie ist nur
 notwendig, wenn eine Karte ersetzt oder der dokumentierte Systemstand exakt
@@ -291,7 +313,9 @@ bei ausgeschalteter T95** einsetzen. Nach dem Start DHCP und SSH nach der
 [Installationsanleitung](INSTALLATION.md#3-box-starten-und-netzwerkadresse-finden)
 prüfen. UART ist bei Bootproblemen eine zusätzliche Diagnosemöglichkeit.
 
-## Recovery-Grenzen
+<a id="recovery-grenzen"></a>
+
+## ℹ️ Recovery-Grenzen
 
 - Das Backup stellt den Zustand zum Zeitpunkt der Sicherung wieder her; es
   ersetzt keine regelmäßigen, versionierten Datenbackups.

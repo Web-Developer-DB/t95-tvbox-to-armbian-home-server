@@ -1,4 +1,8 @@
-# T95 → Armbian Home-Server v1.0.1
+<a id="t95--armbian-home-server-v101"></a>
+
+# 📦 T95 → Armbian Home-Server v1.0.1
+
+**Deutsch** | [English](GITHUB_RELEASE_NOTES.en.md)
 
 Stabil getestetes, hardwaregebundenes SD-Release für die Platine
 **`H616-T95MAX-AXP313A-V3.0`**, Allwinner H616, 2 GiB DDR3L,
@@ -18,7 +22,9 @@ Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
 > setzen. Ein Ersatz dieser angepassten Dateien kann den Start der Box verhindern.
 > [Pflichtschritt zum Schutz](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen).
 
-## Installation
+<a id="installation"></a>
+
+## 🚀 Installation
 
 **[→ Vollständige Anleitung auf Deutsch](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md)** ·
 **[English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.en.md)**
@@ -41,14 +47,18 @@ Dashboard und Bluetooth sind optionale Zusatzmodule aus `main`. Ihre
 dokumentierten Schritte wurden vom Projektbetreiber am 17.10.2026 geprüft
 und als funktionsfähig bestätigt.
 
-## Änderung in v1.0.1: DRAM-Stabilität
+<a id="änderung-in-v101-dram-stabilität"></a>
+
+## ⚡ Änderung in v1.0.1: DRAM-Stabilität
 
 Der Linux-DTB hält den AXP313A-Regler `dcdc3` mit Minimum und Maximum auf
 **1,36 V**. Das entspricht der SPL-Initialisierung und verhindert die vorherige
 Absenkung auf 1,20 V beim Kernelstart. Vollständige Kaltstarts bis zum Login
 wurden auf zwei Boxen der exakten Platinenrevision geprüft.
 
-## Was geprüft ist und welche Grenzen gelten
+<a id="was-geprüft-ist-und-welche-grenzen-gelten"></a>
+
+## ✅ Was geprüft ist und welche Grenzen gelten
 
 - microSD-Boot, Ethernet/DHCP, SSH, sauberes Herunterfahren und Dateizugriff
   wurden auf der Zielplatine geprüft. Samba/USB/VLC wurden auf der
@@ -69,17 +79,21 @@ wurden auf zwei Boxen der exakten Platinenrevision geprüft.
 [Hilfe nach Symptomen](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/TROUBLESHOOTING.md) ·
 [Testmatrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/VALIDATION.md)
 
-## Download-Dateien
+<a id="download-dateien"></a>
+
+## 📦 Download-Dateien
 
 Der empfohlene Installer lädt die benötigten Dateien automatisch. Für die
 manuelle Alternative genügen Image und zugehörige Image-Prüfsumme; der
 komplette Satz enthält zusätzlich Entwickler- und Nachweisdateien:
 
-- `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz`
-- `SHA256SUMS`
-- `RELEASE-MANIFEST.txt`
-- `HARDENING-METADATA.txt`
-- `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin`
-- `T95-H616-AXP313A-tanix-6.18.dtb`
+| Datei | Zweck |
+| --- | --- |
+| `T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz` | 💾 Systemimage |
+| `SHA256SUMS` | 🔎 Image-Prüfsumme |
+| `RELEASE-MANIFEST.txt` | 📋 Release-Nachweis |
+| `HARDENING-METADATA.txt` | 🔒 Härtungsnachweis |
+| `T95-H616-AXP313A-u-boot-sunxi-with-spl.bin` | 🛠️ Bootloader-Artefakt |
+| `T95-H616-AXP313A-tanix-6.18.dtb` | 🧩 Platinen-DTB-Artefakt |
 
 Persönliche Images, Passwortdaten, SSH-Schlüssel und SD-Backups bleiben privat.

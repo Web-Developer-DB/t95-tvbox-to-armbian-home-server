@@ -1,4 +1,6 @@
-# Dateiserver und USB-Laufwerke auf der T95
+<a id="dateiserver-und-usb-laufwerke-auf-der-t95"></a>
+
+# 📂 Dateiserver und USB-Laufwerke auf der T95
 
 <a id="t95-samba--usb-automount"></a>
 
@@ -17,11 +19,21 @@ Die feste Freigabe
 `/srv/t95-sd-data/Share`; sie ist von den USB-Freigaben unabhängig.
 Der eingebaute eMMC-Speicher wird nicht formatiert oder eingerichtet.
 
-[Einrichten](#dateiserver-einrichten) · [Dateien öffnen](#zugriff-von-clients-und-vlc) · [USB auswerfen](#usb-sicher-auswerfen)
+| Dein Ziel | Hier geht es weiter |
+| --- | --- |
+| 🚀 Einmalig einrichten | [Voraussetzungen](#voraussetzungen) → [Dateiserver einrichten](#dateiserver-einrichten) |
+| 📂 Dateien öffnen und speichern | [PC, Handy und VLC verbinden](#zugriff-von-clients-und-vlc) |
+| 🔌 Ein USB-Laufwerk abziehen | [Dieses Laufwerk sicher auswerfen](#usb-sicher-auswerfen) |
+| ↩️ Konfiguration zurückholen | [Einrichtung zurücknehmen](#einrichtung-zurücknehmen) |
 
 [Zur Grundinstallation](../../docs/INSTALLATION.md#7-dateiserver-einrichten) · [Alltag](../../docs/DAILY_USE.md) · [Fehlerhilfe](../../docs/TROUBLESHOOTING.md)
 
-## Voraussetzungen
+> [!TIP]
+> **Einmal einrichten, USB-Speicher im Alltag einfach nutzen.** Unterstützte Datenträger werden automatisch gemountet und einzeln freigegeben. Vor dem Abziehen immer [sicher auswerfen](#usb-sicher-auswerfen).
+
+<a id="voraussetzungen"></a>
+
+## 📋 Voraussetzungen
 
 - T95 läuft von der geprüften SD und du bist als normaler Benutzer per SSH angemeldet.
 - [Kernel-/DTB-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen) ist gesetzt.
@@ -37,7 +49,9 @@ Ein [vollständiges SD-Backup](../../docs/BACKUP.md) ist optional.
 
 <a id="schnellstart-reproduzierbare-wiederherstellung"></a>
 
-## Dateiserver einrichten
+<a id="dateiserver-einrichten"></a>
+
+## 🚀 Dateiserver einrichten
 
 Alle folgenden Installationsbefehle gehören **auf die T95**, nicht auf den PC.
 Bleibe im selben SSH-Fenster. Falls Git fehlt, zuerst installieren:
@@ -102,7 +116,9 @@ schreiben und wieder öffnen. Dafür ist noch kein USB-Laufwerk nötig.
 **Datei lässt sich schreiben und lesen?** Dann weiter mit der Bedienung unten.
 Bei Fehlern [Freigaben und Anmeldung prüfen](../../docs/TROUBLESHOOTING.md#freigabe-fehlt-oder-zugriff-wird-abgelehnt).
 
-## Zugriff von Clients und VLC
+<a id="zugriff-von-clients-und-vlc"></a>
+
+## 📂 Zugriff von Clients und VLC
 
 Bevorzugt wird die Serverwurzel:
 
@@ -128,7 +144,9 @@ smb://<SERVER-IP>/Extern-USB-1
 Für VLC wird das Samba-Passwort des zuvor festgelegten Benutzers verwendet.
 Das Projekt setzt bewusst kein Gastkonto und keine Klartext-Zugangsdaten voraus.
 
-## USB sicher auswerfen
+<a id="usb-sicher-auswerfen"></a>
+
+## ⏏️ USB sicher auswerfen
 
 Ein eingestecktes USB-Laufwerk erscheint als eigene Freigabe. Vor dem Abziehen
 Dateien auf den Clients schließen und laufende Kopiervorgänge beenden.
@@ -195,7 +213,9 @@ Aushängen entfernt; anschließend startet udiskie wieder.
 
 </details>
 
-## Einrichtung zurücknehmen
+<a id="einrichtung-zurücknehmen"></a>
+
+## ↩️ Einrichtung zurücknehmen
 
 Eine frühere Samba-Konfiguration kann aus der Sicherung wiederhergestellt
 werden. Ein vollständiges Deinstallationsprogramm für alle Pakete und
@@ -209,7 +229,9 @@ Alle folgenden Shell-Befehle laufen auf der T95 als normaler SSH-Benutzer;
 `sudo` ist dort angegeben, wo es benötigt wird. Anpassungsbeispiele ersetzen
 den empfohlenen Installationsaufruf und sind keine zusätzlichen Pflichtschritte.
 
-## Ergebnis auf einen Blick
+<a id="ergebnis-auf-einen-blick"></a>
+
+## 📊 Ergebnis auf einen Blick
 
 ```mermaid
 flowchart LR
@@ -229,7 +251,9 @@ Freigaben gemeinsam angezeigt.
 Es gibt absichtlich **keine** statische `[USB]`-Sammelfreigabe. Jedes Medium
 zeigt dadurch seine echte Kapazität und den korrekten freien Speicherplatz.
 
-## Was richtet das Samba-Modul ein?
+<a id="was-richtet-das-samba-modul-ein"></a>
+
+## ⚙️ Was richtet das Samba-Modul ein?
 
 Das Modul macht aus der laufenden T95 einen zugriffsgeschützten Dateiserver:
 
@@ -358,7 +382,9 @@ liegen unter `/etc/samba/smb.conf.before-t95.*`.
 
 Unter [USB sicher auswerfen](#usb-sicher-auswerfen) wählst du das tatsächliche Laufwerk aus.
 
-## Nach der Installation prüfen
+<a id="nach-der-installation-prüfen"></a>
+
+## ✅ Nach der Installation prüfen
 
 Alle Prüfungen laufen auf der T95, außer dem abschließenden Clienttest.
 
@@ -404,7 +430,9 @@ Beispiel `SunDiskUSB`. Ein Medium ohne Label erhält `Extern-USB-1`, danach
 `Extern-USB-2` usw. Ein bereits veröffentlichter Mountpunkt erzeugt keine
 doppelte Freigabe.
 
-## Konfiguration wiederherstellen
+<a id="konfiguration-wiederherstellen"></a>
+
+## ↩️ Konfiguration wiederherstellen
 
 Vor dem Überschreiben legt das Restore-Skript eine Sicherung an:
 
@@ -428,7 +456,9 @@ Dies stellt die Samba-Konfigurationsdatei wieder her. Ein vollständiges
 Deinstallations- oder Rückbauprogramm für alle installierten Pakete, Polkit-
 Regeln und Benutzerdateien ist absichtlich nicht Bestandteil dieses Moduls.
 
-## Sicherheit und Veröffentlichung
+<a id="sicherheit-und-veröffentlichung"></a>
+
+## 🔒 Sicherheit und Veröffentlichung
 
 > [!CAUTION]
 > Niemals produktive Geheimnisse in dieses Repository kopieren.
@@ -443,7 +473,9 @@ Nicht veröffentlichen:
 Die Vorlagen und Skripte im Modul enthalten keine Samba-Passwörter. Das
 Passwort wird erst auf der T95 mit `smbpasswd` gesetzt.
 
-## Weiterführende Dokumentation
+<a id="weiterführende-dokumentation"></a>
+
+## 📚 Weiterführende Dokumentation
 
 - [Vollständige technische Dokumentation](docs/SAMBA-USB-SETUP.md)
 - [Restore-Checkliste](docs/RESTORE-CHECKLIST.md)

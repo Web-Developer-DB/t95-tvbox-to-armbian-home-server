@@ -1,4 +1,6 @@
-# DTB porting: only after a stable FEL/DRAM test
+<a id="dtb-porting-only-after-a-stable-feldram-test"></a>
+
+# 🧩 DTB porting: only after a stable FEL/DRAM test
 
 [Deutsch](DTB_PORTING.md) | **English**
 
@@ -6,7 +8,9 @@ The Device Tree describes the specific board. It cannot replace a suitable
 SPL/U-Boot loader. If U-Boot prints no banner or DRAM cannot be initialized,
 check [FEL](FEL_BRINGUP.en.md) and [DRAM/PMIC](DRAM_PMIC.en.md) first.
 
-## Safe procedure
+<a id="safe-procedure"></a>
+
+## 🧭 Safe procedure
 
 1. Choose the closest available upstream or Armbian DTB as a starting point.
 2. Add only confirmed hardware nodes: UART, SD, eMMC, PMIC, RAM parameters,
@@ -18,7 +22,9 @@ check [FEL](FEL_BRINGUP.en.md) and [DRAM/PMIC](DRAM_PMIC.en.md) first.
 5. Preserve the complete UART log and enable further components only after a
    stable kernel start.
 
-## Ethernet is especially board-dependent
+<a id="ethernet-is-especially-board-dependent"></a>
+
+## 🌐 Ethernet is especially board-dependent
 
 The tested T95 uses the Allwinner AC300 EPHY through RMII. Another H616 box
 may differ in PHY address, reset GPIO, clock, supply, or even PHY model. The
@@ -33,7 +39,9 @@ another board.
 | Link up, no address | userspace | inspect DHCP using `ip -br addr` and `journalctl -u NetworkManager` |
 | USB, audio, or Wi-Fi fails | individual peripheral node | disable the node separately or verify it against board evidence |
 
-## Stop criteria
+<a id="stop-criteria"></a>
+
+## 🛑 Stop criteria
 
 - Do not try random GPIO, PHY, or voltage values.
 - On kernel panic, filesystem errors, or repeated DRAM failures, return to the

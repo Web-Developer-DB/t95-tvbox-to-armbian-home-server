@@ -1,9 +1,13 @@
-# Hardware identification before the first boot test
+<a id="hardware-identification-before-the-first-boot-test"></a>
+
+# 🔎 Hardware identification before the first boot test
 
 [Deutsch](HARDWARE_IDENTIFICATION.md) | **English**
 
 Photograph the open board in good light and record the exact PCB marking.
 Component markings are more important than the product name on the case.
+
+[🧭 Porting path](PORTING.en.md) · [🔌 Prepare UART](UART_BRINGUP.en.md)
 
 | Area | Determine | T95 reference | Do not copy blindly |
 | --- | --- | --- | --- |

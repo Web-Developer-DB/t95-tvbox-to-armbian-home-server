@@ -1,4 +1,6 @@
-# Öffentliche Testmatrix: stabil getesteter T95-Stand
+<a id="öffentliche-testmatrix-stabil-getesteter-t95-stand"></a>
+
+# ✅ Öffentliche Testmatrix: stabil getesteter T95-Stand
 
 **Deutsch** | [English](VALIDATION.en.md)
 
@@ -10,7 +12,12 @@ Diese Zusammenfassung enthält nur generische Prüfergebnisse. Rohe UART-Logs,
 lokale IP- und MAC-Adressen, Routerdaten, SD-Backups und die Android-Forensik
 bleiben außerhalb des öffentlichen Repositorys.
 
-## Hardware- und Startpfad
+> [!NOTE]
+> **Testergebnisse lesen:** „bestanden“ gilt für den beschriebenen Aufbau und Prüfumfang. Offene Neuinstallations- und Einzelprüfungen stehen weiter unten und werden dadurch nicht als erledigt gewertet.
+
+<a id="hardware--und-startpfad"></a>
+
+## 🔎 Hardware- und Startpfad
 
 | Test | Ergebnis | Aussage |
 |---|---|---|
@@ -38,7 +45,9 @@ Die UART-Aufzeichnung erfolgte mit einem externen
 [RP2040-Zero-UART-Adapterprojekt](https://github.com/Web-Developer-DB/rp2040-zero-uart-adapter)
 bei 3,3-V-TTL und 115200 Baud/8N1.
 
-## Härtung des öffentlichen Images
+<a id="härtung-des-öffentlichen-images"></a>
+
+## 🔒 Härtung des öffentlichen Images
 
 | Offline-Prüfung | Ergebnis |
 |---|---|
@@ -55,7 +64,9 @@ Das Ergebnis ist ein generisches, nicht direkt loginfähiges Image. Vor dem
 Schreiben wird lokal ein eigener Passwort-Hash eingetragen; die dabei erzeugte
 Kopie ist kein Release-Asset.
 
-## Release-Dateien
+<a id="release-dateien"></a>
+
+## 📦 Release-Dateien
 
 | Datei | SHA-256 |
 |---|---|
@@ -68,7 +79,9 @@ Der Loader wurde bei Byte 8192 gegen die separate Loaderdatei verglichen. Das
 Release-Asset wurde mit `xz --check=sha256` komprimiert; seine sechs Dateien
 werden über `SHA256SUMS` geprüft.
 
-## Dashboard und Bluetooth
+<a id="dashboard-und-bluetooth"></a>
+
+## 🧩 Dashboard und Bluetooth
 
 **Geprüft und getestet, bestätigt am 17.10.2026.** Der Projektbetreiber hat
 die dokumentierten Schritte für Bluetooth und Dashboard selbst geprüft und
@@ -91,7 +104,9 @@ Für diese Prüfungen die funktionierende Produktiv-SD als Rückweg erhalten.
 Die Rückmeldung enthält keine Angaben zu einer Ersatz-SD oder diesen
 Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten geführt.
 
-## Optionale Weiterentwicklung
+<a id="optionale-weiterentwicklung"></a>
+
+## 🔭 Optionale Weiterentwicklung
 
 - zusätzliche USB-/SMB-Dauerlast, weitere Kaltstarts und Langzeitstabilität;
 - WLAN, HDMI, weitere Audio-Ausgänge und Infrarot-Fernbedienung;
@@ -102,7 +117,9 @@ Der dokumentierte Grundstand darf für die geprüfte Platine als **stabil
 getesteter Home-Server-Release** bezeichnet werden. Die offenen Punkte sind
 Erweiterungen und keine bekannten Fehler im abgenommenen Funktionsumfang.
 
-## Abnahme der Installationsanleitung
+<a id="abnahme-der-installationsanleitung"></a>
+
+## ✅ Abnahme der Installationsanleitung
 
 **Stand 17.10.2026: offen.** Die neu geordnete Anleitung wurde redaktionell
 und statisch geprüft. Ein vollständiger Durchlauf genau dieses Nutzerwegs

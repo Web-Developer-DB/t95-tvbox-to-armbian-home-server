@@ -1,11 +1,15 @@
-# Change inventory: Armbian base → T95
+<a id="change-inventory-armbian-base--t95"></a>
+
+# 📋 Change inventory: Armbian base → T95
 
 [Deutsch](CHANGES_FROM_ARMBIAN.md) | **English**
 
 This is the technical, public, reproducible change reference for the compact
 overview in [README.en.md](../README.en.md).
 
-## Pinned baseline
+<a id="pinned-baseline"></a>
+
+## 📌 Pinned baseline
 
 | Property | Baseline |
 | --- | --- |
@@ -23,7 +27,9 @@ overview in [README.en.md](../README.en.md).
 Images and build artifacts remain local or are supplied only as GitHub release
 assets.
 
-## Change matrix
+<a id="change-matrix"></a>
+
+## 📋 Change matrix
 
 | ID | Armbian baseline | Project file/patch | Change and purpose | Verify when porting | Evidence |
 | --- | --- | --- | --- | --- | --- |
@@ -40,7 +46,9 @@ assets.
 | `SAMBA` | not minimal image | `server/samba-usb/` | optional Samba/USB automount layer | package, mounts, user, filesystem | installation/restore checks |
 | `PORTING` | no Armbian image change | public porting docs and host build scripts | safe host-side bring-up with optional user key | UART, FEL, Secure Boot, real board data | host check, commits, eGON manifest, UART log |
 
-## Unchanged components
+<a id="unchanged-components"></a>
+
+## ℹ️ Unchanged components
 
 - Debian/Armbian userspace and verified 6.18 kernel are the base; final 6.18
   does not need a kernel rebuild.
@@ -51,7 +59,9 @@ assets.
 - No captures, backups, raw images, individual hardware IDs, or private keys
   belong in the public repository.
 
-## Port another H616 board
+<a id="port-another-h616-board"></a>
+
+## 🧭 Port another H616 board
 
 1. Record version, kernel, partition layout, and rootfs hash (`BASE`).
 2. Isolate TOC0, SD offset, DRAM, and PMIC first (`BOOT`, `TFA`, `AXP313`).
@@ -65,7 +75,9 @@ assets.
 Change only the failed layer. A new kernel or eMMC write is never a substitute
 for missing hardware evidence.
 
-## Script markers and maintenance
+<a id="script-markers-and-maintenance"></a>
+
+## 🔄 Script markers and maintenance
 
 `ARMBIAN-BASE` marks an unchanged Armbian step, `T95-CHANGE` a project-specific
 change, and `PORTING-NOTE` a value to re-check on other hardware. For every new

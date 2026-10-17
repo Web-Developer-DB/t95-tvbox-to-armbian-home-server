@@ -62,9 +62,13 @@ Box vor dem Öffnen vollständig von der Stromversorgung trennen.
 **Gesuchter Aufdruck: `H616-T95MAX-AXP313A-V3.0`**, auf der Anschlussseite
 oberhalb des Kühlkörpers. Vergleiche ihn mit deiner Platine; der Gehäusename genügt nicht.
 
-<a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unverändertes Originalfoto der Anschlussseite; Platinenaufdruck oberhalb des Kühlkörpers" width="320"></a>
+<p>
+  <a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unverändertes Originalfoto der Anschlussseite; Platinenaufdruck oberhalb des Kühlkörpers" width="320" align="top"></a>
+  <a href="docs/images/t95-board-identification.png"><img src="docs/images/t95-board-identification.png" alt="KI-unterstützter Detailausschnitt: Platinenaufdruck H616-T95MAX-AXP313A-V3.0 mit Rahmen und Pfeil markiert" width="480" align="top"></a>
+</p>
 
-**Originalfoto anklicken und vergrößern**, um den Aufdruck zu lesen.
+**Bilder anklicken und vergrößern.** Die KI-unterstützte Detailansicht markiert
+den Platinenaufdruck. Für den Hardwareabgleich ist das unveränderte Originalfoto maßgeblich.
 
 <details>
 <summary>Weitere Hardwarefotos anzeigen</summary>

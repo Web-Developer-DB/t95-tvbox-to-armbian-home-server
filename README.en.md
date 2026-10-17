@@ -60,9 +60,13 @@ Disconnect all power before opening the box. **Look for `H616-T95MAX-AXP313A-V3.
 on the connector side above the heatsink. Compare it with your PCB;
 the case name alone is insufficient.
 
-<a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unchanged original connector-side photo; PCB marking above the heatsink" width="320"></a>
+<p>
+  <a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unchanged original connector-side photo; PCB marking above the heatsink" width="320" align="top"></a>
+  <a href="docs/images/t95-board-identification.png"><img src="docs/images/t95-board-identification.png" alt="AI-assisted detail: PCB marking H616-T95MAX-AXP313A-V3.0 highlighted with a rectangle and arrow" width="480" align="top"></a>
+</p>
 
-**Click the original photo and enlarge it** to read the marking.
+**Click either image to enlarge it.** The AI-assisted detail highlights the PCB
+marking. Use the unchanged original photo as the reference for hardware inspection.
 
 <details>
 <summary>Show more hardware photos</summary>

@@ -2,14 +2,30 @@
 
 [Deutsch](INSTALLATION.md) | **English**
 
-Follow this guide from a matching TV box to your first file transfer. Basic
-terminal and SSH knowledge is assumed. Use the recommended installer; the
+Follow this guide from a matching TV box to your first file transfer.
+The steps explain terminal use and the connection to your box. Use the recommended installer; the
 [manual alternative](#manual-alternative-for-sd-preparation) replaces only
 step 2. Do not perform both paths in sequence.
 
 **Route:** hardware → Linux PC → SD → SSH → kernel holds → backup → Samba.
 
 [Home](../README.en.md) · [Troubleshooting by symptom](TROUBLESHOOTING.en.md)
+
+## How to use the commands
+
+Open **Terminal** from the Linux PC's application menu. A command is one line
+you paste and run with **Enter**. You do not need to memorize it.
+
+- **On the Linux PC** means your computer, including image preparation.
+- **On the T95** means the SSH connection opened in step 4. SSH is remote
+  access to the box; its commands run on the box even though the window is on the PC.
+- **Normal user** means your personal account rather than `root`.
+  `sudo` permits an administrative action and may ask for that user's password.
+- Password entry shows no letters or stars. Type the password and press Enter.
+- Run blocks in order. If a command asks a question, answer it before copying
+  the next block. Text labelled **Expected** describes the response; do not type it.
+- After an error, use the linked help before continuing. Keep related commands
+  in the same window so selected addresses and paths remain available.
 
 ## 1. Prepare the hardware and PC
 
@@ -28,22 +44,27 @@ step 2. Do not perform both paths in sequence.
   not a minimum. Allow **at least 6 GB free** on the PC for the download, raw
   image, personal copy, and temporary filesystem; `/tmp` also needs about
   1.6 GB free.
+- **Backup space is additional:** reserve at least the entire SD card's size
+  on another drive. A 128-GB card may require close to that amount of free
+  backup space; the 6 GB above only covers image preparation.
 - This server path uses **Ethernet and SSH**. Wi-Fi and an HDMI display are
   not verified prerequisites.
 
-**Linux PC · normal user with `sudo` · Ubuntu/Debian:**
+**On the Linux PC, normal user; `sudo` where shown:**
 
 ```bash
 sudo apt update
-sudo apt install -y bash git curl xz-utils coreutils util-linux e2fsprogs openssl parted udev sudo gawk
+sudo apt install -y bash git curl xz-utils coreutils util-linux e2fsprogs openssl parted udev sudo gawk openssh-client
 df -h "$HOME" /tmp
 ```
 
 `e2fsprogs` supplies `debugfs`/`e2fsck`; `parted` supplies `partprobe`.
 Check the tools:
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
-for tool in bash git curl xz sha256sum lsblk dd debugfs e2fsck openssl partprobe udevadm sudo awk; do
+for tool in bash git curl xz sha256sum lsblk dd debugfs e2fsck openssl partprobe udevadm sudo awk ssh scp; do
   command -v "$tool" || { printf "Missing: %s\n" "$tool"; break; }
 done
 ```
@@ -63,12 +84,12 @@ SSH client. UART/FEL require their own serial/USB access; see
 
 ## 2. Create your personal SD card
 
-**Linux PC · normal user; the writer requests `sudo` when needed.**
-
 > [!CAUTION]
 > The selected USB medium is overwritten completely. Disconnect other USB
 > storage where practical. Check size, model, and serial before confirming
 > the exact device path.
+
+**On the Linux PC, normal user; `sudo` where shown:**
 
 ```bash
 mkdir -p "$HOME/t95-install"
@@ -115,10 +136,17 @@ before escalating to UART diagnostics.
 
 ## 4. First SSH login and normal user
 
-**Linux PC · normal user · connecting to the T95:**
+**On the Linux PC, normal user; `sudo` where shown:**
 
 ```bash
 read -r -p 'T95 IP address: ' T95_IP
+```
+
+Enter the address from the router and press Enter. Then connect:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 ssh "root@$T95_IP"
 ```
 
@@ -137,13 +165,29 @@ and creation of a normal user; retain that username privately.
 `exit` if necessary. If the dialog already ended the session, reconnect
 directly. Run the next block on the PC:
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
 read -r -p 'T95 IP address: ' T95_IP
+```
+
+Answer with the box address and press Enter. Next ask for your new username:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 read -r -p 'Normal Linux user on the T95: ' T95_LOGIN
+```
+
+Enter the username created in the first-run dialog, then connect:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 ssh "$T95_LOGIN@$T95_IP"
 ```
 
-**T95 · normal SSH user:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 whoami
@@ -162,12 +206,12 @@ user's Linux password. For problems, [check access](TROUBLESHOOTING.en.md#ssh-lo
 
 ## 5. Protect the kernel and DTB before updates
 
-**T95 · normal SSH user with `sudo` · before installing more packages.**
-
 > [!CAUTION]
 > Do not run `apt upgrade`, `apt full-upgrade`, or `armbian-upgrade` first.
 > The kernel and DTB hardware description must match the tested board.
 > Replacing them can break booting or Ethernet.
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
@@ -183,7 +227,7 @@ updates require a backup and renewed hardware checks; see the
 
 ## 6. Back up the base system
 
-**T95 · normal SSH user with `sudo`:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo poweroff
@@ -200,7 +244,7 @@ normal SSH user from step 4.
 ## 7. Set up file sharing
 
 **T95 · normal SSH user with `sudo`:** follow the
-[Samba quick start](../server/samba-usb/README.en.md#quick-start-reproducible-restore).
+[File server setup](../server/samba-usb/README.en.md#quick-start-reproducible-restore).
 It is the authoritative installation and client-test guide; commands are not
 duplicated here.
 
@@ -215,6 +259,8 @@ a file-manager location, not a terminal command. For problems,
 [check shares and authentication](TROUBLESHOOTING.en.md#share-missing-or-access-denied).
 
 ## 8. Daily use and optional extensions
+
+Use [everyday use](DAILY_USE.en.md) to reconnect, reboot, or shut down.
 
 - [Eject USB safely](../server/samba-usb/README.en.md#safely-eject-usb-storage)
   before unplugging; reinsert and test access afterward.
@@ -238,6 +284,8 @@ run. Step 1 hardware and PC requirements still apply.
 
 ### A. Download and verify the release
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
 mkdir -p "$HOME/t95-install"
 cd "$HOME/t95-install"
@@ -257,6 +305,8 @@ working directory rather than overwriting it.
 
 In the same PC terminal:
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
 cd "$HOME/t95-install"
 xz -dk --keep T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
@@ -274,9 +324,25 @@ does not overwrite a personal image.
 
 ### C. Select the card and write with verification
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
+```
+
+Check the whole card using the criteria from step 1. Then enter this prompt:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 read -r -p 'Verified SD device, e.g. /dev/sdb: ' T95_SD
+```
+
+Answer with your checked device path, press Enter, then run the writer:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 bash "$HOME/t95-install/t95-release-tools/tools/write-t95-provisioned-image-to-sd.sh" \
   "$T95_SD" \
   "$HOME/t95-install/t95-private/t95-personal.img" \

@@ -1,22 +1,203 @@
-# T95 Samba + USB-Automount
+# Dateiserver und USB-Laufwerke auf der T95
+
+<a id="t95-samba--usb-automount"></a>
 
 **Deutsch** | [English](README.en.md)
 
-![Status: getestet](https://img.shields.io/badge/Status-Samba%2FUSB%20getestet-brightgreen)
-![Platform: Armbian](https://img.shields.io/badge/Platform-Armbian%20%2F%20Debian-18a303)
-![Protocol: SMB2%2FSMB3](https://img.shields.io/badge/Protocol-SMB2%20%2F%20SMB3-blue)
-![Secrets: lokal](https://img.shields.io/badge/Secrets-nie%20in%20GitHub-critical)
+Teile Dateien im Heimnetz mit PC, Handy oder VLC. Die feste Freigabe
+**`T95-DATA` liegt beim empfohlenen Erststart auf der System-SD** unter
+`/srv/t95-sd-data/Share`. Eingesteckte USB-Laufwerke erhalten eigene Freigaben.
+Der eingebaute eMMC-Speicher wird nicht formatiert oder eingerichtet.
 
-Reproduzierbare Samba-/USB-Konfiguration für den als Armbian-Home-Server
-betriebenen T95. Die Anleitung richtet sich an eine laufende T95-Armbian-Box,
-nicht an den Linux-PC, auf dem das T95-Image gebaut wird.
+[Einrichten](#dateiserver-einrichten) · [Dateien öffnen](#zugriff-von-clients-und-vlc) · [USB auswerfen](#usb-sicher-auswerfen)
 
-[Zur Installation](../../docs/INSTALLATION.md#7-dateiserver-einrichten) ·
-[Hilfe bei Problemen](../../docs/TROUBLESHOOTING.md)
+[Zur Grundinstallation](../../docs/INSTALLATION.md#7-dateiserver-einrichten) · [Alltag](../../docs/DAILY_USE.md) · [Fehlerhilfe](../../docs/TROUBLESHOOTING.md)
 
-**Empfohlener Erststart:** Die feste Freigabe liegt ausdrücklich auf der
-System-SD unter `/srv/t95-sd-data/Share`. USB-Laufwerke bekommen eigene
-Freigaben. eMMC ist eine spätere Erweiterung.
+## Voraussetzungen
+
+- T95 läuft von der geprüften SD und du bist als normaler Benutzer per SSH angemeldet.
+- [Kernel-/DTB-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen) und privates SD-Backup sind erledigt.
+- Dein T95-Benutzer kann `sudo` verwenden; für die Installation ist Internet nötig.
+- USB-Festplatten haben bei Bedarf eine eigene ausreichende Stromversorgung.
+
+> [!WARNING]
+> Eine vorhandene Samba-Konfiguration wird nach einer Sicherung ersetzt.
+> Auf einer bereits angepassten Installation zuerst die
+> [technische Referenz](docs/SAMBA-USB-SETUP.md) lesen.
+
+<a id="schnellstart-reproduzierbare-wiederherstellung"></a>
+
+## Dateiserver einrichten
+
+Alle folgenden Installationsbefehle gehören **auf die T95**, nicht auf den PC.
+Bleibe im selben SSH-Fenster. Falls Git fehlt, zuerst installieren:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo apt update
+sudo apt install -y git
+```
+
+### 1. Modul beziehen und Manifest prüfen
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+git clone --branch main --depth 1 \
+  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+cd t95-tvbox-to-armbian-home-server/server/samba-usb
+sha256sum -c MANIFEST.sha256
+```
+
+**Ergebnis:** Alle Prüfzeilen enden mit `OK`. Bei `FAILED` hier stoppen.
+Existiert der Zielordner bereits, die vorhandene Kopie und lokale Änderungen
+prüfen, statt sie zu überschreiben. Der Release-Werkzeugeordner auf dem PC ist
+kein Checkout der aktuellen Servermodule.
+
+### 2. Linux-Benutzer und Netzwerk prüfen
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+export T95_USER="$(id -un)"
+id "$T95_USER"
+ip -brief address
+```
+
+**Ergebnis:** `id` zeigt deinen normalen T95-Benutzer, nicht `root`.
+Notiere die IPv4-Adresse für den Dateizugriff auf dem PC.
+
+### 3. Installation ausführen
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share \
+  ./scripts/restore-samba-usb-setup.sh
+```
+
+Die Abfrage von `sudo` erwartet dein Linux-Passwort. Wenn noch kein Samba-Konto
+existiert, fragt das Skript anschließend nach einem **Samba-Passwort** für
+Dateifreigaben. Dabei erscheinen keine Zeichen. Beide Passwörter haben
+unterschiedliche Aufgaben und werden getrennt verwaltet.
+
+**Ergebnis:** Nach `Fertig.` ist die Einrichtung beendet.
+Öffne **auf dem Client-PC im Dateimanager** `smb://<SERVER-IP>/T95-DATA`, unter
+Windows im Explorer `\\<SERVER-IP>\T95-DATA`. `<SERVER-IP>` durch die Adresse
+der Box ersetzen; die Adresse ist kein Terminalbefehl.
+Mit T95-Benutzername und Samba-Passwort anmelden. Eine kleine Testdatei
+schreiben und wieder öffnen. Dafür ist noch kein USB-Laufwerk nötig.
+
+**Datei lässt sich schreiben und lesen?** Dann weiter mit der Bedienung unten.
+Bei Fehlern [Freigaben und Anmeldung prüfen](../../docs/TROUBLESHOOTING.md#freigabe-fehlt-oder-zugriff-wird-abgelehnt).
+
+## Zugriff von Clients und VLC
+
+Bevorzugt wird die Serverwurzel:
+
+```text
+smb://<SERVER-IP>/
+```
+
+Direkte Pfade sind ebenfalls möglich:
+
+```text
+smb://<SERVER-IP>/T95-DATA
+smb://<SERVER-IP>/SunDiskUSB
+smb://<SERVER-IP>/Extern-USB-1
+```
+
+| Client | Zugriff |
+| --- | --- |
+| Linux-Dateimanager | `smb://<SERVER-IP>/` öffnen und Samba-Benutzer anmelden |
+| Windows-Explorer | `\\<SERVER-IP>\` öffnen |
+| Android-Dateimanager | SMB-/Netzwerkfreigabe mit Server-IP und Samba-Konto anlegen |
+| VLC | Netzwerkfreigabe öffnen und die gewünschte SMB-Datei auswählen |
+
+Für VLC wird das Samba-Passwort des zuvor festgelegten Benutzers verwendet.
+Das Projekt setzt bewusst kein Gastkonto und keine Klartext-Zugangsdaten voraus.
+
+## USB sicher auswerfen
+
+Ein eingestecktes USB-Laufwerk erscheint als eigene Freigabe. Vor dem Abziehen
+Dateien auf den Clients schließen und laufende Kopiervorgänge beenden.
+Liste zuerst die USB-Freigaben auf:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+T95_USER="$(id -un)"
+sudo -u "$T95_USER" net usershare list
+```
+
+**Beispielantwort — nur lesen:**
+
+```text
+SunDiskUSB
+```
+
+Ohne eingebundenes USB-Laufwerk darf die Liste leer sein.
+`T95-DATA` ist die feste SD-Freigabe und gehört nicht in diese USB-Liste.
+Wenn dein Laufwerk gelistet ist, diese Abfrage starten:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+read -r -p 'Freigabename des auszuwerfenden USB-Laufwerks: ' T95_SHARE
+```
+
+Den tatsächlichen Namen aus deiner Liste eingeben, Enter drücken, dann
+**genau dieses Laufwerk** auswerfen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo usb-eject "$T95_SHARE"
+```
+
+**Ergebnis:** Erst bei `USB-Datenträger kann entfernt werden.` oder
+`Der Datenträger kann entfernt werden.` abziehen. Die zweite Meldung kann
+bei einem nicht unterstützten USB-Power-off erscheinen. Bei `DeviceBusy`
+geöffnete Dateien und Wiedergaben schließen; ein Terminal darf ebenfalls
+nicht im USB-Ordner stehen. Danach erneut versuchen. Weitere
+[USB-Fehlerhilfe](../../docs/TROUBLESHOOTING.md#usb-laufwerk-fehlt-oder-ist-belegt).
+
+Danach kontrollieren:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo -u "$T95_USER" net usershare list
+lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
+```
+
+Die Freigabe ist verschwunden; nach erfolgreichem Power-off sollte das Gerät
+auch nicht mehr in `lsblk` erscheinen. Wiedereinstecken erzeugt die Freigabe erneut.
+
+<details>
+<summary>Was beim Auswerfen passiert</summary>
+
+`usb-eject` hält udiskie vorübergehend an, schließt Verbindungen zur gewählten
+Freigabe, synchronisiert Schreibvorgänge, hängt alle Partitionen dieses
+USB-Geräts aus und schaltet es ab. Zuordnungen werden erst nach erfolgreichem
+Aushängen entfernt; anschließend startet udiskie wieder.
+
+</details>
+
+## Einrichtung zurücknehmen
+
+Eine frühere Samba-Konfiguration kann aus der Sicherung wiederhergestellt
+werden. Ein vollständiges Deinstallationsprogramm für alle Pakete und
+Benutzerdateien ist nicht Teil dieses Moduls. Die Schritte stehen unten in
+„Technische Details und Wiederherstellung“.
+
+<details>
+<summary>Technische Details und Wiederherstellung</summary>
+
+Alle folgenden Shell-Befehle laufen auf der T95 als normaler SSH-Benutzer;
+`sudo` ist dort angegeben, wo es benötigt wird. Anpassungsbeispiele ersetzen
+den empfohlenen Installationsaufruf und sind keine zusätzlichen Pflichtschritte.
 
 ## Ergebnis auf einen Blick
 
@@ -32,7 +213,7 @@ flowchart LR
 ```
 
 Die geprüfte Bedienung ist die Serverwurzel `smb://<SERVER-IP>/`. Dort werden
-die interne Freigabe `T95-DATA` und alle aktuell eingesteckten USB-/SSD-
+die feste Freigabe `T95-DATA` und alle aktuell eingesteckten USB-/SSD-
 Freigaben gemeinsam angezeigt.
 
 Es gibt absichtlich **keine** statische `[USB]`-Sammelfreigabe. Jedes Medium
@@ -83,96 +264,6 @@ vorhandenen Dateien.
 Andere Debian-/Armbian-Systeme können funktionieren, sind aber durch diese
 Projektabnahme nicht automatisch bestätigt.
 
-## Voraussetzungen
-
-Vor der Installation:
-
-- T95 ist vollständig von der funktionierenden microSD gestartet und per SSH
-  erreichbar. Der eMMC-Boot ist in diesem Projekt nicht der unterstützte Weg.
-- Die interne eMMC kann optional als ext4-Datenlaufwerk eingebunden werden.
-  Der Mount muss vor dem Samba-Zugriff vorhanden sein; das Restore-Skript
-  formatiert oder partitioniert die eMMC nicht.
-- Ein normaler Linux-Benutzer existiert bereits, zum Beispiel `serveruser`.
-- Dieser Benutzer darf `sudo` verwenden; das Skript selbst läuft als root.
-- Die Box hat während der Paketinstallation Internetzugang.
-- Für USB-Platten ist eine ausreichende externe Stromversorgung vorhanden.
-- Eine bestehende Samba-Konfiguration ist gesichert oder darf ersetzt werden.
-
-> [!WARNING]
-> Das Restore-Skript installiert Pakete und Dienste, aktiviert `smbd`, `nmbd`
-> und den Benutzerdienst `udiskie`. Eine vorhandene `/etc/samba/smb.conf` wird
-> zunächst mit Zeitstempel gesichert und anschließend durch eine bekannte
-> Minimal-Konfiguration ersetzt. Auf einem produktiven Samba-Server zuerst
-> [die technische Dokumentation](docs/SAMBA-USB-SETUP.md) lesen.
-
-## Schnellstart: reproduzierbare Wiederherstellung
-
-Die folgenden Befehle werden **auf der T95 als normaler SSH-Benutzer**
-ausgeführt. `T95_USER` wird automatisch auf diesen Benutzer gesetzt; die
-Ausgabe von `id` muss deinen normalen Benutzernamen zeigen, nicht `root`.
-
-**Ausführungsort:** Alle Befehle bis zum Clienttest auf der T95 als normaler
-SSH-Benutzer mit `sudo`. Zuerst die [Kernel-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
-setzen und ein SD-Backup erstellen. Der Checkout verwendet `main`;
-der Release-Werkzeugeordner auf dem PC ist ein anderer Ordner.
-
-Das Skript ersetzt `/etc/samba/smb.conf` nach einer Sicherung mit Zeitstempel.
-Bei einer bereits angepassten Samba-Installation zuerst die
-[technische Referenz](docs/SAMBA-USB-SETUP.md) lesen.
-
-Falls Git fehlt, auf der T95 ausführen:
-
-```bash
-sudo apt update
-sudo apt install -y git
-```
-
-### 1. Modul beziehen und Manifest prüfen
-
-```bash
-git clone --branch main --depth 1 \
-  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
-cd t95-tvbox-to-armbian-home-server/server/samba-usb
-sha256sum -c MANIFEST.sha256
-```
-
-Bei lokaler Kopie genügt der Wechsel in das vorhandene Verzeichnis. Die
-Manifestprüfung muss vor einer Wiederherstellung ohne `FAILED`-Zeile enden.
-
-### 2. Linux-Benutzer und Netzwerk prüfen
-
-```bash
-export T95_USER="$(id -un)"
-id "$T95_USER"
-ip -brief address
-```
-
-`id` muss den Benutzer auflösen. Die aktuelle IPv4-Adresse wird später als
-`<SERVER-IP>` für den Clientzugriff verwendet.
-
-### 3. Installation ausführen
-
-```bash
-sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share \
-  ./scripts/restore-samba-usb-setup.sh
-```
-
-Dieser Aufruf legt `T95-DATA` auf der SD an. Das Skript installiert
-unter anderem Samba, UDisks2, udiskie, Polkit und die
-Dateisystemwerkzeuge für exFAT/NTFS. Falls noch kein Samba-Konto existiert,
-fragt es interaktiv nach dem Samba-Passwort für `T95_USER`.
-
-Nach `Fertig.` zuerst auf dem **Client-PC im Dateimanager**
-`smb://<SERVER-IP>/T95-DATA` oder unter Windows `\\<SERVER-IP>\T95-DATA`
-öffnen. Ersetze `<SERVER-IP>` durch die aktuelle Routeradresse und melde dich
-mit Linux-Benutzername und Samba-Passwort an. Schreibe und lies eine kleine
-Testdatei. Dazu ist noch kein USB-Laufwerk erforderlich. Anschließend kannst
-du USB-Speicher einstecken und dessen eigene Freigabe in der Serverwurzel
-`smb://<SERVER-IP>/` prüfen.
-
-<details>
-<summary>Optionale Anpassungen und Skriptübersicht</summary>
-
 ### Einrichtung anpassen
 
 Die folgenden Alternativen ersetzen den Aufruf aus Schritt 3. Führe sie nur
@@ -181,6 +272,8 @@ aus, wenn du bewusst einen anderen Speicherort oder Namen wählen möchtest.
 Du kannst Benutzername, Servername und festen Speicherpfad beim Skriptaufruf
 setzen. Ersetze `serveruser` durch deinen normalen Linux-Benutzer. `DATA_PATH`
 legt fest, wohin die feste Freigabe `T95-DATA` zeigt:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo T95_USER=serveruser \
@@ -195,19 +288,22 @@ sudo T95_USER=serveruser \
 | `NETBIOS_NAME` | nein | `T95-SERVER` | Name des Servers im SMB-Netz |
 | `DATA_PATH` | nein | `/srv/T95-DATA/Share` | Verzeichnis der festen Freigabe |
 
-Beispiel: feste Freigabe auf dem System-Dateisystem der SD-Karte einrichten:
-
-```bash
-sudo T95_USER=serveruser \
-  DATA_PATH=/srv/t95-sd-data/Share \
-  ./scripts/restore-samba-usb-setup.sh
-```
+Für den empfohlenen SD-Pfad gilt der Aufruf unter [Dateiserver einrichten](#dateiserver-einrichten).
 
 Beispiel: feste Freigabe auf eMMC einrichten, die bereits unter
 `/srv/T95-DATA` eingehängt ist:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
 findmnt /srv/T95-DATA
+```
+
+Nur fortfahren, wenn der erwartete eMMC-Mount angezeigt wird. Danach ausführen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
 sudo T95_USER=serveruser \
   DATA_PATH=/srv/T95-DATA/Share \
   ./scripts/restore-samba-usb-setup.sh
@@ -225,6 +321,8 @@ Das Skript verwendet außerdem `/media/<T95_USER>` als USB-Mountbasis und
 Wechsle in das geklonte Modulverzeichnis und rufe das Restore-Skript mit den
 gewünschten Werten erneut auf. Zum Beispiel, um `T95-DATA` von eMMC auf die
 SD-Karte zu verlegen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 cd ~/t95-tvbox-to-armbian-home-server/server/samba-usb
@@ -248,23 +346,16 @@ liegen unter `/etc/samba/smb.conf.before-t95.*`.
 | `scripts/t95-usb-share` | Erstellt oder entfernt die dynamische Freigabe für ein eingebundenes USB-Dateisystem. | Nein, `udiskie` ruft es automatisch auf. |
 | `scripts/usb-eject` | Trennt die ausgewählte Freigabe, synchronisiert Schreibvorgänge, hängt das Laufwerk aus und schaltet es ab. | Ja, vor dem physischen Abziehen eines USB-Laufwerks. |
 
-Zum sicheren Auswerfen den Freigabenamen verwenden:
-
-```bash
-sudo usb-eject SunDiskUSB
-```
-
-Der Freigabename entspricht normalerweise dem Laufwerkslabel. Die folgenden
-Abschnitte zeigen Prüfungen und Fehlerbehebung, falls etwas nicht wie erwartet
-funktioniert.
-
-</details>
+Unter [USB sicher auswerfen](#usb-sicher-auswerfen) wählst du das tatsächliche Laufwerk aus.
 
 ## Nach der Installation prüfen
 
 Alle Prüfungen laufen auf der T95, außer dem abschließenden Clienttest.
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
+T95_USER="$(id -un)"
 sudo testparm -s
 systemctl --no-pager --full status smbd
 systemctl --no-pager --full status nmbd
@@ -290,6 +381,8 @@ an und lies sie wieder. Erst dieser Test bestätigt den tatsächlichen Zugriff.
 
 Nach dem Einstecken:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
 sudo -u "$T95_USER" net usershare list
@@ -301,62 +394,6 @@ Beispiel `SunDiskUSB`. Ein Medium ohne Label erhält `Extern-USB-1`, danach
 `Extern-USB-2` usw. Ein bereits veröffentlichter Mountpunkt erzeugt keine
 doppelte Freigabe.
 
-## Zugriff von Clients und VLC
-
-Bevorzugt wird die Serverwurzel:
-
-```text
-smb://<SERVER-IP>/
-```
-
-Direkte Pfade sind ebenfalls möglich:
-
-```text
-smb://<SERVER-IP>/T95-DATA
-smb://<SERVER-IP>/SunDiskUSB
-smb://<SERVER-IP>/Extern-USB-1
-```
-
-| Client | Zugriff |
-| --- | --- |
-| Linux-Dateimanager | `smb://<SERVER-IP>/` öffnen und Samba-Benutzer anmelden |
-| Windows-Explorer | `\\<SERVER-IP>\` öffnen |
-| Android-Dateimanager | SMB-/Netzwerkfreigabe mit Server-IP und Samba-Konto anlegen |
-| VLC | Netzwerkfreigabe öffnen und die gewünschte SMB-Datei auswählen |
-
-Für VLC wird das Samba-Passwort des zuvor festgelegten Benutzers verwendet.
-Das Projekt setzt bewusst kein Gastkonto und keine Klartext-Zugangsdaten voraus.
-
-## USB sicher auswerfen
-
-Immer den Freigabenamen verwenden, nicht blind ein `/dev/sdX`-Gerät angeben:
-
-```bash
-sudo usb-eject SunDiskUSB
-sudo usb-eject Extern-USB-1
-```
-
-`usb-eject` führt in dieser Reihenfolge aus:
-
-1. `udiskie` vorübergehend anhalten;
-2. aktive Samba-Verbindungen nur für die ausgewählte Freigabe schließen;
-3. Schreibpuffer synchronisieren;
-4. alle Partitionen des physischen USB-Geräts aushängen;
-5. Usershare und State-Datei erst nach erfolgreichem Unmount entfernen;
-6. das Gerät über UDisks ausschalten;
-7. `udiskie` wieder starten.
-
-Erfolg kontrollieren:
-
-```bash
-findmnt "/media/$T95_USER/<MOUNTNAME>"
-sudo -u "$T95_USER" net usershare list
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-```
-
-Nach dem Power-off sollte das physische USB-Gerät nicht mehr in `lsblk`
-erscheinen. Beim erneuten Einstecken wird die Freigabe automatisch neu erzeugt.
-
 ## Konfiguration wiederherstellen
 
 Vor dem Überschreiben legt das Restore-Skript eine Sicherung an:
@@ -367,6 +404,8 @@ Vor dem Überschreiben legt das Restore-Skript eine Sicherung an:
 
 Verfügbare Sicherungen anzeigen und die gewünschte Sicherung kontrolliert
 wiederherstellen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo ls -1t /etc/samba/smb.conf.before-t95.*
@@ -401,3 +440,5 @@ Passwort wird erst auf der T95 mit `smbpasswd` gesetzt.
 - [Fehlerdiagnose](docs/TROUBLESHOOTING.md)
 - [Hinweise zur GitHub-Veröffentlichung](docs/GITHUB-PUBLISH.md)
 - [Änderungsverlauf](CHANGELOG.md)
+
+</details>

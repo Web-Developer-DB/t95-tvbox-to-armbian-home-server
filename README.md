@@ -3,139 +3,141 @@
 **Deutsch** | [English](README.en.md)
 
 Eine T95 mit **Allwinner H616 und der Platine `H616-T95MAX-AXP313A-V3.0`**
-als kleinen Datei- und Medienserver weiterverwenden: Armbian startet von
-microSD, Ethernet verbindet die Box mit dem Heimnetz, SSH dient zur Bedienung.
-Samba stellt auf Wunsch Dateien für PC, Android und VLC bereit.
+als kleinen Home-Server nutzen: Armbian startet von microSD und verbindet die
+Box per Ethernet mit deinem Heimnetz.
 
-Armbian ist ein vollständiges Linux-System, hier auf Basis von Debian 13.
-Die Skripte dieses Projekts sind **optionale Ergänzungen für die private
-Nutzung des Projektbetreibers**. Nach der Grundinstallation mit
-[Kernel-/DTB-Sperre](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
-kannst du weitere passende Anwendungen aus den Debian-Paketquellen und
-Docker-Container installieren.
-Ideen und Anleitungen findest du im **[Armbian-Software-Katalog](https://docs.armbian.com/software/)**
-und in der [Docker-Anleitung von Armbian](https://docs.armbian.com/software/docker/).
+**[Neu einrichten](docs/INSTALLATION.md)** · **[Im Alltag benutzen](docs/DAILY_USE.md)** · **[Problem lösen](docs/TROUBLESHOOTING.md)**
+
+Armbian ist ein vollständiges Linux-System auf Basis von Debian 13.
+Die Projektskripte sind **optionale Ergänzungen für die private Nutzung des
+Projektbetreibers**. Weitere Anwendungen findest du im
+**[Armbian-Software-Katalog](https://docs.armbian.com/software/)** und in der
+[Docker-Anleitung](https://docs.armbian.com/software/docker/) — für die Zeit
+**nach der Grundinstallation mit Kernel-Sperre und Backup**.
 
 ![Basisrelease: hardwaregeprüft](https://img.shields.io/badge/Basisrelease-hardwaregepr%C3%BCft-brightgreen)
-![System: Armbian 26.8.4](https://img.shields.io/badge/Armbian-26.8.4-18a303)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
 
 > [!WARNING]
-> **Zuerst die Platine prüfen.** „T95“ bezeichnet unterschiedliche Hardware.
-> Nur `H616-T95MAX-AXP313A-V3.0` ist für dieses Image geprüft. Bei anderer
-> oder unbekannter Platine hier stoppen: [Hardware identifizieren](docs/HARDWARE_IDENTIFICATION.md)
-> und [Entwicklerpfad](docs/PORTING.md).
+> **Zuerst die Platine prüfen:** [Aufdruck mit dem Originalfoto vergleichen](#hardware-fotos).
+> „T95“ bezeichnet unterschiedliche Hardware. Nur `H616-T95MAX-AXP313A-V3.0`
+> ist für dieses Image geprüft. Bei anderer oder unbekannter Platine stoppen:
+> [Hardware identifizieren](docs/HARDWARE_IDENTIFICATION.md) und [Entwicklerpfad](docs/PORTING.md).
 
 > [!CAUTION]
 > **⛔ PFLICHT: KERNEL UND DTB SPERREN**
 >
-> **Nach der Ersteinrichtung, vor weiterer Softwareinstallation oder Systemupdates:**
-> Kernel und DTB sperren und **die Sperre im normalen Betrieb nicht aufheben**.
-> Ein Kernel-/DTB-Update kann die T95-Anpassungen überschreiben —
+> Nach der Ersteinrichtung, **vor weiterer Softwareinstallation oder Systemupdates**,
+> Kernel und DTB (die Hardwarebeschreibung) sperren. **Die Sperre im normalen
+> Betrieb nicht aufheben.** Ein Ersatz kann die T95-Anpassungen überschreiben —
 > **die Box startet danach möglicherweise nicht mehr.**
 >
-> **[→ Jetzt den Pflichtschritt zur Kernel-/DTB-Sperre lesen](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)**
+> **[→ Pflichtschritt zur Kernel-/DTB-Sperre](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)**
 
 ## Home-Server installieren
 
-**[→ Zur vollständigen Installationsanleitung](docs/INSTALLATION.md)**
+**[→ Mit Schritt 1 der Installationsanleitung beginnen](docs/INSTALLATION.md)**
 
-Der empfohlene Weg setzt grundlegende Terminal-/SSH-Kenntnisse und einen
-Linux-PC mit USB-Kartenleser voraus. Er enthält Voraussetzungen, Download,
-Prüfung und lokale Passwortvergabe, SD-Schreiben, Erstlogin und Dateifreigaben.
+Du brauchst:
 
-**Hardware prüfen → PC vorbereiten → SD erstellen → SSH → Kernel schützen
-→ Backup → Samba → Dateizugriff prüfen**
+- die geprüfte Box mit passender Stromversorgung;
+- eine entbehrliche microSD und einen USB-Kartenleser;
+- einen Linux-PC, Internet und Ethernet zum Router;
+- Platz für die Image-Vorbereitung **und zusätzlich für ein vollständiges SD-Backup**.
+
+Die Anleitung erklärt Terminal und SSH, also den Fernzugriff auf die Box.
+Windows/WSL2 hat einen eigenen Abschnitt mit zusätzlichen Gerätevoraussetzungen.
+
+**Hardware → PC → SD → SSH → Kernel sperren → Backup → optionaler Dateiserver**
 
 > [!IMPORTANT]
-> Das Download-Image hat **kein Standardpasswort**. Vor dem Schreiben ist
-> eine persönliche Kopie mit eigenem Passwort erforderlich. Die Anleitung
-> erledigt das mit dem geprüften Installer. Alle Schreibvorgänge löschen
-> die ausgewählte SD vollständig; die interne Android-eMMC wird dabei nicht beschrieben.
-
-**Schon installiert?** [Hilfe nach Symptomen](docs/TROUBLESHOOTING.md) ·
-[Samba und USB](server/samba-usb/README.md) · [SD-Backup](docs/BACKUP.md)
+> **Kein Standardpasswort:** Vor dem Schreiben eine persönliche Image-Kopie
+> mit eigenem Passwort erzeugen. Der Installer führt dich durch diesen Schritt.
+> **Schreiben löscht die ausgewählte SD vollständig.** Die eMMC, der fest
+> eingebaute Android-Speicher der Box, wird dabei nicht beschrieben.
 
 ## Hardware-Fotos
 
-Vergleiche den **Platinenaufdruck**, nicht nur das Gehäuse. Auf der
-Anschlussseite steht er direkt oberhalb des Kühlkörpers. Die KI-unterstützte
-Orientierungsansicht markiert die gesuchte Stelle; für den Hardwareabgleich
-sind die unveränderten Originalfotos darunter maßgeblich.
 Box vor dem Öffnen vollständig von der Stromversorgung trennen.
+**Gesuchter Aufdruck: `H616-T95MAX-AXP313A-V3.0`**, auf der Anschlussseite
+oberhalb des Kühlkörpers. Vergleiche ihn mit deiner Platine; der Gehäusename genügt nicht.
 
-![KI-unterstützte Orientierungsansicht des Platinenaufdrucks H616-T95MAX-AXP313A-V3.0](docs/images/t95-board-identification.png)
+<a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unverändertes Originalfoto der Anschlussseite; Platinenaufdruck oberhalb des Kühlkörpers" width="320"></a>
+
+**Originalfoto anklicken und vergrößern**, um den Aufdruck zu lesen.
+
+<details>
+<summary>Weitere Hardwarefotos anzeigen</summary>
 
 <p>
-  <a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Original: Anschlussseite der geprüften Platine" width="320"></a>
-  <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original: Speicherbausteine auf der Rückseite" width="240"></a>
-</p>
-<p>
+  <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original: Speicherbausteine auf der Rückseite" width="200"></a>
   <a href="docs/images/t95-box-top.jpg"><img src="docs/images/t95-box-top.jpg" alt="T95-Gehäuse von oben" width="200"></a>
   <a href="docs/images/t95-case-bottom-redacted.jpg"><img src="docs/images/t95-case-bottom-redacted.jpg" alt="Gehäuseunterseite mit abgedecktem individuellen Aufkleber" width="200"></a>
 </p>
 
-Die Originalfotos lassen sich durch Anklicken vergrößern. Sie ersetzen keine
-Hardwareprüfung. EXIF-/GPS-Daten sind entfernt; individuelle Aufkleber sind abgedeckt.
+Die Originalfotos lassen sich vergrößern. EXIF-/GPS-Daten sind entfernt;
+individuelle Aufkleber sind abgedeckt.
+
+</details>
 
 ## Was funktioniert?
 
-| Funktion | Dokumentierter Stand |
+| Funktion | Stand |
 | --- | --- |
-| Armbian von microSD, Ethernet, DHCP, SSH, Herunterfahren | Auf der exakten Platine geprüft |
-| Samba-Dateifreigaben, USB-Automount, Auswurf, VLC über SMB | Auf der Referenzinstallation geprüft; separat einzurichten |
-| eMMC als Datenlaufwerk | Auf der Referenzinstallation geprüft; eigene Einrichtung nötig |
-| Armbian von eMMC starten | Nicht erfolgreich; microSD bleibt der unterstützte Bootweg |
-| SSH-Dashboard: Einrichtung und Anzeige | Vom Projektbetreiber geprüft und als funktionsfähig bestätigt (17.10.2026) |
-| Bluetooth-Musikplayer: Einrichtung und Bedienung | Vom Projektbetreiber geprüft und als funktionsfähig bestätigt (17.10.2026) |
-| WLAN, HDMI als Serverfunktion, Fernbedienung und weitere Langzeittests | Nicht Bestandteil der Basisabnahme |
+| microSD-Boot, Ethernet, SSH und Herunterfahren | ✅ Getestet |
+| Samba, USB-Laufwerke und VLC über SMB | ✅ Getestet; optional einzurichten |
+| SSH-Dashboard und Bluetooth-Musikplayer | ✅ Getestet; optional einzurichten |
+| eMMC als Datenlaufwerk | ✅ Getestet; eigene Vorbereitung nötig |
+| Armbian von eMMC starten | Nicht unterstützt; microSD verwenden |
+| WLAN, HDMI als Serverfunktion, Infrarot-Fernbedienung | Nicht geprüft |
 
-Die Basis ist Armbian **26.8.4 / Debian 13 Trixie / Kernel
-`6.18.48-current-sunxi64`**. Nach dem Erstlogin schützt die Anleitung Kernel
-und DTB vor unkontrolliertem Ersatz. Ethernet ist auf 100 Mbit/s begrenzt;
-im Referenztest wurden ungefähr 11–12 MB/s Nutzdaten erreicht.
+Referenz: **Armbian 26.8.4 / Debian 13 / Kernel `6.18.48-current-sunxi64`**.
+Die Dashboard-/Bluetooth-Schritte hat der Projektbetreiber am **17.10.2026**
+als funktionsfähig bestätigt. Weitere Abnahmen und Langzeittests stehen in den
+[Testnachweisen](docs/VALIDATION.md). Ethernet: 100 Mbit/s, gemessen etwa 11–12 MB/s.
 
-[Testnachweise und offene Einzelprüfungen](docs/VALIDATION.md) ·
-[Hardwaredetails, Messwerte und SSH-Beispiel](docs/TECHNICAL_REFERENCE.md)
+## Alltag
+
+**[→ Zur Alltagsanleitung](docs/DAILY_USE.md)**: erneut anmelden, Dateien öffnen,
+USB sicher auswerfen, Bluetooth bedienen, Musik hören, neu starten oder herunterfahren.
+Für Fehler verwende die [Hilfe nach Symptomen](docs/TROUBLESHOOTING.md).
 
 ## Optionale Erweiterungen
 
-Erst nach dem funktionierenden Grundsystem und einem privaten SD-Backup:
+Erst nach funktionierendem Grundsystem, Kernel-Sperre und privatem SD-Backup:
 
-| Wunsch | Anleitung |
+| Dein Ziel | Anleitung |
 | --- | --- |
-| Dateien im Heimnetz bereitstellen und USB-Laufwerke nutzen | [Samba-Modul](server/samba-usb/README.md) |
-| Systeminformationen bei der SSH-Anmeldung anzeigen | [Dashboard](docs/SSH_DASHBOARD.md) |
-| Musik an Bluetooth-Kopfhörer senden | [Bluetooth und Musikplayer](server/bluetooth/README.md) |
-| Beide Zusatzmodule über ein Auswahlmenü einrichten | [Gemeinsamer Setup-Einstieg](server/setup/README.md) |
-| Interne eMMC später als Datenlaufwerk verwenden | [Voraussetzungen und Referenz](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
+| Dateien teilen und USB-Laufwerke nutzen | [Dateiserver einrichten](server/samba-usb/README.md) |
+| Systeminformationen bei der SSH-Anmeldung sehen | [Dashboard](docs/SSH_DASHBOARD.md) |
+| Musik an Kopfhörer oder Lautsprecher senden | [Bluetooth-Musikplayer](server/bluetooth/README.md) |
+| Dashboard und Player über ein Menü einrichten | [Gemeinsame Einrichtung](server/setup/README.md) |
+| Interne eMMC als Datenlaufwerk nutzen | [Voraussetzungen für Fortgeschrittene](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
 
 ## Weitere Anwendungen installieren
 
-Wähle Software, die **ARM64 unterstützt** und zur Prozessorleistung, den
-**2 GiB RAM** und dem verfügbaren Speicherplatz der Box passt. Prüfe dafür
-die Anforderungen der jeweiligen Anwendung und plane Reserven für Armbian
-und bereits laufende Dienste ein.
+Wähle Anwendungen mit **ARM64-Unterstützung**, die zur Prozessorleistung,
+zu **2 GiB RAM** und dem freien Speicher passen. Reserven für Armbian und
+bereits laufende Dienste einplanen; die Projektmodule sind optional.
 
 > [!CAUTION]
-> **Kernel und DTB eingefroren lassen.** Vor weiterer Softwareinstallation die
-> [Kernel-/DTB-Sperre setzen](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
-> und im normalen Betrieb nicht aufheben. Ein Kernelwechsel oder Kernel-/DTB-Update
-> kann die T95-Anpassungen überschreiben, sodass die Box nicht mehr startet.
-> In `armbian-config` keine Kernelwechsel oder Kernel-/Firmware-/Bootloader-Updates
-> aktivieren. Normale Anwendungspakete dürfen bei gesetzter Sperre aktualisiert werden.
+> **Kernel-/DTB-Sperre beibehalten.** In `armbian-config` keine Kernelwechsel
+> oder Kernel-/Firmware-/Bootloader-Updates aktivieren. Normale
+> Anwendungspakete dürfen bei gesetzter Sperre aktualisiert werden.
 
-Viele Anwendungen lassen sich über die
-[Armbian-Konfigurationssoftware](https://docs.armbian.com/config/) auswählen.
-**Auf der eingerichteten T95, als normaler SSH-Benutzer mit `sudo`:**
+**Auf der T95, normaler SSH-Benutzer mit `sudo`:**
 
 ```bash
 sudo armbian-config
 ```
 
-Im Menü **Software** die Kategorie und dann die gewünschte Anwendung wählen.
-Docker findest du unter **Software → Containers → Docker**. Erst das
-Grundsystem samt Kernel-Sperre und SD-Backup abschließen, dann Anwendungen ergänzen.
+In der [Armbian-Konfiguration](https://docs.armbian.com/config/) unter
+**Software** eine Kategorie und Anwendung auswählen. Docker steht unter
+**Software → Containers → Docker**. Anforderungen und Anleitungen stehen
+im [Software-Katalog](https://docs.armbian.com/software/).
+
+<details>
+<summary>Quellstände und Entwicklerdetails</summary>
 
 ## Quellstände
 
@@ -166,6 +168,8 @@ zuständigen Anleitung; Dateien verschiedener Quellstände nicht mischen.
 UART ist für Portierung und frühe Bootfehler der Diagnoseweg. Vor diesen
 Arbeiten einen **3,3-V-TTL-Adapter** vorbereiten; niemals 5-V-TTL oder RS-232
 anschließen. Hardwaredetails und sichere Verdrahtung stehen im Entwicklerpfad.
+
+</details>
 
 ## Projekt und Grenzen
 

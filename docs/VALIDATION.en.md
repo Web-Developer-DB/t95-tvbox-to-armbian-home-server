@@ -107,13 +107,28 @@ in the accepted functional scope.
 checks; a full run of this exact user path on a separate SD is outstanding.
 Existing hardware results and the confirmed dashboard/Bluetooth steps are separate.
 
-**Documentation checks on 2026-10-17:** all 16 existing setup tests,
-21 shell syntax checks, and 34 Samba/dashboard checksum entries pass.
-Relative documentation links, image targets, language links, and former README
-section anchors were checked. The start page and navigation to installation
-and Samba were inspected in a local Markdown preview. Command blocks received
-Bash syntax checks during this static review. The maintainer's dashboard and
-Bluetooth confirmation is recorded in the preceding section.
+**Documentation checks on 2026-10-17:**
+
+| Check | Result |
+| --- | --- |
+| Relative links, images, language links in all 65 Markdown documents | passed; existing anchors in the edited documents preserved |
+| Executable Bash examples and the 21 shell scripts | 330 example blocks and 21 scripts pass `bash -n` |
+| Existing setup tests | 16 passed; simulated APT/systemd/BlueZ |
+| Samba/dashboard manifests | all 34 entries match; changed documentation hashes refreshed |
+| Backup examples taken directly from both guides | 22 checks passed in temporary directories |
+| Local Markdown preview at 1280 px and 390 px viewport width | both languages checked; quick navigation visible without scrolling; separate adjacent hardware/kernel alerts; original photo 320 px; no page overflow |
+
+The backup checks cover portable checksum creation, unchanged/moved archives,
+legacy absolute-path manifests after moving, and a damaged selected copy while
+the original still exists. Missing/empty/invalid checksums, missing archives,
+invalid zstd data, and a different subsequently selected path are rejected.
+The write block was tested only for refusal after failed checks; privileged
+commands were stubbed. No real disk, formatting, installation, or development-PC
+service operations were performed. The corrected compression option is `zstd --check`.
+
+These are documentation and test-environment results. The maintainer's earlier
+hardware confirmation for dashboard/Bluetooth remains recorded separately above.
+A complete run on a separate SD remains open.
 
 A reviewer with basic terminal/SSH skills should follow
 [installation](INSTALLATION.en.md) without extra verbal instructions. Preserve
@@ -130,6 +145,7 @@ the working production card as recovery.
 - [ ] Attach USB, check its dynamic share, eject safely, reinsert, and access again.
 - [ ] Shut down cleanly, cold boot, and recheck SSH/file access.
 - [ ] Back up the configured SD; separately verify restoring a replacement and booting it.
+- [ ] Optional player: follow the new first-file guide, check SCP to the configured music folder, headphone output, pause, and stop.
 
 Record actual card/client types, outcome, and deviations without private
 credentials. Leave unchecked items open; hashes and syntax checks do not count

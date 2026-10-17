@@ -16,6 +16,8 @@ Die Box muss bereits eingerichtet und der
    **Passe das folgende Beispiel vor dem Eingeben an:** `alex` ist der
    Beispielbenutzer, `192.168.178.50` die Beispieladresse der Box.
 
+   **Auf dem PC, normaler Benutzer; Beispiel vorher anpassen:**
+
    ```bash
    ssh alex@192.168.178.50
    ```
@@ -69,7 +71,7 @@ Suchen oder Verbinden mit `t95-bluetooth on` wieder einschalten.
 
 ## Gekoppelte Geräte anzeigen
 
-**Auf der T95 eingeben:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 bluetoothctl devices Paired
@@ -94,7 +96,7 @@ Bei einer Fehlermeldung stattdessen [die Hilfe](#wenn-etwas-nicht-klappt) öffne
 
 ## Verbundene Geräte anzeigen
 
-**Auf der T95 eingeben:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 bluetoothctl devices Connected
@@ -206,7 +208,7 @@ selbstständig wieder verbindet, verwende die folgende Bluetooth-Pause.
 
 ## Kopfhörer am PC oder Handy verwenden
 
-**Auf der T95 eingeben:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 t95-bluetooth off

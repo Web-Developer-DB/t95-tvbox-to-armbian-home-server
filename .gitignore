@@ -41,6 +41,8 @@ AGENTS.md
 docs/*
 !docs/INSTALLATION.md
 !docs/INSTALLATION.en.md
+!docs/DAILY_USE.md
+!docs/DAILY_USE.en.md
 !docs/TROUBLESHOOTING.md
 !docs/TROUBLESHOOTING.en.md
 !docs/TECHNICAL_REFERENCE.md

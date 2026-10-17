@@ -6,6 +6,8 @@ Send music from the box to headphones or Bluetooth speakers.
 **Already installed?** Open [Bluetooth made simple](../../docs/BLUETOOTH_CHEATSHEET.en.md)
 for showing, connecting, disconnecting, and forgetting devices.
 
+## Requirements
+
 For initial setup, the T95 must be running and you must be logged in as your
 normal user. [Open your connection to the box](../../docs/BLUETOOTH_CHEATSHEET.en.md#start-here-connect-to-the-box).
 Complete [base installation, kernel holds, and SD backup](../../docs/INSTALLATION.en.md) first.
@@ -27,6 +29,8 @@ The download commands and installer obtain their files from `main`.
 **Once, on the T95:** copy the entire next line, paste it into the terminal
 window connected to the box, and press Enter.
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-bluetooth.sh)
 ```
@@ -38,17 +42,34 @@ installs the player. After `Fertig.`, setup is finished; continue with
 selected and paired deliberately. Music is expected in your user's `Music`
 folder; existing music is preserved.
 
+## Verify setup
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+t95-bluetooth status
+```
+
+**Expected:** `Setup: installed`, `Abweichende Dateien: 0`, and active Bluetooth/player
+services. Headphones need not be connected yet. For errors, use
+[module help](../../docs/TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails).
+Next, pair/select headphones and [play your first file](../../docs/MUSIKPLAYER_CHEATSHEET.en.md).
+
 <details>
 <summary>Additional setup options for experienced users</summary>
 
 From a [local checkout](../setup/README.en.md#local-checkout),
 run at the repository root **on the T95 as normal SSH user with `sudo`**:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 sudo python3 server/setup/t95_setup.py bluetooth install --user "$USER"
 ```
 
 For a different music directory, choose it on the **first** installation:
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo python3 server/setup/t95_setup.py bluetooth install --user "$USER" --music-dir "$HOME/.local/share/t95-music-test"
@@ -93,15 +114,22 @@ headphone device, use [device controls](../../docs/BLUETOOTH_CHEATSHEET.en.md#di
 
 This command removes the setup and its newly added target packages:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 t95-bluetooth remove --remove-packages
 ```
 
 Alternatively, use the dedicated download launcher without a menu:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-bluetooth.sh)
 ```
+
+<details>
+<summary>What removal keeps and how conflicts are handled</summary>
 
 Removal stops/disables the user's MPD, mpDris2, and `mpris-proxy`, blocks radio,
 and stops/disables BlueZ. Existing configuration files are restored. A
@@ -123,6 +151,8 @@ even if an earlier manual setup existed; it is not a full service-state rewind.
 Later edits to managed files block removal. Save/check them before
 deliberately using `t95-bluetooth remove --force --remove-packages`, which
 overwrites those edits with the saved files.
+
+</details>
 
 <details>
 <summary>Technical background and test evidence</summary>

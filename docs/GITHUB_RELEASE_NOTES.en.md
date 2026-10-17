@@ -10,6 +10,12 @@ Allwinner H616, 2 GiB DDR3L, Armbian 26.8.4 / Debian 13 Trixie /
 > not provide password login. Use the installation guide below to create a
 > private copy with your own password and write it with verification.
 
+> [!CAUTION]
+> **Keep kernel and DTB packages held.** DTB is the board's hardware description.
+> Enable the holds after first-run setup, before application installs or updates;
+> replacing these board-specific files can leave the box unable to boot.
+> [Mandatory protection step](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates).
+
 ## Installation
 
 **[→ Complete English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.en.md)** ·

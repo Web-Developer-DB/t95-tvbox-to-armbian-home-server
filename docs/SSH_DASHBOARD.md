@@ -1,17 +1,104 @@
-# SSH-Anmeldedashboard archivieren und wiederherstellen
+# SSH-Dashboard einrichten
+
+<a id="ssh-anmeldedashboard-archivieren-und-wiederherstellen"></a>
 
 **Deutsch** | [English](SSH_DASHBOARD.en.md)
 
-**Ort: laufende T95, normaler SSH-Benutzer mit `sudo`.** Zuerst
-[Grundsystem, Kernel-Sperre und SD-Backup](INSTALLATION.md) abschließen.
-Das Dashboard zeigt Systeminformationen beim SSH-Login; es ist keine Weboberfläche.
+Das Dashboard zeigt bei jeder SSH-Anmeldung Systeminformationen der T95:
+unter anderem Auslastung, Speicher und Laufwerke. Du brauchst keine zusätzliche
+Weboberfläche zu öffnen.
 
-Starter-Voraussetzungen: [Bash, curl, tar, Python 3, sudo](../server/setup/README.md#voraussetzungen).
+[Einrichten](#einrichten) · [Prüfen](#erfolg-prüfen) · [Entfernen](#entfernen) · [Alltag](DAILY_USE.md)
 
-> [!NOTE]
-> **Geprüft und getestet:** Der Projektbetreiber hat die dokumentierten
-> Dashboard-Schritte am **17.10.2026** geprüft und als funktionsfähig bestätigt.
-> [Testnachweise und offene Einzelprüfungen](VALIDATION.md#dashboard-und-bluetooth).
+## Voraussetzungen
+
+Die T95 läuft und du bist als normaler Benutzer per SSH angemeldet.
+[Grundsystem, Kernel-Sperre und SD-Backup](INSTALLATION.md) müssen abgeschlossen
+sein. Die nötigen [Startwerkzeuge](../server/setup/README.md#voraussetzungen)
+sind vorhanden; Anzeige-Pakete installiert der Starter.
+
+**Geprüft:** Der Projektbetreiber hat die dokumentierten Dashboard-Schritte
+am **17.10.2026** als funktionsfähig bestätigt. [Testnachweise](VALIDATION.md#dashboard-und-bluetooth).
+
+<a id="ein-befehl-wiederherstellung"></a>
+<a id="github-starter-mit-installation-und-deinstallation"></a>
+
+## Einrichten
+
+**Auf der T95, normaler SSH-Benutzer mit `sudo`:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-dashboard.sh)
+```
+
+Bei einer Passwortfrage das Linux-Passwort dieses T95-Benutzers eingeben.
+Es erscheinen keine Zeichen oder Sternchen. **Ergebnis:** Der Starter beendet
+die Einrichtung mit `Fertig.`. Bei einem Fehler zuerst die
+[Modul-Fehlerhilfe](TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) öffnen.
+
+## Erfolg prüfen
+
+**Auf der T95, normaler SSH-Benutzer:**
+
+```bash
+t95-dashboard status
+```
+
+**Ergebnis:** `Setup: installed` und `Abweichende Dateien: 0`. Bei einem
+anderen Stand die [Modul-Hilfe](TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) verwenden.
+
+Öffne danach auf deinem PC ein **zweites Terminalfenster** und melde dich neu
+an. Im Beispiel `alex` und `192.168.178.50` durch deinen normalen T95-Benutzer
+und die Box-Adresse aus dem Router ersetzen.
+
+**Auf dem PC, normaler Benutzer; Beispiel vorher anpassen:**
+
+```bash
+ssh alex@192.168.178.50
+```
+
+**Ergebnis:** Bei der neuen SSH-Anmeldung erscheint die Systemübersicht.
+[Eine bereinigte Beispielansicht](images/t95-ssh-status-redacted.png) zeigt den
+Aufbau; Zahlen und angezeigte Laufwerke unterscheiden sich je nach Box.
+
+## Benutzen
+
+Das Dashboard erscheint automatisch bei späteren SSH-Anmeldungen. Ein laufendes
+Fenster wird dadurch nicht ständig aktualisiert. Für normales Arbeiten kannst
+du nach der Anzeige deine weiteren Befehle eingeben.
+
+## Entfernen
+
+Nur ausführen, wenn du die Einrichtung zurücknehmen möchtest.
+
+**Auf der T95, normaler SSH-Benutzer:**
+
+```bash
+t95-dashboard remove
+```
+
+**Ergebnis:** Die vor der Einrichtung gesicherten Dashboard-Dateien werden
+wiederhergestellt. Zusätzliche fremde Module bleiben erhalten. Waren die alten
+Dateien bereits identisch, kann die Anzeige danach gleich aussehen.
+Bei späteren manuellen Änderungen zuerst die betroffenen Dateien sichern und
+prüfen; `--force` überschreibt diese Änderungen mit dem Backup. Pakete bleiben
+standardmäßig installiert.
+
+<details>
+<summary>Alternative Entfernung über Download</summary>
+
+Dieser Aufruf ist eine Alternative zum lokalen `remove`, kein zusätzlicher Schritt.
+
+**Auf der T95, normaler SSH-Benutzer mit `sudo`:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-dashboard.sh)
+```
+
+</details>
+
+<details>
+<summary>Archiv, technische Details und manuelle Wiederherstellung</summary>
 
 Der Stand vom **16.10.2026** ist unter `server/ssh-dashboard/2026-10-16/` gesichert: 14 tatsächliche Quelldateien der laufenden T95, SHA-256-Prüfsummen und Unix-Dateimodi. Ausgangsbasis: Armbian-BSP 26.8.4, Debian Trixie, Kernel 6.18.48-current-sunxi64. Die vorhandenen Lizenzhinweise der Armbian-Dateien bleiben erhalten; siehe `NOTICE.md` im Archiv.
 
@@ -30,35 +117,6 @@ Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [
 
 `manifest.json` ist die maschinenlesbare Grundlage für eine eigene Ein-Klick-Oberfläche: relatives Ziel, Modus und SHA-256 je Datei. `SHA256SUMS` prüft dieselben Dateien mit Standardwerkzeugen. Das bereits vorhandene Wiederherstellungswerkzeug verwendet dieses Manifest.
 
-## Ein-Befehl-Wiederherstellung
-
-### GitHub-Starter mit Installation und Deinstallation
-
-Die Downloadbefehle und der Installer beziehen ihre Dateien von `main`.
-Auf der T95 direkt installieren:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-dashboard.sh)
-```
-
-Eigene Schnell-Deinstallation, ohne Auswahlmenü:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-dashboard.sh)
-```
-
-Rücknahme und Status funktionieren danach lokal ohne erneuten Download:
-
-```bash
-t95-dashboard status
-t95-dashboard remove
-```
-
-`remove` stellt die vor dieser
-Installation vorhandenen Dashboard-Dateien wieder her; es löscht nicht pauschal
-das Armbian-Dashboard. War vorher bereits exakt derselbe Stand vorhanden, sieht
-die Rücknahme deshalb gleich aus. Fremde zusätzliche MOTD-Module bleiben erhalten.
-
 Der Starter installiert die benötigten Anzeige-/Systemwerkzeuge über APT und
 führt das erste Installationsbackup unter `/var/lib/t95-setup/dashboard`.
 Wiederholtes Installieren ersetzt dieses Backup nicht. Nachträgliche manuelle
@@ -70,8 +128,17 @@ neu hinzugefügte Zielpakete, mit vorgeschalteter APT-Prüfung.
 Aus einem [lokalen Checkout](../server/setup/README.md#lokaler-checkout)
 auf der Box, im Repository-Hauptverzeichnis als normaler SSH-Benutzer mit `sudo`:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
 sudo python3 server/setup/t95_setup.py dashboard install
+```
+
+Nur zur späteren Rücknahme, statt des lokalen Helfers:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
 sudo python3 server/setup/t95_setup.py dashboard remove
 ```
 
@@ -85,11 +152,15 @@ Diese manuelle Alternative ist nach der Starter-Installation nicht zusätzlich
 nötig. Im lokalen Checkout, im Repository-Hauptverzeichnis als normaler
 Benutzer, zunächst ohne Änderungen prüfen (auch auf dem Linux-PC möglich):
 
+**Auf dem Linux-PC, normaler Benutzer:**
+
 ```bash
 python3 tools/restore-ssh-dashboard.py
 ```
 
 Auf der Armbian-Box mit einem Befehl installieren:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo python3 tools/restore-ssh-dashboard.py --apply
@@ -99,8 +170,18 @@ Das Werkzeug prüft zunächst alle Prüfsummen und Ziele. Vor Änderungen sicher
 
 Rücknahme mit dem vom Werkzeug ausgegebenen Backup-Pfad:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
-sudo python3 tools/restore-ssh-dashboard.py --rollback /var/backups/t95-dashboard/BACKUP-NAME
+read -r -p 'Vollständiger ausgegebener Backup-Pfad: ' T95_DASHBOARD_BACKUP
+```
+
+Den tatsächlichen Backup-Pfad eingeben und Enter drücken. Danach auf der T95:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo python3 tools/restore-ssh-dashboard.py --rollback "$T95_DASHBOARD_BACKUP"
 ```
 
 Dabei werden vorher vorhandene Dateien einschließlich Modus und Eigentümer wiederhergestellt; durch die Installation neu angelegte Dateien werden entfernt. Andere Dateien bleiben erhalten. Ein SSH-Neustart ist nicht erforderlich. Die nächste SSH-Anmeldung erzeugt das Dashboard über die vorhandene PAM-MOTD-Einbindung.
@@ -127,3 +208,5 @@ Neuinstallations-, Rücknahme- und Kaltstartprüfungen stehen in der
 [Testmatrix](VALIDATION.md#dashboard-und-bluetooth).
 CPU-/RAM-Spannungen, Bootparameter, Bluetooth, Samba und die
 SSH-Authentifizierung werden durch die Dashboard-Wiederherstellung nicht konfiguriert.
+
+</details>

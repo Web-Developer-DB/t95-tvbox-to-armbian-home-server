@@ -83,20 +83,29 @@ Prüfung von `git status --ignored`.
 
 ## Dokumentation und Releasebeschreibung synchron veröffentlichen
 
-Die Startseite verweist auf die maßgebliche Installation und Fehlerhilfe.
-Bei Änderungen an dokumentierten Abläufen beide Sprachen und die
-[Releasebeschreibung](GITHUB_RELEASE_NOTES.md) aktualisieren. Der Release-Text
-verwendet absolute Links, damit er auch direkt auf einer GitHub-Release-Seite
-funktioniert. Die englische Fassung steht in
-[GITHUB_RELEASE_NOTES.en.md](GITHUB_RELEASE_NOTES.en.md).
+Die Dokumentationsüberarbeitung wird auf dem bestehenden Arbeitsbranch geliefert.
+Merge und Änderung der öffentlichen Releasebeschreibung sind eigene Veröffentlichungsschritte.
+Diese Reihenfolge einhalten:
 
-Vor dem Ersetzen der öffentlichen Beschreibung zuerst die Dokumentation auf
-dem angegebenen Branch veröffentlichen und die verlinkten Seiten auf GitHub
-öffnen. Ein lokaler neuer Dateipfad ist noch kein erreichbares Webziel.
-Der Text muss lokale Passwort-Personalisierung vor dem Schreiben,
-Boardbindung, Kernel-Schutz und den Teststatus der Zusatzmodule nennen.
-Bei späterem Merge Branchlinks und Installer-Standardreferenz gemeinsam prüfen.
-Diese Dokumentationsänderung verändert keine Image-Assets oder Release-Hashes.
+1. **Vor dem Merge:** beide Sprachen, frühere Sprungmarken, Bilder, ausführbare
+   Beispiele und Modul-Manifeste prüfen. Verpflichtende Personalisierung,
+   exakte Platine, Kernel-Sperre und SD-Löschhinweis in
+   [Release-Text](GITHUB_RELEASE_NOTES.md) und [englischer Fassung](GITHUB_RELEASE_NOTES.en.md) erhalten.
+2. **Nach `main` mergen.** Neue absolute `main`-Links können vorher 404 liefern;
+   vor dem Merge werden stattdessen die zugehörigen Repository-Dateien geprüft.
+3. **Nach dem Merge die öffentlichen Ziele öffnen:** beide Installationsanleitungen,
+   Alltag, Fehlerhilfe, Testmatrix und alle fünf gemeinsamen/Modul-Starter.
+   Erreichbarkeit und einheitliche Quellreferenz `main` bestätigen. Dafür keine
+   Installationsbefehle auf dem Entwicklungs-PC ausführen.
+4. **Erst dann die öffentliche Releasebeschreibung aktualisieren:** den vorbereiteten
+   Text übernehmen. Passwort-Personalisierung, Installationslink und Kernel-Schutz
+   stehen vor den Download-Dateien. Beide Sprachfassungen der Anleitung verlinken.
+5. Die Release-Seite als Leser öffnen und Installations-/Hilfelinks verfolgen.
+   Veröffentlichung erst nach tatsächlicher Änderung der Seite als erledigt markieren.
+
+Image-Assets, Release-Version und Image-Prüfsummen bleiben bei dieser
+Dokumentationsänderung erhalten. Bestätigte Modul-Funktionen und gesonderte
+Hardwareprüfungen in der Testmatrix getrennt dokumentieren.
 
 ## Lizenz- und Upstream-Prüfung
 

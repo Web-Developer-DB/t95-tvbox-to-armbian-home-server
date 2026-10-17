@@ -3,13 +3,30 @@
 **Deutsch** | [English](INSTALLATION.en.md)
 
 Diese Anleitung führt von der passenden TV-Box bis zum ersten Dateizugriff.
-Du brauchst grundlegende Terminal- und SSH-Kenntnisse. Verwende den empfohlenen
-Skriptweg; die [manuelle Alternative](#manuelle-alternative-zur-sd-vorbereitung)
+Terminalbedienung und die Verbindung zur Box werden erklärt. Verwende den
+empfohlenen Skriptweg; die [manuelle Alternative](#manuelle-alternative-zur-sd-vorbereitung)
 ersetzt ausschließlich die SD-Vorbereitung in Schritt 2.
 
 **Ablauf:** Hardware → Linux-PC → SD → SSH → Kernel-Schutz → Backup → Samba.
 
 [Startseite](../README.md) · [Hilfe nach Symptomen](TROUBLESHOOTING.md)
+
+## So benutzt du die Befehle
+
+Öffne auf dem Linux-PC im Anwendungsmenü **Terminal**. Einen Befehl kopierst
+du in das Fenster und führst ihn mit **Enter** aus. Auswendiglernen ist nicht nötig.
+
+- **Auf dem Linux-PC** bedeutet: auf deinem Computer, etwa für die SD-Vorbereitung.
+- **Auf der T95** bedeutet: in der SSH-Verbindung aus Schritt 4. SSH ist der
+  Fernzugriff auf die Box; Befehle laufen dort, obwohl das Fenster auf dem PC steht.
+- **Normaler Benutzer** ist dein persönliches Konto statt `root`.
+  `sudo` erlaubt eine Verwaltungsaktion und fragt eventuell nach dessen Passwort.
+- Beim Passworttippen erscheinen keine Zeichen oder Sternchen. Passwort eingeben und Enter drücken.
+- Die Blöcke der Reihe nach ausführen. Fragt ein Befehl etwas, erst antworten,
+  dann den nächsten Block kopieren. **Ergebnis** beschreibt eine Antwort der Box;
+  diesen Text nicht eingeben.
+- Bei Fehlern vor dem Weiterarbeiten die verlinkte Hilfe lesen. Zusammengehörige
+  Schritte im selben Fenster ausführen, damit Adressen und Pfade erhalten bleiben.
 
 ## 1. Hardware und PC vorbereiten
 
@@ -28,22 +45,27 @@ ersetzt ausschließlich die SD-Vorbereitung in Schritt 2.
   und Pakete wird zusätzlich freier Platz benötigt. Auf dem PC sollten für
   Download, Rohimage, persönliche Kopie und temporäres Dateisystem zusammen
   **mindestens 6 GB** frei sein; auch `/tmp` braucht etwa 1,6 GB freien Platz.
+- **Platz für das Backup kommt hinzu:** Auf einem anderen Datenträger mindestens
+  die gesamte SD-Kartengröße freihalten. Bei einer 128-GB-Karte kann das Backup
+  fast so viel Platz benötigen; die 6 GB oben gelten nur für die Image-Vorbereitung.
 - Die Box wird per **Ethernet und SSH** bedient. WLAN und eine HDMI-Anzeige
   gehören nicht zu den bestätigten Voraussetzungen dieses Serverwegs.
 
-**Linux-PC · normaler Benutzer mit `sudo` · Ubuntu/Debian:**
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo apt update
-sudo apt install -y bash git curl xz-utils coreutils util-linux e2fsprogs openssl parted udev sudo gawk
+sudo apt install -y bash git curl xz-utils coreutils util-linux e2fsprogs openssl parted udev sudo gawk openssh-client
 df -h "$HOME" /tmp
 ```
 
 `e2fsprogs` liefert `debugfs` und `e2fsck`, `parted` liefert `partprobe`.
 Prüfe, dass die Werkzeuge vorhanden sind:
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
-for tool in bash git curl xz sha256sum lsblk dd debugfs e2fsck openssl partprobe udevadm sudo awk; do
+for tool in bash git curl xz sha256sum lsblk dd debugfs e2fsck openssl partprobe udevadm sudo awk ssh scp; do
   command -v "$tool" || { printf "Fehlt: %s\n" "$tool"; break; }
 done
 ```
@@ -65,12 +87,12 @@ UART/FEL benötigen jeweils gesonderten USB-/Seriellzugriff; siehe
 
 ## 2. Persönliche SD-Karte erstellen
 
-**Linux-PC · normaler Benutzer, das Werkzeug fragt bei Bedarf nach `sudo`.**
-
 > [!CAUTION]
 > Das ausgewählte USB-Medium wird vollständig überschrieben. Ziehe andere
 > USB-Datenträger nach Möglichkeit ab. Prüfe Größe, Modell und Seriennummer
 > des Kartenlesers, bevor du den angezeigten Gerätenamen bestätigst.
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
 ```bash
 mkdir -p "$HOME/t95-install"
@@ -120,10 +142,17 @@ dann bei Bedarf die UART-Diagnose verwenden.
 
 ## 4. Erstes SSH-Login und normalen Benutzer einrichten
 
-**Linux-PC · normaler Benutzer · Verbindung zur T95:**
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
 ```bash
 read -r -p 'IP-Adresse der T95: ' T95_IP
+```
+
+Die Adresse aus dem Router eingeben und Enter drücken. Danach verbinden:
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 ssh "root@$T95_IP"
 ```
 
@@ -143,13 +172,29 @@ Notiere dessen Namen für deine eigene Verwendung.
 die Root-Sitzung mit `exit`. Falls der Dialog die Sitzung bereits beendet hat,
 verbinde dich direkt erneut. Die nächsten Befehle laufen wieder auf dem PC:
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
 read -r -p 'IP-Adresse der T95: ' T95_IP
+```
+
+Die Box-Adresse eingeben und Enter drücken. Danach nach deinem neuen Benutzer fragen:
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 read -r -p 'Normaler Linux-Benutzer auf der T95: ' T95_LOGIN
+```
+
+Den im Erststartdialog angelegten Benutzernamen eingeben, dann verbinden:
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 ssh "$T95_LOGIN@$T95_IP"
 ```
 
-**T95 · normaler SSH-Benutzer:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 whoami
@@ -168,12 +213,12 @@ nach dessen Linux-Passwort. Bei Problemen [Zugang prüfen](TROUBLESHOOTING.md#ss
 
 ## 5. Kernel und DTB vor Updates schützen
 
-**T95 · normaler SSH-Benutzer mit `sudo` · vor weiterer Paketinstallation.**
-
 > [!CAUTION]
 > Führe vor diesem Schritt kein `apt upgrade`, `apt full-upgrade` oder
 > `armbian-upgrade` aus. Der Kernel und die DTB-Hardwarebeschreibung müssen
 > zur geprüften Platine passen. Ein Ersatz kann Boot oder Ethernet beeinträchtigen.
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo apt-mark hold linux-image-current-sunxi64 linux-dtb-current-sunxi64
@@ -189,7 +234,7 @@ Hardwareprüfung; siehe [Release-Handbuch](RELEASE.md#den-geprüften-kernel-dtb-
 
 ## 6. Grundsystem sichern
 
-**T95 · normaler SSH-Benutzer mit `sudo`:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo poweroff
@@ -206,9 +251,9 @@ starten und wie in Schritt 4 als normaler Benutzer per SSH anmelden.
 
 ## 7. Dateiserver einrichten
 
-**T95 · normaler SSH-Benutzer mit `sudo`:** Folge jetzt dem
-[Samba-Schnellstart](../server/samba-usb/README.md#schnellstart-reproduzierbare-wiederherstellung).
-Er ist die maßgebliche Anleitung für Installation und Clienttest; die Befehle
+**T95 · normaler SSH-Benutzer mit `sudo`:** Folge jetzt der Anleitung
+[Dateiserver einrichten](../server/samba-usb/README.md#schnellstart-reproduzierbare-wiederherstellung).
+Sie ist die maßgebliche Anleitung für Installation und Clienttest; die Befehle
 werden hier nicht erneut aufgeführt.
 
 Der empfohlene Aufruf setzt `DATA_PATH=/srv/t95-sd-data/Share` ausdrücklich:
@@ -223,6 +268,8 @@ Die Adresse ist ein Dateimanagerpfad, kein Terminalbefehl.
 Bei Problemen [Freigaben und Anmeldung prüfen](TROUBLESHOOTING.md#freigabe-fehlt-oder-zugriff-wird-abgelehnt).
 
 ## 8. Alltag und optionale Erweiterungen
+
+Die [Alltagsanleitung](DAILY_USE.md) erklärt erneutes Anmelden, Neustart und Herunterfahren.
 
 - [USB sicher auswerfen](../server/samba-usb/README.md#usb-sicher-auswerfen),
   bevor du ein Laufwerk abziehst; danach Wiedereinstecken und Zugriff testen.
@@ -247,6 +294,8 @@ Voraussetzungen und Hardwareprüfung aus Schritt 1 gelten weiterhin.
 
 ### A. Release herunterladen und prüfen
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
 mkdir -p "$HOME/t95-install"
 cd "$HOME/t95-install"
@@ -266,6 +315,8 @@ empfohlenen Installer oder einen neuen Arbeitsordner.
 
 Im selben PC-Terminal:
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
 cd "$HOME/t95-install"
 xz -dk --keep T95-H616-AXP313A-Armbian-26.8.4-6.18.48-v1.0.1.img.xz
@@ -283,9 +334,25 @@ wiederverwenden; der manuelle Weg überschreibt kein persönliches Image.
 
 ### C. Karte wählen und geprüft schreiben
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
+```
+
+Die ganze Karte anhand der Kriterien aus Schritt 1 prüfen. Danach diese Abfrage starten:
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 read -r -p 'Geprüfte SD-Karte, z. B. /dev/sdb: ' T95_SD
+```
+
+Den geprüften Gerätenamen eingeben, Enter drücken und erst dann den Schreiber starten:
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 bash "$HOME/t95-install/t95-release-tools/tools/write-t95-provisioned-image-to-sd.sh" \
   "$T95_SD" \
   "$HOME/t95-install/t95-private/t95-personal.img" \

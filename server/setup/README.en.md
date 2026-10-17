@@ -2,38 +2,96 @@
 
 [Deutsch](README.md) | **English**
 
-**Run on: T95, normal SSH user with `sudo`.** Complete
-[base installation, kernel holds, and backup](../../docs/INSTALLATION.en.md)
-first. This menu installs optional modules on a running box; it does not
-prepare an Armbian SD or set up Samba.
+Install the SSH dashboard and Bluetooth music player through one menu.
+They are optional additions to an already running T95; this menu does not
+create an Armbian SD card or set up Samba.
 
-> [!NOTE]
-> **Verified and tested:** the project maintainer tested the documented
-> dashboard and Bluetooth steps on **2026-10-17** and confirmed they work.
-> [Test evidence and remaining individual checks](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
+[Set up](#quick-start-on-the-running-t95) · [Verify](#verify-success) · [Remove](#remove-a-module) · [Daily use](../../docs/DAILY_USE.en.md)
 
 ## Requirements
 
-Bash, curl, tar, Python 3, and sudo must already exist. If missing, install
-**on the T95 as normal user with sudo, after kernel holds**:
+Finish [base setup, kernel holds, and SD backup](../../docs/INSTALLATION.en.md)
+and log in as your normal T95 user. Bash, curl, tar, Python 3, and sudo must
+exist. If tools are missing, prepare them first:
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo apt update
 sudo apt install -y bash curl tar python3 sudo
 ```
 
-The setup installs actual dashboard/audio packages afterward. Git is not
-needed for the download launcher.
+The setup installs module packages afterward; the download method does not require Git.
+The maintainer confirmed the documented dashboard/Bluetooth steps work on
+**2026-10-17**. [Evidence and individual open checks](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
 ## Quick start on the running T95
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/t95-setup.sh)
 ```
 
-Select an action; `0` installs dashboard and Bluetooth/player sequentially.
-Then inspect `t95-dashboard status` or `t95-bluetooth status`. Pairing and
-music require the additional [Bluetooth steps](../bluetooth/README.en.md).
+**When the menu asks for a selection, type the number and press Enter:**
+
+| Your goal | Selection |
+| --- | --- |
+| Install both modules | `0` |
+| Install dashboard only | `1` |
+| Install Bluetooth/player only | `3` |
+
+Enter your T95 user's Linux password if asked; no letters or stars appear.
+Setup runs the selected action. With option `0`, dashboard finishes first,
+then Bluetooth starts. Each installed module reports `Fertig.`.
+For errors, stop and use [module help](../../docs/TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails).
+
+## Verify success
+
+For the installed dashboard:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+t95-dashboard status
+```
+
+Then open a new SSH session; see [dashboard verification](../../docs/SSH_DASHBOARD.en.md#verify-success).
+For the installed player:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+t95-bluetooth status
+```
+
+Then follow [Bluetooth made simple](../../docs/BLUETOOTH_CHEATSHEET.en.md) to pair
+and select headphones, followed by [first music playback](../../docs/MUSIKPLAYER_CHEATSHEET.en.md).
+Installation alone does not start music.
+
+## Remove a module
+
+Choose only the action you need. To restore the previous dashboard:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+t95-dashboard remove
+```
+
+To remove the music player and disable Bluetooth:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+t95-bluetooth remove --remove-packages
+```
+
+Music and pairings remain. Read the [Bluetooth removal details](../bluetooth/README.en.md#remove-the-player-and-disable-bluetooth)
+before removing it from an existing setup. Kernel holds remain enabled.
+
+<details>
+<summary>Technical behavior, local checkout, and verification</summary>
 
 ## Behavior and individual launchers
 
@@ -76,6 +134,8 @@ transport; it is not an independent release signature.
 Use a separate checkout of `main`; the PC's `v1.0.1` release tools do
 not include them:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 sudo apt update
 sudo apt install -y git
@@ -114,6 +174,8 @@ are retained.
 
 **Linux PC · normal user · from the repository root:**
 
+**On the Linux PC, normal user; repository root:**
+
 ```bash
 for script in tools/t95-setup.sh tools/{install,uninstall}-t95-{dashboard,bluetooth}.sh; do bash -n "$script"; done
 python3 -m unittest discover -s server/setup/tests -v
@@ -141,3 +203,5 @@ removal, and cold-boot checks are tracked in the
 
 [Bluetooth cheat sheet](../../docs/BLUETOOTH_CHEATSHEET.en.md) ·
 [Music player cheat sheet](../../docs/MUSIKPLAYER_CHEATSHEET.en.md)
+
+</details>

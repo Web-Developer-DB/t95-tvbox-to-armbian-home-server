@@ -2,39 +2,98 @@
 
 **Deutsch** | [English](README.en.md)
 
-**Ort: T95, normaler SSH-Benutzer mit `sudo`.** Erst
-[Grundinstallation, Kernel-Sperre und Backup](../../docs/INSTALLATION.md)
-abschließen. Dieses Menü installiert Zusatzmodule auf einer laufenden Box;
-es erstellt keine Armbian-SD und richtet Samba nicht ein.
+Installiere SSH-Dashboard und Bluetooth-Musikplayer über ein Menü.
+Beides sind optionale Ergänzungen einer bereits laufenden T95. Dieses Menü
+erstellt keine Armbian-SD und richtet Samba nicht ein.
 
-> [!NOTE]
-> **Geprüft und getestet:** Der Projektbetreiber hat die dokumentierten
-> Dashboard- und Bluetooth-Schritte am **17.10.2026** geprüft und als
-> funktionsfähig bestätigt. [Testnachweise und offene Einzelprüfungen](../../docs/VALIDATION.md#dashboard-und-bluetooth).
+[Einrichten](#schnellstart-auf-der-laufenden-t95) · [Prüfen](#erfolg-prüfen) · [Entfernen](#ein-modul-entfernen) · [Alltag](../../docs/DAILY_USE.md)
 
 ## Voraussetzungen
 
-Bash, curl, tar, Python 3 und sudo müssen bereits vorhanden sein. Falls nötig,
-nach der Kernel-Sperre **auf der T95 als normaler Benutzer mit `sudo`** installieren:
+Zuerst [Grundsystem, Kernel-Sperre und SD-Backup](../../docs/INSTALLATION.md)
+abschließen und als normaler T95-Benutzer anmelden. Bash, curl, tar,
+Python 3 und sudo müssen vorhanden sein. Fehlende Werkzeuge zuerst vorbereiten:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo apt update
 sudo apt install -y bash curl tar python3 sudo
 ```
 
-Die eigentlichen Dashboard-/Audiopakete installiert das Setup anschließend.
-Eine Git-Installation ist für den Downloadstarter nicht nötig.
+Die Modul-Pakete installiert das Setup danach. Der Downloadweg benötigt kein Git.
+Der Projektbetreiber hat die dokumentierten Dashboard-/Bluetooth-Schritte am
+**17.10.2026** als funktionsfähig bestätigt. [Nachweise und offene Einzelprüfungen](../../docs/VALIDATION.md#dashboard-und-bluetooth).
 
 ## Schnellstart auf der laufenden T95
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/t95-setup.sh)
 ```
 
-Wähle die gewünschte Aktion im Menü; `0` installiert Dashboard und
-Bluetooth/Player nacheinander. Prüfe danach `t95-dashboard status` bzw.
-`t95-bluetooth status`. Musik und Kopplung benötigen zusätzliche Schritte in
-der [Bluetooth-Anleitung](../bluetooth/README.md).
+**Wenn das Menü nach der Auswahl fragt, die Zahl eingeben und Enter drücken:**
+
+| Dein Ziel | Auswahl |
+| --- | --- |
+| Beide Module installieren | `0` |
+| Nur Dashboard installieren | `1` |
+| Nur Bluetooth-Musikplayer installieren | `3` |
+
+Bei einer Passwortfrage das Linux-Passwort deines T95-Benutzers eingeben;
+es erscheinen keine Zeichen. Das Setup führt die gewählte Aktion aus. Bei `0`
+wird zuerst das Dashboard eingerichtet, danach Bluetooth. Jedes eingerichtete
+Modul meldet `Fertig.`. Bei Fehlern stoppen und die
+[Modul-Fehlerhilfe](../../docs/TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) lesen.
+
+## Erfolg prüfen
+
+Für das installierte Dashboard:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+t95-dashboard status
+```
+
+Danach eine neue SSH-Verbindung öffnen; siehe [Dashboard-Prüfung](../../docs/SSH_DASHBOARD.md#erfolg-prüfen).
+Für den installierten Player:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+t95-bluetooth status
+```
+
+Danach mit [Bluetooth einfach bedienen](../../docs/BLUETOOTH_CHEATSHEET.md)
+Kopfhörer koppeln und auswählen, anschließend [erste Musik abspielen](../../docs/MUSIKPLAYER_CHEATSHEET.md).
+Die Installation allein startet keine Musik.
+
+## Ein Modul entfernen
+
+Nur die benötigte Aktion wählen. Um den vorherigen Dashboard-Stand wiederherzustellen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+t95-dashboard remove
+```
+
+Um den Musikplayer zu entfernen und Bluetooth zu deaktivieren:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+t95-bluetooth remove --remove-packages
+```
+
+Musik und Kopplungen bleiben erhalten. Vorher die
+[Details zur Bluetooth-Entfernung](../bluetooth/README.md#player-entfernen-und-bluetooth-deaktivieren)
+lesen, insbesondere bei einer vorhandenen Einrichtung. Die Kernel-Sperre bleibt gesetzt.
+
+<details>
+<summary>Technische Abläufe, lokaler Checkout und Prüfungen</summary>
 
 ## Funktionsweise und einzelne Starter
 
@@ -92,6 +151,8 @@ Anleitungen:
 Der Release-Werkzeugeordner auf dem PC enthält die aktuellen Module nicht.
 Verwende auf der T95 einen separaten Checkout von `main`:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
 sudo apt update
 sudo apt install -y git
@@ -139,6 +200,8 @@ bleiben erhalten. Musik und Bluetooth-Kopplungen werden nicht gelöscht.
 
 Auf dem Linux-PC aus dem Repository ausführen:
 
+**Auf dem Linux-PC, normaler Benutzer; Repository-Hauptverzeichnis:**
+
 ```bash
 for script in tools/t95-setup.sh tools/{install,uninstall}-t95-{dashboard,bluetooth}.sh; do bash -n "$script"; done
 python3 -m unittest discover -s server/setup/tests -v
@@ -170,3 +233,5 @@ Die dokumentierten Dashboard- und Bluetooth-Schritte wurden am **17.10.2026**
 zusätzlich vom Projektbetreiber geprüft und als funktionsfähig bestätigt.
 Gesonderte Neuinstallations-, Rücknahme- und Kaltstartprüfungen sind in der
 [Testmatrix](../../docs/VALIDATION.md#dashboard-und-bluetooth) aufgeführt.
+
+</details>

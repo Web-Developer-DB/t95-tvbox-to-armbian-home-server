@@ -77,18 +77,29 @@ files.
 
 ## Publish documentation and release description together
 
-When a documented flow changes, update both languages and the
-[release description](GITHUB_RELEASE_NOTES.en.md). The release text uses
-absolute links so it also works on a GitHub release page. The German copy is
-[GITHUB_RELEASE_NOTES.md](GITHUB_RELEASE_NOTES.md).
+The documentation update is delivered on its existing working branch.
+Merging and editing the public release description are separate publication steps.
+Use this order:
 
-Before replacing the public description, publish the docs on the named
-branch and open each linked page on GitHub. A new local path is not yet a
-reachable web target. The text must state mandatory local password
-personalization, exact board support, kernel holds, and optional-installer
-validation status. Before publishing, check that the `main` documentation links
-and default installer ref agree. Image assets and release hashes are separate
-from these documentation and module updates.
+1. **Before merge:** check both languages, previous section anchors, images,
+   executable examples, and module manifests. Keep the mandatory personalization,
+   exact PCB, kernel holds, and SD-erasure notices in
+   [the release text](GITHUB_RELEASE_NOTES.en.md) and its [German counterpart](GITHUB_RELEASE_NOTES.md).
+2. **Merge to `main`.** Until then, new absolute `main` links can return 404;
+   checking their repository-relative source targets is the pre-merge check.
+3. **After merge, open the public targets:** both installation guides, everyday
+   use, troubleshooting, validation, and all five shared/module launchers.
+   Confirm successful responses and a consistent `main` source ref; do not run
+   installation commands on the development PC for this check.
+4. **Then update the public release description** using the prepared text.
+   Keep the password-personalization warning, installation link, and kernel
+   protection before download assets. Include both language-guide links.
+5. Open the release page as a reader and follow its installation/help links.
+   Do not mark publication complete until the actual page is updated.
+
+Image assets, release versions, and image hashes are unchanged by this
+documentation update. Keep the maintainer's confirmed module results and
+separately tracked hardware checks distinct in the validation matrix.
 
 ## License and upstream review
 

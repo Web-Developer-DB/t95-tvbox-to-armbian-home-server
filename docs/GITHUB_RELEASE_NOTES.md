@@ -12,6 +12,12 @@ Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
 > verlinkten Installationsweg, um eine private Kopie mit eigenem Passwort
 > zu erstellen und anschließend geprüft auf SD zu schreiben.
 
+> [!CAUTION]
+> **Kernel und DTB dauerhaft sperren.** Die DTB beschreibt die Hardware der Platine.
+> Die Sperre nach der Ersteinrichtung und vor weiteren Installationen oder Updates
+> setzen. Ein Ersatz dieser angepassten Dateien kann den Start der Box verhindern.
+> [Pflichtschritt zum Schutz](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen).
+
 ## Installation
 
 **[→ Vollständige Anleitung auf Deutsch](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md)** ·

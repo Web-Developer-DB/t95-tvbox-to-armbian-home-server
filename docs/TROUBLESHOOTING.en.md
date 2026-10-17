@@ -6,7 +6,7 @@ Start with the visible symptom and simple checks. Change one thing at a time.
 Stop using the T95 image for an unknown/different board:
 [identify the hardware](HARDWARE_IDENTIFICATION.en.md).
 
-[Installation](INSTALLATION.en.md) · [Home](../README.en.md)
+[Installation](INSTALLATION.en.md) · [Everyday use](DAILY_USE.en.md) · [Home](../README.en.md)
 
 | Symptom | Start here |
 | --- | --- |
@@ -36,7 +36,7 @@ installation path that stopped.
 
 ## SD card not detected
 
-**Linux PC · normal user · read-only check:**
+**On the Linux PC, normal user; `sudo` where shown:**
 
 ```bash
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
@@ -72,10 +72,17 @@ Do not erase eMMC to repair booting.
 
 ## SSH login fails
 
-**PC · normal user · enter the address shown by the router:**
+**On the Linux PC, normal user; `sudo` where shown:**
 
 ```bash
 read -r -p 'T95 IP address: ' T95_IP
+```
+
+Enter the router address and press Enter. Then connect:
+
+**On the Linux PC, normal user; `sudo` where shown:**
+
+```bash
 ssh -v "root@$T95_IP"
 ```
 
@@ -92,6 +99,8 @@ setup, use your normal username instead of `root`.
 Only after confirming a known reinstall and the new key, remove the old
 entry on the **PC**:
 
+**On the Linux PC, normal user; `sudo` where shown:**
+
 ```bash
 ssh-keygen -R "$T95_IP"
 ```
@@ -103,7 +112,7 @@ private keys, and unredacted diagnostic output private.
 
 ## Kernel version mismatch
 
-**T95 · normal SSH user · read-only check:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 uname -r
@@ -119,7 +128,7 @@ separate card from the verified release. Preserve needed files beforehand.
 
 ## Share missing or access denied
 
-**T95 · normal SSH user with `sudo`:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo testparm -s
@@ -139,6 +148,8 @@ saved client password if necessary.
 
 To set the Samba password again, run on the **T95 as the affected normal user**:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
 sudo smbpasswd -a "$(id -un)"
 ```
@@ -154,7 +165,7 @@ it is not the first diagnostic step.
 
 ## USB drive missing or busy
 
-**T95 · normal SSH user · read-only check:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
@@ -168,10 +179,20 @@ share. Unlabelled shares are named `Extern-USB-1`, etc.; labelled drives use a
 sanitized label. For missing hardware, check cables and power. USB disks may
 need external power. Do not format existing data as a troubleshooting step.
 
-To eject, run on the **T95 with `sudo`**, using the actual share name, for example:
+To eject, select the actual share name from the list:
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
-sudo usb-eject Extern-USB-1
+read -r -p 'USB share name from the list: ' T95_SHARE
+```
+
+Enter the name of the drive you intend to unplug, then press Enter. Eject only that drive:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+sudo usb-eject "$T95_SHARE"
 ```
 
 For `DeviceBusy`, close client files and VLC playback; terminals must also
@@ -183,7 +204,7 @@ share again. Further help: [Samba/USB troubleshooting](../server/samba-usb/docs/
 
 ## Dashboard or Bluetooth fails
 
-**T95 · normal SSH user · after installing the respective module:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 t95-dashboard status

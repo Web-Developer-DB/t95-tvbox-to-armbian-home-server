@@ -109,14 +109,30 @@ und statisch geprüft. Ein vollständiger Durchlauf genau dieses Nutzerwegs
 auf einer separaten SD ist noch nicht durchgeführt. Vorhandene Hardwaretests
 oben und die bestätigten Dashboard-/Bluetooth-Schritte sind davon getrennt.
 
-**Dokumentationsprüfung am 17.10.2026:** Alle 16 vorhandenen Setup-Tests,
-21 Shell-Syntaxprüfungen und 34 Samba-/Dashboard-Prüfsummeneinträge bestehen.
-Relative Dokumentationsverweise, Bildziele, Übersetzungslinks und die früheren
-README-Sprungmarken wurden geprüft. Startseite und Übergang zur Installation
-und Samba-Anleitung wurden in einer lokalen Markdown-Vorschau kontrolliert.
-Die Befehlsblöcke wurden bei dieser statischen Prüfung auf Bash-Syntax geprüft.
-Der Funktionsnachweis des Projektbetreibers für Dashboard und Bluetooth ist
-im vorigen Abschnitt dokumentiert.
+**Dokumentationsprüfung am 17.10.2026:**
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Relative Links, Bilder und Sprachverweise in allen 65 Markdown-Dokumenten | bestanden; bisherige Anker der bearbeiteten Dokumente erhalten |
+| Ausführbare Bash-Beispiele und die 21 Shellskripte | 330 Beispielblöcke und 21 Skripte bestehen `bash -n` |
+| Vorhandene Setup-Tests | 16 bestanden; simuliertes APT/systemd/BlueZ |
+| Samba-/Dashboard-Manifeste | alle 34 Einträge stimmen; geänderte Dokumentationswerte aktualisiert |
+| Backup-Beispiele direkt aus beiden Anleitungen | 22 Prüfungen in temporären Verzeichnissen bestanden |
+| Lokale Markdown-Vorschau bei 1280 und 390 Pixel Fensterbreite | beide Sprachen geprüft; Schnellnavigation ohne Scrollen sichtbar; Hardware-/Kernel-Warnung getrennt und direkt nacheinander; Originalfoto 320 Pixel; keine überbreiten Seiten |
+
+Die Backup-Prüfungen erfassen portable Prüfsummenerzeugung, unveränderte und
+verschobene Archive, alte absolute Prüfsummenpfade nach dem Verschieben sowie
+eine beschädigte ausgewählte Kopie bei weiterhin korrektem Original.
+Fehlende, leere oder ungültige Prüfsummen, fehlende Archive, ungültige zstd-Daten
+und eine nachträglich andere Dateiauswahl werden abgewiesen. Der Schreibblock
+wurde ausschließlich auf Ablehnung nach fehlgeschlagener Prüfung getestet;
+privilegierte Befehle waren durch Testfunktionen ersetzt. Es gab keine echten
+Datenträger-, Formatierungs-, Installations- oder Dienständerungen am Entwicklungs-PC.
+Die korrigierte Kompressionsoption lautet `zstd --check`.
+
+Diese Ergebnisse betreffen Dokumentation und Testumgebung. Die frühere
+Hardwarebestätigung des Projektbetreibers für Dashboard/Bluetooth steht separat
+oben. Ein vollständiger Durchlauf auf einer separaten SD bleibt offen.
 
 Ein Prüfer mit grundlegenden Terminal-/SSH-Kenntnissen soll der
 [Installation](INSTALLATION.md) ohne zusätzliche mündliche Anleitung folgen.
@@ -133,6 +149,7 @@ Die funktionierende Produktiv-SD bleibt als Rückweg erhalten.
 - [ ] USB anschließen, dynamische Freigabe prüfen, sicher auswerfen, erneut anschließen und zugreifen.
 - [ ] Sauber herunterfahren, kalt starten und SSH/Dateizugriff erneut prüfen.
 - [ ] Konfiguriertes SD-Backup erstellen; Wiederherstellung auf Ersatzkarte und Boot separat prüfen.
+- [ ] Optionaler Player: neuen Erstdatei-Durchlauf mit SCP zum tatsächlichen Musikordner, Kopfhörerausgang, Pause und Stopp prüfen.
 
 Ergebnis, tatsächlich verwendete Karten-/Clienttypen und Abweichungen ohne
 private Zugangsdaten protokollieren. Ungeprüfte Punkte bleiben offen; eine

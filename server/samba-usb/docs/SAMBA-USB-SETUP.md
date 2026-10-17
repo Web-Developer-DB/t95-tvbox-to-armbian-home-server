@@ -386,12 +386,8 @@ Referenzversion:
 scripts/usb-eject
 ```
 
-Benutzung:
-
-```bash
-sudo usb-eject SunDiskUSB
-sudo usb-eject Extern-USB-1
-```
+Benutzung: [ein bestimmtes USB-Laufwerk auswählen und sicher auswerfen](../README.md#usb-sicher-auswerfen).
+Die Anleitung fragt nach dem tatsächlichen Freigabenamen; keine Beispielgeräte nacheinander auswerfen.
 
 Die Reihenfolge ist absichtlich genau so:
 
@@ -632,13 +628,25 @@ journalctl -t T95-USB-SHARE --no-pager -n 30
 Auswerfen:
 
 ```bash
-sudo usb-eject <Freigabename>
+read -r -p 'Freigabename aus net usershare list: ' T95_SHARE
+```
+
+Die Frage mit dem tatsächlichen Namen beantworten, dann auf der T95 ausführen:
+
+```bash
+sudo usb-eject "$T95_SHARE"
 ```
 
 Danach:
 
 ```bash
-findmnt /media/$T95_USER/<Mountname>
+read -r -p 'Vollständiger Mountpfad aus lsblk: ' T95_MOUNT_PATH
+```
+
+Den tatsächlichen Pfad eingeben, dann auf der T95 prüfen:
+
+```bash
+findmnt "$T95_MOUNT_PATH"
 sudo -u $T95_USER net usershare list
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
 ```

@@ -15,6 +15,8 @@ up and the [Bluetooth player installed](../server/bluetooth/README.en.md).
    **Adapt this example before entering it:** `alex` is an example username
    and `192.168.178.50` an example box address.
 
+   **On the PC, normal user; adapt the example first:**
+
    ```bash
    ssh alex@192.168.178.50
    ```
@@ -67,7 +69,7 @@ listing, discovering, or connecting devices again.
 
 ## Show paired devices
 
-**Enter on the T95:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 bluetoothctl devices Paired
@@ -91,7 +93,7 @@ new headphones. For an error message instead, open [help](#if-something-goes-wro
 
 ## Show connected devices
 
-**Enter on the T95:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 bluetoothctl devices Connected
@@ -201,7 +203,7 @@ reconnect, use the Bluetooth pause below.
 
 ## Use headphones with a PC or phone
 
-**Enter on the T95:**
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 t95-bluetooth off

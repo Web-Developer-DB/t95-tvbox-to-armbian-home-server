@@ -1,61 +1,97 @@
-# SSH login dashboard: install and restore
+# Set up the SSH dashboard
+
+<a id="ssh-login-dashboard-install-and-restore"></a>
 
 [Deutsch](SSH_DASHBOARD.md) | **English**
 
-**Run on: running T95, normal SSH user with `sudo`.** Complete
-[base system, kernel holds, and SD backup](INSTALLATION.en.md) first.
-This dashboard displays system information at SSH login; it is not a web interface.
+The dashboard shows T95 system information at each SSH login, including load,
+storage, and drives. You do not need to open a separate web interface.
 
-Launcher requirements: [Bash, curl, tar, Python 3, sudo](../server/setup/README.en.md#requirements).
+[Set up](#set-up) · [Verify](#verify-success) · [Remove](#remove) · [Daily use](DAILY_USE.en.md)
 
-> [!NOTE]
-> **Verified and tested:** the project maintainer tested the documented
-> dashboard steps on **2026-10-17** and confirmed they work.
-> [Test evidence and remaining individual checks](VALIDATION.en.md#dashboard-and-bluetooth).
+## Requirements
 
-## Install and remove
+The T95 is running and you are logged in over SSH as a normal user.
+Complete [base setup, kernel holds, and SD backup](INSTALLATION.en.md) first.
+[Launcher tools](../server/setup/README.en.md#requirements) must exist; the
+launcher installs display packages.
 
-The download commands use `main`. On the T95:
+**Tested:** the maintainer confirmed the documented dashboard steps work on
+**2026-10-17**. [Test evidence](VALIDATION.en.md#dashboard-and-bluetooth).
+
+<a id="install-and-remove"></a>
+
+## Set up
+
+**On the T95, normal SSH user with `sudo`:**
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-dashboard.sh)
 ```
 
-Inspect the state locally, then open a new SSH session to see the display:
+Enter your T95 user's Linux password if asked. No letters or stars appear.
+**Success:** setup finishes with `Fertig.`. For errors, use
+[module help](TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails) first.
+
+## Verify success
+
+**On the T95, normal SSH user:**
 
 ```bash
 t95-dashboard status
 ```
 
-Restore the previous dashboard locally:
+**Expected:** `Setup: installed` and `Abweichende Dateien: 0`. For a different
+state, use [module help](TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails).
+
+Open a **second terminal window on the PC** and connect again. Replace sample
+user `alex` and address `192.168.178.50` with your normal T95 user and router address.
+
+**On the PC, normal user; adapt the example first:**
+
+```bash
+ssh alex@192.168.178.50
+```
+
+**Success:** the new SSH login shows the system overview. A
+[redacted example](images/t95-ssh-status-redacted.png) illustrates its layout;
+values and available drives vary.
+
+## Use it
+
+The dashboard appears automatically at later SSH logins. It does not continuously
+refresh an already open window. Continue with normal shell commands after the display.
+
+## Remove
+
+Run this only to undo setup.
+
+**On the T95, normal SSH user:**
 
 ```bash
 t95-dashboard remove
 ```
 
-A separate download launcher performs the same removal without a menu:
+**Success:** files saved before setup are restored. Unrelated added modules remain.
+If old files were identical, the display may look unchanged. Later manual edits
+must be saved/checked first; `--force` overwrites those edits with the backup.
+Packages remain installed by default.
+
+<details>
+<summary>Alternative removal through download</summary>
+
+This is an alternative to local `remove`, not an additional step.
+
+**On the T95, normal SSH user with `sudo`:**
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-dashboard.sh)
 ```
 
-Removal restores files present before installation; it does not delete the
-Armbian dashboard wholesale. If the prior files were identical, the restored
-display looks the same. Additional unrelated MOTD modules remain.
+</details>
 
-The launcher installs display/system packages via APT and keeps the first
-backup in `/var/lib/t95-setup/dashboard`. Repeated installs preserve it.
-Later manual edits block removal; save/check them before `remove --force`.
-Packages remain by default; `remove --remove-packages` requests checked
-removal of newly added target packages only. See [shared setup](../server/setup/README.en.md).
-
-From a [local checkout](../server/setup/README.en.md#local-checkout),
-run at the repository root **on the T95 as normal SSH user with `sudo`**:
-
-```bash
-sudo python3 server/setup/t95_setup.py dashboard install
-sudo python3 server/setup/t95_setup.py dashboard remove
-```
+<details>
+<summary>Archive, technical details, and manual restoration</summary>
 
 ## Archive and display contents
 
@@ -83,16 +119,43 @@ upgrade counts are snapshots and are recalculated on later logins.
 `manifest.json` records destinations, modes, and hashes; `SHA256SUMS` checks
 the same payloads. Keep unredacted captures, credentials, and private keys private.
 
+The launcher installs display/system packages via APT and preserves its
+first backup at `/var/lib/t95-setup/dashboard`. Reinstalling does not replace
+that backup. Later file edits block removal; save/check them before using
+`remove --force`. `remove --remove-packages` requests checked removal of newly
+added target packages only. See [shared setup](../server/setup/README.en.md).
+
+From a [local checkout](../server/setup/README.en.md#local-checkout), an alternative
+installation invocation is:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+sudo python3 server/setup/t95_setup.py dashboard install
+```
+
+For later removal, instead of the local helper:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+sudo python3 server/setup/t95_setup.py dashboard remove
+```
+
 ## Manual restore alternative with preview
 
 This alternative is not an extra step after launcher installation. From the
 local repository root, preview **as normal user on the Linux PC or T95**:
+
+**On the Linux PC, normal user:**
 
 ```bash
 python3 tools/restore-ssh-dashboard.py
 ```
 
 To apply, run **on the T95 with `sudo`**:
+
+**On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo python3 tools/restore-ssh-dashboard.py --apply
@@ -106,8 +169,18 @@ An installation failure restores the previous state automatically.
 For rollback, replace `BACKUP-NAME` with the actual printed backup directory
 and run **on the T95 with `sudo`**:
 
+**On the T95, normal SSH user; `sudo` where shown:**
+
 ```bash
-sudo python3 tools/restore-ssh-dashboard.py --rollback /var/backups/t95-dashboard/BACKUP-NAME
+read -r -p 'Full printed backup directory: ' T95_DASHBOARD_BACKUP
+```
+
+Enter the actual backup directory and press Enter. Then run on the T95:
+
+**On the T95, normal SSH user; `sudo` where shown:**
+
+```bash
+sudo python3 tools/restore-ssh-dashboard.py --rollback "$T95_DASHBOARD_BACKUP"
 ```
 
 Previous content/mode/ownership is restored; files newly introduced by the
@@ -146,3 +219,5 @@ documented dashboard steps work. Separate fresh-SD, removal, and cold-boot
 checks are tracked in the [test matrix](VALIDATION.en.md#dashboard-and-bluetooth).
 The tool does not configure boot parameters, voltages, Bluetooth, Samba,
 or SSH authentication.
+
+</details>

@@ -1,54 +1,169 @@
-# Musikplayer-Cheat-Sheet: MPD auf der T95
+# Eigene Musik auf der T95 abspielen
+
+<a id="musikplayer-cheat-sheet-mpd-auf-der-t95"></a>
 
 **Deutsch** | [English](MUSIKPLAYER_CHEATSHEET.en.md)
 
-**Ort: T95, normaler SSH-Benutzer des eingerichteten Players.**
+Übertrage eine erste eigene MP3 vom PC und höre sie über Bluetooth-Kopfhörer.
+Verwende eine bereits vorhandene Datei. MPD ist der Player auf der Box;
+mit `mpc` bedienst du ihn. Der [Bluetooth-Musikplayer muss installiert sein](../server/bluetooth/README.md).
+Verwende das normale T95-Konto, für das du den Player eingerichtet hast.
+`mpc`, `wpctl` und `systemctl --user` als dieser Benutzer ohne `sudo` ausführen.
 
-Als derselbe normale SSH-Benutzer arbeiten, für den der
-[Bluetooth-Musikplayer](../server/bluetooth/README.md) installiert wurde.
-`mpc`, `wpctl` und `systemctl --user` hier **ohne sudo** ausführen.
-MPD hört lokal auf `127.0.0.1:6600`.
+[Bedienung](#tägliche-bedienung) · [Fehlerhilfe](#kein-ton-oder-keine-tastenreaktion) · [Alltag](DAILY_USE.md)
 
 ## Start: Kopfhörer und Musik bereitstellen
 
-```bash
-t95-bluetooth on
-sudo bluetoothctl connect AA:BB:CC:DD:EE:FF
-```
+### A. Kopfhörer verbinden und Ordner prüfen
 
-Bei erster Einrichtung oder geändertem Audio-Ausgang zusätzlich:
+Mit [Bluetooth einfach bedienen](BLUETOOTH_CHEATSHEET.md#wieder-verbinden-und-für-musik-auswählen)
+den Kopfhörer verbinden und als Musikausgang auswählen. Neue Kopfhörer zuerst
+[koppeln](BLUETOOTH_CHEATSHEET.md#neue-kopfhörer-zum-ersten-mal-verbinden).
+Die Ausgangswahl beginnt bei 20 % und hält die Wiedergabe zunächst an.
 
-```bash
-t95-bluetooth audio AA:BB:CC:DD:EE:FF
-```
+Bleibe in diesem SSH-Fenster der T95. Den eingerichteten Musikordner anzeigen:
 
-Dieser Befehl wählt den Kopfhörer, setzt PipeWire auf 20 % und stoppt MPD.
-Der Standard-Musikordner ist `~/Music`. Wurde beim Installieren
-`--music-dir` verwendet, gilt dieser andere Ordner. Anzeigen:
+**Auf der T95, normaler Player-Benutzer:**
 
 ```bash
 grep '^music_directory' "$HOME/.config/mpd/mpd.conf"
 ```
 
-Dateien als normaler Benutzer in diesen Ordner kopieren. Vorhandene persönliche
-Musik wird vom Installer nicht angefasst. Auch die früher angelegten eigenen
-Testdateien können über `--music-dir "$HOME/.local/share/t95-music-test"`
-verwendet werden. MPD importiert nicht automatisch die alte Playlist einer
-vorherigen manuellen Einrichtung.
+**Beispielantwort — nur lesen:**
+
+```text
+music_directory "/home/alex/Music"
+```
+
+Standard ist der Ordner `Music` deines T95-Benutzers. Bei einer Einrichtung
+mit `--music-dir` gilt ein anderer Pfad. Verwende den **tatsächlich angezeigten
+Pfad**. Danach diese Abfrage starten:
+
+**Auf der T95, normaler Player-Benutzer:**
+
+```bash
+read -r -p 'Musikordner aus der Ausgabe, ohne Anführungszeichen: ' T95_MUSIC_DIR
+```
+
+Den vollständigen Pfad eingeben und Enter drücken. Dann prüfen:
+
+**Auf der T95, normaler Player-Benutzer:**
+
+```bash
+ls -ld -- "$T95_MUSIC_DIR"
+```
+
+**Ergebnis:** Der eingerichtete Ordner wird angezeigt. Bei fehlendem Ordner,
+falschem Benutzer oder Berechtigungsfehler hier stoppen und die Einrichtung prüfen.
+
+### B. Eigene MP3 vom PC übertragen
+
+Öffne ein **zweites Terminalfenster auf dem Linux-PC**, dort ohne SSH-Anmeldung.
+Das erste Fenster bleibt mit der T95 verbunden. SCP kopiert eine Datei über SSH;
+auf dem PC liefert das Paket `openssh-client` den Befehl.
+
+Beispielantworten sind `/home/alex/Musik/Mein Lied.mp3`, `192.168.178.50` und
+`alex`. Ersetze sie durch deinen eigenen PC-Dateipfad, die Box-Adresse und
+deinen T95-Benutzernamen. Pfade bei den folgenden Abfragen ohne Anführungszeichen eingeben.
+
+**Auf dem Linux-PC, normaler Benutzer:**
+
+```bash
+read -r -p 'Vollständiger Pfad deiner eigenen MP3 auf diesem PC: ' T95_AUDIO_FILE
+```
+
+Den lokalen Dateipfad eingeben und Enter drücken. Dann die Datei prüfen:
+
+**Auf dem Linux-PC, normaler Benutzer:**
+
+```bash
+ls -l -- "$T95_AUDIO_FILE"
+```
+
+**Ergebnis:** Die gewünschte MP3 wird angezeigt. Jetzt die Box-Adresse abfragen:
+
+**Auf dem Linux-PC, normaler Benutzer:**
+
+```bash
+read -r -p 'IP-Adresse der T95 aus dem Router: ' T95_IP
+```
+
+Die Adresse eingeben und Enter drücken. Danach den normalen T95-Benutzer abfragen:
+
+**Auf dem Linux-PC, normaler Benutzer:**
+
+```bash
+read -r -p 'Normaler Benutzername auf der T95: ' T95_LOGIN
+```
+
+Den Namen eingeben und Enter drücken. Anschließend kopieren. Ein Zeitstempel
+gibt der Testkopie einen neuen Namen; das Original auf dem PC bleibt erhalten.
+
+**Auf dem Linux-PC, normaler Benutzer:**
+
+```bash
+T95_TEST_NAME="t95-test-$(date +%Y%m%d-%H%M%S).mp3"
+scp -- "$T95_AUDIO_FILE" "$T95_LOGIN@$T95_IP:$T95_TEST_NAME" &&
+  printf 'Übertragener Testdateiname: %s\n' "$T95_TEST_NAME"
+```
+
+Bei einer Passwortfrage das Linux-Passwort dieses T95-Benutzers eingeben.
+Einen neuen SSH-Schlüssel erst nach der Gerätezuordnung gemäß
+[Installation](INSTALLATION.md#4-erstes-ssh-login-und-normalen-benutzer-einrichten) bestätigen.
+**Ergebnis:** SCP endet ohne Fehler und der Testdateiname wird ausgegeben.
+Die Kopie liegt zunächst im T95-Benutzerordner. So kann der nächste Schritt
+auch einen abweichenden Musikpfad mit Leerzeichen direkt auf der Box verwenden.
+
+### C. Testkopie in den Player-Ordner legen
+
+Wechsle zurück in das **erste, mit der T95 verbundene Fenster**, als derselbe
+normale Benutzer wie beim Player. Den am PC ausgegebenen Dateinamen abfragen:
+
+**Auf der T95, normaler Player-Benutzer:**
+
+```bash
+read -r -p 'Übertragener Testdateiname einschließlich .mp3: ' T95_TEST_NAME
+```
+
+Den Dateinamen eingeben und Enter drücken. Danach in den in A geprüften Ordner
+kopieren. `--backup=numbered` erhält eine vorhandene Zieldatei als nummerierte Sicherung.
+
+**Auf der T95, normaler Player-Benutzer:**
+
+```bash
+ls -l -- "$HOME/$T95_TEST_NAME" &&
+  cp --backup=numbered -- "$HOME/$T95_TEST_NAME" "$T95_MUSIC_DIR/$T95_TEST_NAME" &&
+  ls -l -- "$T95_MUSIC_DIR/$T95_TEST_NAME"
+```
+
+**Ergebnis:** Die Datei steht ohne Kopierfehler im eingerichteten Musikordner.
+Bei einem Fehler hier stoppen. Falls das erste Fenster geschlossen wurde,
+zuerst A wiederholen, um den Musikordner erneut festzulegen.
 
 ## Musiksammlung einlesen und abspielen
 
+Für die oben übertragene Testdatei den folgenden Block ausführen. Im selben
+T95-Fenster bleiben, damit `T95_TEST_NAME` noch den übertragenen Namen enthält.
+`clear` leert nur die Warteschlange und löscht keine Musikdatei.
+
+**Auf der T95, normaler Player-Benutzer:**
+
 ```bash
-mpc update --wait          # Musiksammlung neu einlesen
-mpc ls                    # erkannte Ordner/Dateien anzeigen
-mpc clear                 # nur die aktuelle Warteschlange leeren, keine Musik löschen
-mpc add /                 # gesamte konfigurierte Musiksammlung in die Warteschlange
-mpc volume 30             # Playerlautstärke zunächst niedrig halten
+mpc update --wait
+mpc ls
+mpc clear
+mpc add "$T95_TEST_NAME"
+mpc volume 30
 mpc play
+mpc status
 ```
 
-Für einzelne Titel oder Unterordner statt `/` den von `mpc ls` angezeigten
-Pfad verwenden, z. B. `mpc add "Album/Titel.flac"`.
+**Ergebnis:** Der gewählte Titel spielt auf dem ausgewählten Kopfhörer;
+der Status zeigt `[playing]`. Pause und Stoppen mit den Befehlen unten prüfen.
+Bei Stille die [Ton-Fehlerhilfe](#kein-ton-oder-keine-tastenreaktion) verwenden.
+Für bereits vorhandene Musik den Pfad aus `mpc ls` bei `mpc add` verwenden,
+oder `mpc add /` für die ganze Sammlung. Alte Playlists einer vorherigen
+manuellen Player-Einrichtung werden nicht automatisch übernommen.
 
 ## Tägliche Bedienung
 
@@ -80,6 +195,8 @@ anderen Namen wählen oder die alte gespeicherte Liste bewusst mit `rm` löschen
 
 PipeWire hat zusätzlich eine Ausgangslautstärke. Nach Auswahl des Kopfhörers:
 
+**Auf der T95, normaler Player-Benutzer:**
+
 ```bash
 wpctl status
 wpctl get-volume @DEFAULT_AUDIO_SINK@
@@ -100,6 +217,8 @@ physischer Stoppknopf wurde nicht nachgewiesen; `mpc stop` funktioniert.
 
 Für die Tasten müssen `mpd`, `mpdris2` und `mpris-proxy` laufen:
 
+**Auf der T95, normaler Player-Benutzer:**
+
 ```bash
 systemctl --user is-active mpd mpdris2 mpris-proxy
 systemctl --user restart mpd mpdris2 mpris-proxy
@@ -107,9 +226,10 @@ systemctl --user restart mpd mpdris2 mpris-proxy
 
 ## Kein Ton oder keine Tastenreaktion?
 
+**Auf der T95, normaler Player-Benutzer:**
+
 ```bash
 t95-bluetooth status
-bluetoothctl info AA:BB:CC:DD:EE:FF
 wpctl status
 mpc status
 mpc outputs
@@ -119,8 +239,8 @@ journalctl --user -u mpd -u mpdris2 -u mpris-proxy -u wireplumber -b --no-pager 
 
 Kopfhörer müssen verbunden sein und in `wpctl status` als Audio-Ausgang
 erscheinen. Bei einem geänderten Ausgangsnamen erneut
-`t95-bluetooth audio ADRESSE` ausführen. Eine leere Warteschlange mit
-`update --wait`, `add /` und `play` füllen. Falls `mpc` eine andere Instanz
+[den Kopfhörer erneut auswählen](BLUETOOTH_CHEATSHEET.md#wieder-verbinden-und-für-musik-auswählen) ausführen. Eine leere Warteschlange mit
+`mpc update --wait`, `mpc add /` und `mpc play` füllen. Falls `mpc` eine andere Instanz
 anspricht, gezielt `mpc -h 127.0.0.1 -p 6600 status` verwenden.
 
 Für den Wechsel zum PC: `t95-bluetooth off`. Später `on`, Kopfhörer verbinden

@@ -2,137 +2,138 @@
 
 [Deutsch](README.md) | **English**
 
-Reuse a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** as a
-small file/media server. Armbian boots from microSD, Ethernet connects it to
-your home network, and SSH provides administration. Optional Samba shares
-serve files to PCs, Android, and VLC.
+Turn a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** into a
+small home server. Armbian boots from microSD; Ethernet connects the box to your network.
 
-Armbian is a full Linux system, based here on Debian 13. This project's
-scripts are **optional additions for the maintainer's personal use**.
-After base setup with [kernel/DTB holds](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates),
-you can also install suitable applications from Debian repositories and
-Docker containers. Find ideas and instructions in the
-**[Armbian software catalog](https://docs.armbian.com/software/)** and
-[Armbian's Docker guide](https://docs.armbian.com/software/docker/).
+**[Set up a new box](docs/INSTALLATION.en.md)** · **[Everyday use](docs/DAILY_USE.en.md)** · **[Solve a problem](docs/TROUBLESHOOTING.en.md)**
+
+Armbian is a full Linux system based on Debian 13. Project scripts are
+**optional additions for the maintainer's personal use**. Find other applications
+in the **[Armbian software catalog](https://docs.armbian.com/software/)** and
+[Docker guide](https://docs.armbian.com/software/docker/) — for use **after
+base installation, kernel holds, and backup**.
 
 ![Base release: hardware tested](https://img.shields.io/badge/Base_release-hardware_tested-brightgreen)
-![System: Armbian 26.8.4](https://img.shields.io/badge/Armbian-26.8.4-18a303)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
 
 > [!WARNING]
-> **Check the PCB first.** “T95” covers different hardware. Only
-> `H616-T95MAX-AXP313A-V3.0` is tested for this image. Stop for a different or
-> unknown board: [identify hardware](docs/HARDWARE_IDENTIFICATION.en.md) and
-> use the [developer path](docs/PORTING.en.md).
+> **Check the PCB first:** [compare its marking with the original photo](#hardware-photos).
+> “T95” covers different hardware. Only `H616-T95MAX-AXP313A-V3.0` is tested
+> for this image. Stop for a different or unknown board:
+> [identify hardware](docs/HARDWARE_IDENTIFICATION.en.md) and use the [developer path](docs/PORTING.en.md).
 
 > [!CAUTION]
 > **⛔ REQUIRED: HOLD THE KERNEL AND DTB**
 >
-> **After initial setup, before installing more software or updating the system:**
-> hold the kernel and DTB and **keep these holds enabled during normal use**.
-> A kernel/DTB update can overwrite T95-specific changes —
+> After initial setup, **before installing more software or updating the system**,
+> hold the kernel and DTB (hardware description). **Keep these holds enabled
+> during normal use.** Replacing them can overwrite T95-specific changes —
 > **the box may no longer boot afterward.**
 >
-> **[→ Read the required kernel/DTB protection step now](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)**
+> **[→ Required kernel/DTB protection step](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)**
 
 ## Install the home server
 
-**[→ Open the complete installation guide](docs/INSTALLATION.en.md)**
+**[→ Begin with installation step 1](docs/INSTALLATION.en.md)**
 
-The recommended route assumes basic terminal/SSH knowledge and a Linux PC
-with a USB card reader. It covers requirements, download, verification, your
-own local password, SD writing, first login, and file sharing.
+You need:
 
-**Check hardware → prepare PC → create SD → SSH → hold kernel → backup
-→ Samba → verify file access**
+- the verified box and its correct power supply;
+- an expendable microSD and USB card reader;
+- a Linux PC, internet, and Ethernet to the router;
+- space for image preparation **plus a separate full-SD backup**.
+
+The guide explains Terminal and SSH, the remote connection to your box.
+Windows/WSL2 has a separate section with additional device requirements.
+
+**Hardware → PC → SD → SSH → hold kernel → backup → optional file server**
 
 > [!IMPORTANT]
-> The download has **no default password**. Create a personal copy with your
-> own password before writing. The guide handles this with the verified
-> installer. Writing erases the selected SD completely; the internal Android
-> eMMC is not written by this route.
-
-**Already installed?** [Troubleshooting](docs/TROUBLESHOOTING.en.md) ·
-[Samba and USB](server/samba-usb/README.en.md) · [SD backup](docs/BACKUP.en.md)
+> **No default password:** create a personal image copy with your own password
+> before writing. The installer guides you through it.
+> **Writing erases the entire selected SD.** Internal Android storage (eMMC)
+> is not written by this route.
 
 ## Hardware photos
 
-Compare the **PCB marking**, not just the case. On the connector side it is
-immediately above the heatsink. The AI-assisted orientation
-view marks its location; use the unchanged original photos below as the
-authoritative source for hardware comparison. Disconnect all power before opening the box.
+Disconnect all power before opening the box. **Look for `H616-T95MAX-AXP313A-V3.0`**
+on the connector side above the heatsink. Compare it with your PCB;
+the case name alone is insufficient.
 
-![AI-assisted orientation view of PCB inscription H616-T95MAX-AXP313A-V3.0](docs/images/t95-board-identification.png)
+<a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Unchanged original connector-side photo; PCB marking above the heatsink" width="320"></a>
+
+**Click the original photo and enlarge it** to read the marking.
+
+<details>
+<summary>Show more hardware photos</summary>
 
 <p>
-  <a href="docs/images/t95-board-connectors.jpg"><img src="docs/images/t95-board-connectors.jpg" alt="Original connector side of the tested PCB" width="320"></a>
-  <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original memory side of the PCB" width="240"></a>
-</p>
-<p>
+  <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original memory side of the PCB" width="200"></a>
   <a href="docs/images/t95-box-top.jpg"><img src="docs/images/t95-box-top.jpg" alt="T95 case from above" width="200"></a>
   <a href="docs/images/t95-case-bottom-redacted.jpg"><img src="docs/images/t95-case-bottom-redacted.jpg" alt="Case underside with individual sticker covered" width="200"></a>
 </p>
 
-Click original photos to enlarge. They do not replace hardware inspection.
-EXIF/GPS data was removed and individual stickers are covered.
+Click to enlarge originals. EXIF/GPS data was removed and individual stickers are covered.
+
+</details>
 
 ## What works?
 
-| Function | Documented status |
+| Function | Status |
 | --- | --- |
-| Armbian SD boot, Ethernet, DHCP, SSH, clean shutdown | Tested on the exact PCB |
-| Samba shares, USB automount/eject, VLC over SMB | Tested on the reference installation; separate setup |
-| eMMC as a data drive | Tested on the reference installation; separate preparation required |
-| Armbian boot from eMMC | Unsuccessful; microSD remains the supported boot path |
-| SSH dashboard: setup and display | Tested and confirmed working by the project maintainer (2026-10-17) |
-| Bluetooth player: setup and operation | Tested and confirmed working by the project maintainer (2026-10-17) |
-| Wi-Fi, HDMI as a server function, remote control, further long-term tests | Outside base acceptance |
+| microSD boot, Ethernet, SSH, shutdown | ✅ Tested |
+| Samba, USB drives, VLC over SMB | ✅ Tested; optional setup |
+| SSH dashboard and Bluetooth music player | ✅ Tested; optional setup |
+| eMMC as a data drive | ✅ Tested; separate preparation |
+| Armbian boot from eMMC | Unsupported; use microSD |
+| Wi-Fi, HDMI as a server function, infrared remote | Not tested |
 
-The base is Armbian **26.8.4 / Debian 13 Trixie / kernel
-`6.18.48-current-sunxi64`**. The guide protects kernel and DTB from
-uncontrolled replacement after first login. Ethernet is limited to 100 Mbit/s;
-the reference measured approximately 11–12 MB/s payload throughput.
+Reference: **Armbian 26.8.4 / Debian 13 / kernel `6.18.48-current-sunxi64`**.
+The maintainer confirmed the dashboard/Bluetooth steps work on **2026-10-17**.
+[Test evidence](docs/VALIDATION.en.md) tracks further acceptance and long-term tests.
+Ethernet: 100 Mbit/s, measured at about 11–12 MB/s.
 
-[Test evidence and remaining individual checks](docs/VALIDATION.en.md) ·
-[Hardware details, measurements, SSH example](docs/TECHNICAL_REFERENCE.en.md)
+## Daily use
+
+**[→ Open everyday use](docs/DAILY_USE.en.md)** for reconnecting, file access,
+safe USB ejection, Bluetooth, music, rebooting, and shutting down.
+Use [troubleshooting by symptom](docs/TROUBLESHOOTING.en.md) for errors.
 
 ## Optional extensions
 
-After the working base system and a private SD backup:
+After base installation, kernel holds, and a private SD backup:
 
-| Goal | Guide |
+| Your goal | Guide |
 | --- | --- |
-| Share home-network files and USB drives | [Samba module](server/samba-usb/README.en.md) |
-| Show system information on SSH login | [Dashboard](docs/SSH_DASHBOARD.en.md) |
-| Send music to Bluetooth headphones | [Bluetooth and music player](server/bluetooth/README.en.md) |
-| Set up both optional modules through a menu | [Shared setup entry](server/setup/README.en.md) |
-| Later use eMMC as a data drive | [Requirements and reference](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
+| Share files and use USB drives | [Set up file sharing](server/samba-usb/README.en.md) |
+| See system information at SSH login | [Dashboard](docs/SSH_DASHBOARD.en.md) |
+| Send music to headphones or speakers | [Bluetooth music player](server/bluetooth/README.en.md) |
+| Set up dashboard and player through a menu | [Shared setup](server/setup/README.en.md) |
+| Use internal eMMC for data | [Requirements for experienced users](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
 
 ## Install other applications
 
-Choose software that **supports ARM64** and fits the box's processing power,
-**2 GiB RAM**, and available storage. Check each application's requirements
-and leave capacity for Armbian and services already running.
+Choose **ARM64-compatible** applications that fit the box's CPU,
+**2 GiB RAM**, and free storage. Leave capacity for Armbian and existing services;
+project modules are optional.
 
 > [!CAUTION]
-> **Keep the kernel and DTB frozen.** Before installing more software,
-> [set the kernel/DTB holds](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
-> and keep them enabled during normal use. Switching or updating the kernel/DTB
-> can overwrite T95-specific changes and leave the box unable to boot.
-> Do not enable kernel switching or kernel/firmware/bootloader updates in
-> `armbian-config`. Normal application packages can be updated with the holds in place.
+> **Keep kernel/DTB holds enabled.** Do not enable kernel switching or
+> kernel/firmware/bootloader updates in `armbian-config`. Normal application
+> packages can be updated with the holds in place.
 
-Many applications can be selected through the
-[Armbian configuration utility](https://docs.armbian.com/config/).
-**On the configured T95, as your normal SSH user with `sudo`:**
+**On the T95, normal SSH user with `sudo`:**
 
 ```bash
 sudo armbian-config
 ```
 
-Select **Software**, then the category and application. Docker is under
-**Software → Containers → Docker**. Complete base setup, kernel holds, and
-SD backup before adding applications.
+In [Armbian configuration](https://docs.armbian.com/config/), select **Software**,
+then a category and application. Docker is under **Software → Containers → Docker**.
+See requirements and instructions in the [software catalog](https://docs.armbian.com/software/).
+
+<details>
+<summary>Source versions and developer details</summary>
 
 ## Source versions
 
@@ -163,6 +164,8 @@ source versions.
 UART is the diagnostic path for porting and early boot failures. Prepare a
 **3.3 V TTL adapter** before those tasks; never connect 5 V TTL or RS-232.
 Hardware details and wiring belong to the developer path.
+
+</details>
 
 ## Project and boundaries
 

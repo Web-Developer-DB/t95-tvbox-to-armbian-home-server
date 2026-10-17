@@ -6,7 +6,7 @@ Suche das sichtbare Symptom. Prüfe jeweils zuerst die einfachen Ursachen;
 ändere nur eine Sache gleichzeitig. Bei abweichender oder unbekannter
 Platine nicht mit dem T95-Image weiterarbeiten: [Hardware prüfen](HARDWARE_IDENTIFICATION.md).
 
-[Zur Installation](INSTALLATION.md) · [Startseite](../README.md)
+[Alltag](DAILY_USE.md) · [Zur Installation](INSTALLATION.md) · [Startseite](../README.md)
 
 | Symptom | Einstieg |
 | --- | --- |
@@ -37,7 +37,7 @@ Prüfsummenprüfung. Danach den abgebrochenen Installationsweg fortsetzen.
 
 ## SD-Karte wird nicht erkannt
 
-**Linux-PC · normaler Benutzer · rein lesende Prüfung:**
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
 ```bash
 lsblk -b -o NAME,SIZE,MODEL,SERIAL,TRAN,RM,TYPE,MOUNTPOINTS
@@ -78,10 +78,17 @@ Die eMMC wird zur Reparatur nicht gelöscht.
 
 ## SSH-Anmeldung scheitert
 
-**PC · normaler Benutzer · Adresse aus dem Router eingeben:**
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
 ```bash
 read -r -p 'IP-Adresse der T95: ' T95_IP
+```
+
+Die Routeradresse eingeben und Enter drücken. **Auf dem PC, normaler Benutzer:**
+
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
+```bash
 ssh -v "root@$T95_IP"
 ```
 
@@ -98,6 +105,8 @@ verwende deinen normalen Benutzernamen anstelle von `root`.
 Nur wenn eine bekannte Neuinstallation und der neue Schlüssel bestätigt sind,
 kann auf dem **PC** der alte Eintrag entfernt werden:
 
+**Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
+
 ```bash
 ssh-keygen -R "$T95_IP"
 ```
@@ -110,7 +119,7 @@ Passwörter, private Schlüssel und unbereinigte Diagnoseausgaben nicht veröffe
 
 ## Kernelstand weicht ab
 
-**T95 · normaler SSH-Benutzer · rein lesende Prüfung:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 uname -r
@@ -129,7 +138,7 @@ Dateien sichern.
 
 ## Freigabe fehlt oder Zugriff wird abgelehnt
 
-**T95 · normaler SSH-Benutzer mit `sudo`:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 sudo testparm -s
@@ -151,6 +160,8 @@ Clientpasswort gegebenenfalls im Dateimanager ersetzen.
 Wenn das Samba-Passwort neu gesetzt werden muss, auf der **T95** als
 betroffener normaler Benutzer ausführen:
 
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
 ```bash
 sudo smbpasswd -a "$(id -un)"
 ```
@@ -166,7 +177,7 @@ kein erster Diagnoseschritt.
 
 ## USB-Laufwerk fehlt oder ist belegt
 
-**T95 · normaler SSH-Benutzer · rein lesende Prüfung:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
@@ -181,11 +192,20 @@ eine eigene Freigabe besitzen. Ohne Label heißen diese beispielsweise
 Gerät Kabel und Stromversorgung prüfen. USB-Festplatten können externe
 Versorgung benötigen. Vorhandene Daten nicht zur Fehlerbehebung formatieren.
 
-Zum Auswerfen auf der **T95 mit `sudo`** den tatsächlichen Freigabenamen aus
-der Liste verwenden, beispielsweise:
+Zum Auswerfen den tatsächlichen Freigabenamen aus der Liste auswählen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
-sudo usb-eject Extern-USB-1
+read -r -p 'USB-Freigabename aus der Liste: ' T95_SHARE
+```
+
+Den Namen des gewünschten Laufwerks eingeben und Enter drücken. Dann nur dieses Laufwerk auswerfen:
+
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
+
+```bash
+sudo usb-eject "$T95_SHARE"
 ```
 
 Bei `DeviceBusy` auf Clients geöffnete Dateien und VLC-Wiedergaben schließen,
@@ -198,7 +218,7 @@ erzeugt die Freigabe erneut. Weitere Diagnose:
 
 ## Dashboard oder Bluetooth funktioniert nicht
 
-**T95 · normaler SSH-Benutzer · nach Installation des jeweiligen Moduls:**
+**Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
 t95-dashboard status

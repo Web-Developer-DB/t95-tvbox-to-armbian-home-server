@@ -7,6 +7,14 @@ small file/media server. Armbian boots from microSD, Ethernet connects it to
 your home network, and SSH provides administration. Optional Samba shares
 serve files to PCs, Android, and VLC.
 
+Armbian is a full Linux system, based here on Debian 13. This project's
+scripts are **optional additions for the maintainer's personal use**.
+After base setup with [kernel/DTB holds](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates),
+you can also install suitable applications from Debian repositories and
+Docker containers. Find ideas and instructions in the
+**[Armbian software catalog](https://docs.armbian.com/software/)** and
+[Armbian's Docker guide](https://docs.armbian.com/software/docker/).
+
 ![Base release: hardware tested](https://img.shields.io/badge/Base_release-hardware_tested-brightgreen)
 ![System: Armbian 26.8.4](https://img.shields.io/badge/Armbian-26.8.4-18a303)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
@@ -89,6 +97,32 @@ After the working base system and a private SD backup:
 | Send music to Bluetooth headphones | [Bluetooth and music player](server/bluetooth/README.en.md) |
 | Set up both optional modules through a menu | [Shared setup entry](server/setup/README.en.md) |
 | Later use eMMC as a data drive | [Requirements and reference](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
+
+## Install other applications
+
+Choose software that **supports ARM64** and fits the box's processing power,
+**2 GiB RAM**, and available storage. Check each application's requirements
+and leave capacity for Armbian and services already running.
+
+> [!CAUTION]
+> **Keep the kernel and DTB frozen.** Before installing more software,
+> [set the kernel/DTB holds](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
+> and keep them enabled during normal use. Switching or updating the kernel/DTB
+> can overwrite T95-specific changes and leave the box unable to boot.
+> Do not enable kernel switching or kernel/firmware/bootloader updates in
+> `armbian-config`. Normal application packages can be updated with the holds in place.
+
+Many applications can be selected through the
+[Armbian configuration utility](https://docs.armbian.com/config/).
+**On the configured T95, as your normal SSH user with `sudo`:**
+
+```bash
+sudo armbian-config
+```
+
+Select **Software**, then the category and application. Docker is under
+**Software → Containers → Docker**. Complete base setup, kernel holds, and
+SD backup before adding applications.
 
 ## Source versions
 

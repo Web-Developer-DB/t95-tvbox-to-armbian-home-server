@@ -7,6 +7,15 @@ als kleinen Datei- und Medienserver weiterverwenden: Armbian startet von
 microSD, Ethernet verbindet die Box mit dem Heimnetz, SSH dient zur Bedienung.
 Samba stellt auf Wunsch Dateien für PC, Android und VLC bereit.
 
+Armbian ist ein vollständiges Linux-System, hier auf Basis von Debian 13.
+Die Skripte dieses Projekts sind **optionale Ergänzungen für die private
+Nutzung des Projektbetreibers**. Nach der Grundinstallation mit
+[Kernel-/DTB-Sperre](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
+kannst du weitere passende Anwendungen aus den Debian-Paketquellen und
+Docker-Container installieren.
+Ideen und Anleitungen findest du im **[Armbian-Software-Katalog](https://docs.armbian.com/software/)**
+und in der [Docker-Anleitung von Armbian](https://docs.armbian.com/software/docker/).
+
 ![Basisrelease: hardwaregeprüft](https://img.shields.io/badge/Basisrelease-hardwaregepr%C3%BCft-brightgreen)
 ![System: Armbian 26.8.4](https://img.shields.io/badge/Armbian-26.8.4-18a303)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
@@ -90,6 +99,33 @@ Erst nach dem funktionierenden Grundsystem und einem privaten SD-Backup:
 | Musik an Bluetooth-Kopfhörer senden | [Bluetooth und Musikplayer](server/bluetooth/README.md) |
 | Beide Zusatzmodule über ein Auswahlmenü einrichten | [Gemeinsamer Setup-Einstieg](server/setup/README.md) |
 | Interne eMMC später als Datenlaufwerk verwenden | [Voraussetzungen und Referenz](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
+
+## Weitere Anwendungen installieren
+
+Wähle Software, die **ARM64 unterstützt** und zur Prozessorleistung, den
+**2 GiB RAM** und dem verfügbaren Speicherplatz der Box passt. Prüfe dafür
+die Anforderungen der jeweiligen Anwendung und plane Reserven für Armbian
+und bereits laufende Dienste ein.
+
+> [!CAUTION]
+> **Kernel und DTB eingefroren lassen.** Vor weiterer Softwareinstallation die
+> [Kernel-/DTB-Sperre setzen](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
+> und im normalen Betrieb nicht aufheben. Ein Kernelwechsel oder Kernel-/DTB-Update
+> kann die T95-Anpassungen überschreiben, sodass die Box nicht mehr startet.
+> In `armbian-config` keine Kernelwechsel oder Kernel-/Firmware-/Bootloader-Updates
+> aktivieren. Normale Anwendungspakete dürfen bei gesetzter Sperre aktualisiert werden.
+
+Viele Anwendungen lassen sich über die
+[Armbian-Konfigurationssoftware](https://docs.armbian.com/config/) auswählen.
+**Auf der eingerichteten T95, als normaler SSH-Benutzer mit `sudo`:**
+
+```bash
+sudo armbian-config
+```
+
+Im Menü **Software** die Kategorie und dann die gewünschte Anwendung wählen.
+Docker findest du unter **Software → Containers → Docker**. Erst das
+Grundsystem samt Kernel-Sperre und SD-Backup abschließen, dann Anwendungen ergänzen.
 
 ## Quellstände
 

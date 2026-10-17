@@ -2,6 +2,16 @@
 
 [Deutsch](README.md) | **English**
 
+> [!CAUTION]
+> **⛔ REQUIRED: HOLD THE KERNEL AND DTB**
+>
+> **After initial setup, before installing more software or updating the system:**
+> hold the kernel and DTB and **keep these holds enabled during normal use**.
+> A kernel/DTB update can overwrite T95-specific changes —
+> **the box may no longer boot afterward.**
+>
+> **[→ Read the required kernel/DTB protection step now](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)**
+
 Reuse a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** as a
 small file/media server. Armbian boots from microSD, Ethernet connects it to
 your home network, and SSH provides administration. Optional Samba shares

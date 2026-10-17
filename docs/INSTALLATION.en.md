@@ -78,8 +78,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-t
 ```
 
 The launcher is downloaded from `main`; it downloads base image **`v1.0.1`**
-and explicitly obtains its image tools from **tag `v1.0.1`**. Optional modules
-use a separate review branch; see [source versions](../README.en.md#source-versions).
+and explicitly obtains its image tools from **tag `v1.0.1`**. Optional server
+modules are obtained separately from `main`; see [source versions](../README.en.md#source-versions).
 
 The installer downloads/verifies the image, asks twice for your own **initial
 root password** with hidden input, and creates a personal copy. Answer `Y` to
@@ -222,8 +222,8 @@ a file-manager location, not a terminal command. For problems,
   and eMMC data; back up those separately and regularly.
 - Add the [dashboard](SSH_DASHBOARD.en.md) and
   [Bluetooth player](../server/bluetooth/README.en.md) after the base system.
-  Their new installers use the review branch and still need a complete
-  fresh-T95-SD acceptance run.
+  The project maintainer tested the documented steps on 2026-10-17 and
+  confirmed they work.
 - [eMMC data storage](TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive)
   is a later extension requiring its own backup, partitioning, and mounting.
 

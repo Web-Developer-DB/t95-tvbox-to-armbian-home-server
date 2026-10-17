@@ -113,7 +113,7 @@ Ausgabe von `id` muss deinen normalen Benutzernamen zeigen, nicht `root`.
 
 **Ausführungsort:** Alle Befehle bis zum Clienttest auf der T95 als normaler
 SSH-Benutzer mit `sudo`. Zuerst die [Kernel-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
-setzen und ein SD-Backup erstellen. Der Checkout verwendet den Prüfbranch;
+setzen und ein SD-Backup erstellen. Der Checkout verwendet `main`;
 der Release-Werkzeugeordner auf dem PC ist ein anderer Ordner.
 
 Das Skript ersetzt `/etc/samba/smb.conf` nach einer Sicherung mit Zeitstempel.
@@ -130,7 +130,7 @@ sudo apt install -y git
 ### 1. Modul beziehen und Manifest prüfen
 
 ```bash
-git clone --branch codex/archive-ssh-dashboard --depth 1 \
+git clone --branch main --depth 1 \
   https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
 cd t95-tvbox-to-armbian-home-server/server/samba-usb
 sha256sum -c MANIFEST.sha256

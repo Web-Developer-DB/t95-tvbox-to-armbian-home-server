@@ -8,10 +8,9 @@ abschließen. Dieses Menü installiert Zusatzmodule auf einer laufenden Box;
 es erstellt keine Armbian-SD und richtet Samba nicht ein.
 
 > [!NOTE]
-> **Prüfbranch:** Die neuen Installer sind mit simuliertem APT/systemd
-> getestet. Vollständige Installation, Rücknahme und Kaltstart auf einer
-> frischen T95-SD stehen noch aus. Die Hardwaretests der manuellen
-> Ausgangseinrichtung gelten nicht als Abnahme dieser Installer.
+> **Geprüft und getestet:** Der Projektbetreiber hat die dokumentierten
+> Dashboard- und Bluetooth-Schritte am **17.10.2026** geprüft und als
+> funktionsfähig bestätigt. [Testnachweise und offene Einzelprüfungen](../../docs/VALIDATION.md#dashboard-und-bluetooth).
 
 ## Voraussetzungen
 
@@ -29,7 +28,7 @@ Eine Git-Installation ist für den Downloadstarter nicht nötig.
 ## Schnellstart auf der laufenden T95
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/t95-setup.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/t95-setup.sh)
 ```
 
 Wähle die gewünschte Aktion im Menü; `0` installiert Dashboard und
@@ -46,8 +45,9 @@ curl, tar, Python 3 und sudo auf der Armbian-Box. Die Nutzpakete installiert das
 Setup selbst über APT. Eine Git-Installation ist nicht nötig.
 
 
-Der [Schnellstart am Anfang der README](../../README.md#schnellinstallation-dashboard-und-bluetooth)
-zeigt zuerst den gemeinsamen Einstieg und danach vier getrennte Downloadbefehle:
+Neben dem gemeinsamen Menü gibt es vier Starter mit fester Aktion.
+Die Downloadbefehle stehen in der [Dashboard-Anleitung](../../docs/SSH_DASHBOARD.md)
+und der [Bluetooth-Anleitung](../bluetooth/README.md):
 
 | Eigener Starter | Feste Aktion |
 |---|---|
@@ -74,15 +74,11 @@ separaten Bluetooth-Starter gewählt.
 | `dashboard` | `install`, `remove`, `status` |
 | `bluetooth` | `install`, `remove`, `status`, `pair`, `audio ADRESSE`, `off`, `on`, `restart` |
 
-Der Standard-Quellbranch ist vorerst `codex/archive-ssh-dashboard`. Optional
+Der Standard-Quellbranch ist `main`. Optional
 kann `T95_SETUP_REF` eine andere existierende Branch-/Tag-/Commitreferenz im
 selben Repository auswählen. Es wird genau **ein** GitHub-Quellarchiv geladen;
 Dateien verschiedener Downloads werden nicht kombiniert. HTTPS schützt den
-Transport; dies ist keine unabhängige Release-Signatur. Bei geplanter
-Veröffentlichung Links und Standardreferenz gemeinsam prüfen.
-
-**Quellstand:** Die Schnellstarts verwenden `codex/archive-ssh-dashboard`.
-Ein späterer Merge und die Umstellung auf `main` erfolgen getrennt.
+Transport; dies ist keine unabhängige Release-Signatur.
 
 Anleitungen:
 [Dashboard](../../docs/SSH_DASHBOARD.md) ·
@@ -93,19 +89,19 @@ Anleitungen:
 ## Lokaler Checkout
 
 **T95 · normaler SSH-Benutzer mit `sudo` für Pakete, Git als dieser Benutzer.**
-Der Release-Werkzeugeordner auf dem PC enthält die neuen Module nicht.
-Verwende einen separaten Checkout mit ausdrücklich gewähltem Prüfbranch:
+Der Release-Werkzeugeordner auf dem PC enthält die aktuellen Module nicht.
+Verwende auf der T95 einen separaten Checkout von `main`:
 
 ```bash
 sudo apt update
 sudo apt install -y git
-git clone --branch codex/archive-ssh-dashboard --depth 1 \
+git clone --branch main --depth 1 \
   https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git "$HOME/t95-server-tools"
 cd "$HOME/t95-server-tools"
 git branch --show-current
 ```
 
-**Ergebnis:** `codex/archive-ssh-dashboard`; `server/setup/t95_setup.py` ist
+**Ergebnis:** `main`; `server/setup/t95_setup.py` ist
 vorhanden. Wenn der Zielordner bereits existiert, Branch und lokale Änderungen
 prüfen, statt ihn zu überschreiben. Lokale Aufrufe in den Modulanleitungen
 laufen aus diesem Repository-Hauptverzeichnis.
@@ -170,8 +166,7 @@ wurde nur eine temporäre Datei verwendet und anschließend gelöscht; keine
 aktive Konfiguration oder kein Dienst wurde geändert. Die Routingwirkung bei
 fehlendem Kopfhörer ist damit noch nicht praktisch nachgewiesen.
 
-**Noch offen:** kompletter Installations-/Deinstallationslauf mit echten Paketen
-auf einer frischen T95-SD und anschließender Kaltstart. Nicht die funktionierende
-Produktivbox für einen destruktiven Test verwenden. Die bereits nachgewiesenen
-Audio-/Tastenfunktionen der manuellen Ausgangseinrichtung sind davon getrennt
-dokumentiert.
+Die dokumentierten Dashboard- und Bluetooth-Schritte wurden am **17.10.2026**
+zusätzlich vom Projektbetreiber geprüft und als funktionsfähig bestätigt.
+Gesonderte Neuinstallations-, Rücknahme- und Kaltstartprüfungen sind in der
+[Testmatrix](../../docs/VALIDATION.md#dashboard-und-bluetooth) aufgeführt.

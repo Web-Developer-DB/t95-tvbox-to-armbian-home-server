@@ -12,8 +12,8 @@ Allwinner H616, 2 GiB DDR3L, Armbian 26.8.4 / Debian 13 Trixie /
 
 ## Installation
 
-**[→ Complete English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.en.md)** ·
-**[Deutsche Installationsanleitung](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.md)**
+**[→ Complete English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.en.md)** ·
+**[Deutsche Installationsanleitung](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md)**
 
 1. Check the exact PCB; prepare a Linux PC and USB card reader.
 2. Use the installer to download/verify the release and create a personal
@@ -28,9 +28,9 @@ Allwinner H616, 2 GiB DDR3L, Armbian 26.8.4 / Debian 13 Trixie /
 6. Optionally install Samba and test file access. The recommended fixed
    storage path is explicitly on the system SD; USB shares are separate.
 
-The guide uses the base image and image tools from `v1.0.1`. New Codex-branch
-dashboard/Bluetooth installers are optional modules whose full fresh-T95-SD
-acceptance is still open.
+The guide uses the base image and image tools from `v1.0.1`. Dashboard and
+Bluetooth are optional modules from `main`. The project maintainer tested
+their documented steps on 2026-10-17 and confirmed they work.
 
 ## v1.0.1 change: DRAM stability
 
@@ -54,8 +54,8 @@ kernel startup. Full cold boots to login passed on two boxes of the exact PCB re
 - Full acceptance of the newly organized guide on a separate SD remains open
   and is distinct from existing hardware results.
 
-[Troubleshooting](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/TROUBLESHOOTING.en.md) ·
-[Test matrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/VALIDATION.en.md)
+[Troubleshooting](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/TROUBLESHOOTING.en.md) ·
+[Test matrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/VALIDATION.en.md)
 
 ## Download files
 

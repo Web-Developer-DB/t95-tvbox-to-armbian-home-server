@@ -191,11 +191,10 @@ t95-bluetooth status
 ```
 
 `command not found` means that helper is not installed. Local calls to
-`server/setup/t95_setup.py` require a **Codex review-branch checkout**; the
-PC's release-tag checkout does not contain the new modules. See
+`server/setup/t95_setup.py` require a **`main` checkout**; the
+PC's release-tag checkout does not contain the current modules. See
 [local setup checkout](../server/setup/README.en.md#local-checkout).
 
-The new installers still require full fresh-T95-SD acceptance. Back up before
-changes. Instructions, removal, and audio diagnosis:
+Back up before changes. Instructions, removal, and audio diagnosis:
 [dashboard](SSH_DASHBOARD.en.md), [Bluetooth](../server/bluetooth/README.en.md),
 [music player](MUSIKPLAYER_CHEATSHEET.en.md).

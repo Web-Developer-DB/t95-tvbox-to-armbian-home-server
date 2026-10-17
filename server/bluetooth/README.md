@@ -13,25 +13,22 @@ Zuerst [Grundsystem, Kernel-Sperre und SD-Backup](../../docs/INSTALLATION.md) ab
 Bei fehlenden Werkzeugen hilft die [Vorbereitung](../setup/README.md#voraussetzungen).
 
 > [!NOTE]
-> **Noch in Erprobung:** Musik und Kopfhörertasten wurden an der
-> Referenzbox geprüft. Die automatische Einrichtung braucht noch einen
-> vollständigen Test auf einer frisch eingerichteten SD-Karte. Vorher ein
-> Backup des funktionierenden Systems anlegen.
+> **Geprüft und getestet:** Der Projektbetreiber hat die dokumentierten
+> Bluetooth-Schritte am **17.10.2026** geprüft und als funktionsfähig bestätigt.
+> [Testnachweise und offene Einzelprüfungen](../../docs/VALIDATION.md#dashboard-und-bluetooth).
 
 Die passende T95 verwendet ihr eingebautes Bluetooth. Ein zusätzlicher
 USB-Bluetooth-Adapter ist für diesen Aufbau nicht erforderlich.
 
 ## Schnell installieren
 
-**Quellstand:** Die Downloadbefehle verwenden den Prüfbranch
-`codex/archive-ssh-dashboard`. Nach einem geprüften Merge müssen Links und
-Standardreferenz gemeinsam auf `main` umgestellt werden.
+Die Downloadbefehle und der Installer beziehen ihre Dateien von `main`.
 
 **Einmalig auf der T95:** Die gesamte folgende Zeile kopieren, in das
 mit der Box verbundene Terminalfenster einfügen und Enter drücken.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-bluetooth.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-bluetooth.sh)
 ```
 
 Bei einer Passwortfrage dein Linux-Passwort auf der T95 eingeben und Enter
@@ -44,7 +41,7 @@ Eigene Musik wird im Ordner `Music` deines Benutzers erwartet und bleibt erhalte
 <details>
 <summary>Weitere Installationsmöglichkeiten für Fortgeschrittene</summary>
 
-Aus einem [Checkout des Prüfbranches](../setup/README.md#lokaler-checkout)
+Aus einem [lokalen Checkout](../setup/README.md#lokaler-checkout)
 auf der T95, im Repository-Hauptverzeichnis als normaler SSH-Benutzer mit `sudo`:
 
 ```bash
@@ -106,7 +103,7 @@ t95-bluetooth remove --remove-packages
 Für die Deinstallation gibt es einen eigenen Downloadstarter, ohne Menüauswahl:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-bluetooth.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-bluetooth.sh)
 ```
 
 Dabei werden MPD, mpDris2 und `mpris-proxy` für den gewählten Benutzer gestoppt
@@ -154,8 +151,8 @@ wiederherstellen. `--force` überschreibt diese späteren Änderungen.
   MPD-Systeminstanz wird deaktiviert, damit sie den Benutzerplayer nicht stört.
 - Eine auf MPD begrenzte PipeWire-Clientregel setzt `node.dont-fallback` und
   `node.dont-move`. Fehlt der gewählte Kopfhörer, soll MPD dadurch nicht an
-  einen anderen Audio-Ausgang wechseln. Der vollständige Hardwaretest dieser
-  neuen Regel steht zusammen mit dem Installer-Test noch aus. Die Syntax wurde
+  einen anderen Audio-Ausgang wechseln. Der gezielte Hardwaretest bei fehlendem
+  Kopfhörer ist separat in der [Testmatrix](../../docs/VALIDATION.md#dashboard-und-bluetooth) offen. Die Syntax wurde
   mit `pw-config` der laufenden Box aus einer temporären Datei geprüft.
 - Der SSH-Benutzer kann Audio ohne grafische Anmeldung nutzen. WirePlumber
   erhält einen eigenen beschreibbaren Zustandspfad; ein bestehendes
@@ -169,11 +166,12 @@ wiederherstellen. `--force` überschreibt diese späteren Änderungen.
 
 Die manuell eingerichtete Ausgangsbox wurde mit MX42H-Kopfhörern geprüft:
 A2DP/SBC, klare Testtöne und Pause/Wiedergabe/Nächster/Vorheriger am Kopfhörer
-funktionierten. Das ist der Funktionsnachweis für den Aufbau. Die **neuen
-Installations-/Deinstallationsskripte** wurden mit temporären Dateisystemen und
-simuliertem APT/systemd geprüft; ein vollständiger Lauf auf einer frischen SD
-und ein Kaltstarttest stehen noch aus. Die funktionierende Box wurde dafür
-nicht deinstalliert.
+funktionierten. Die Setup-Skripte wurden zusätzlich mit temporären
+Dateisystemen und simuliertem APT/systemd geprüft. Am **17.10.2026** bestätigte
+der Projektbetreiber nach eigener Prüfung, dass die dokumentierten
+Bluetooth-Schritte funktionieren. Gesonderte Neuinstallations-, Rücknahme-
+und Kaltstartprüfungen werden in der
+[Testmatrix](../../docs/VALIDATION.md#dashboard-und-bluetooth) geführt.
 
 Bedienung: [Bluetooth-Cheat-Sheet](../../docs/BLUETOOTH_CHEATSHEET.md) ·
 [Musikplayer-Cheat-Sheet](../../docs/MUSIKPLAYER_CHEATSHEET.md).

@@ -80,8 +80,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-t
 ```
 
 Das Startskript kommt von `main`, lädt das Basisimage **`v1.0.1`** und bezieht
-seine Image-Werkzeuge ausdrücklich vom **Tag `v1.0.1`**. Zusatzmodule im
-Prüfbranch sind davon getrennt; siehe [Quellstände](../README.md#quellstände).
+seine Image-Werkzeuge ausdrücklich vom **Tag `v1.0.1`**. Optionale Servermodule
+werden separat von `main` bezogen; siehe [Quellstände](../README.md#quellstände).
 
 Der Installer lädt und prüft das Image, fragt zweimal verdeckt nach deinem
 eigenen **ersten Root-Passwort** und erzeugt die persönliche Kopie. Bei der
@@ -229,8 +229,8 @@ Bei Problemen [Freigaben und Anmeldung prüfen](TROUBLESHOOTING.md#freigabe-fehl
 - Nach erfolgreicher Einrichtung ein weiteres [SD-Backup](BACKUP.md) anlegen.
   Es erfasst keine Daten auf USB oder eMMC: Diese separat regelmäßig sichern.
 - [Dashboard](SSH_DASHBOARD.md) und [Bluetooth-Musikplayer](../server/bluetooth/README.md)
-  erst nach dem Grundsystem einrichten. Ihre neuen Installer sind im Prüfbranch
-  und noch nicht vollständig auf einer frischen T95-SD abgenommen.
+  erst nach dem Grundsystem einrichten. Die dokumentierten Schritte wurden vom
+  Projektbetreiber am 17.10.2026 geprüft und als funktionsfähig bestätigt.
 - [eMMC als Datenlaufwerk](TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk)
   ist eine spätere Erweiterung mit eigener Sicherung, Partitionierung und Einbindung.
 

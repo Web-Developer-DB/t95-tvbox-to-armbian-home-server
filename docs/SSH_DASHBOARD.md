@@ -9,10 +9,9 @@ Das Dashboard zeigt Systeminformationen beim SSH-Login; es ist keine Weboberflä
 Starter-Voraussetzungen: [Bash, curl, tar, Python 3, sudo](../server/setup/README.md#voraussetzungen).
 
 > [!NOTE]
-> Der archivierte Bildschirm stammt von der Referenzbox. Die neuen
-> Installations-/Rücknahmeskripte wurden mit simulierten Systemdiensten
-> geprüft; ein vollständiger Lauf auf einer frischen T95-SD mit Kaltstart
-> steht noch aus.
+> **Geprüft und getestet:** Der Projektbetreiber hat die dokumentierten
+> Dashboard-Schritte am **17.10.2026** geprüft und als funktionsfähig bestätigt.
+> [Testnachweise und offene Einzelprüfungen](VALIDATION.md#dashboard-und-bluetooth).
 
 Der Stand vom **16.10.2026** ist unter `server/ssh-dashboard/2026-10-16/` gesichert: 14 tatsächliche Quelldateien der laufenden T95, SHA-256-Prüfsummen und Unix-Dateimodi. Ausgangsbasis: Armbian-BSP 26.8.4, Debian Trixie, Kernel 6.18.48-current-sunxi64. Die vorhandenen Lizenzhinweise der Armbian-Dateien bleiben erhalten; siehe `NOTICE.md` im Archiv.
 
@@ -35,17 +34,17 @@ Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [
 
 ### GitHub-Starter mit Installation und Deinstallation
 
-Die Downloadbefehle verwenden den Prüfbranch `codex/archive-ssh-dashboard`.
+Die Downloadbefehle und der Installer beziehen ihre Dateien von `main`.
 Auf der T95 direkt installieren:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-dashboard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-dashboard.sh)
 ```
 
 Eigene Schnell-Deinstallation, ohne Auswahlmenü:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-dashboard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-dashboard.sh)
 ```
 
 Rücknahme und Status funktionieren danach lokal ohne erneuten Download:
@@ -68,7 +67,7 @@ Wiederholtes Installieren ersetzt dieses Backup nicht. Nachträgliche manuelle
 standardmäßig erhalten; optional `remove --remove-packages` für ausschließlich
 neu hinzugefügte Zielpakete, mit vorgeschalteter APT-Prüfung.
 
-Aus einem [lokalen Checkout des Prüfbranches](../server/setup/README.md#lokaler-checkout)
+Aus einem [lokalen Checkout](../server/setup/README.md#lokaler-checkout)
 auf der Box, im Repository-Hauptverzeichnis als normaler SSH-Benutzer mit `sudo`:
 
 ```bash
@@ -77,13 +76,13 @@ sudo python3 server/setup/t95_setup.py dashboard remove
 ```
 
 Weitere Details: [gemeinsamer Setup-Einstieg](../server/setup/README.md).
-Die neuen Setup-Skripte wurden in Fixtures geprüft, noch nicht mit echten
-APT-/systemd-Aktionen auf der Produktivbox.
+Die Setup-Skripte wurden automatisiert geprüft; die dokumentierten
+Dashboard-Schritte wurden zusätzlich vom Projektbetreiber bestätigt.
 
 ### Bestehendes Restore-Werkzeug mit Vorschau
 
 Diese manuelle Alternative ist nach der Starter-Installation nicht zusätzlich
-nötig. Im Checkout des Prüfbranches, im Repository-Hauptverzeichnis als normaler
+nötig. Im lokalen Checkout, im Repository-Hauptverzeichnis als normaler
 Benutzer, zunächst ohne Änderungen prüfen (auch auf dem Linux-PC möglich):
 
 ```bash
@@ -120,4 +119,11 @@ Andere, bereits zusätzlich installierte MOTD-Module werden nicht entfernt. Die 
 
 Auf einem temporären Test-Dateisystem geprüft: unverändernde Vorschau, Installation aller 14 Dateien bytegleich zu den erfassten Originalen und mit korrekten Modi, erneutes Anwenden ohne Änderung, vollständige Rücknahme, Ablehnung umgeleiteter Ziele, Ablehnung veränderter Nutzdaten und automatische Rücknahme bei unterbrochener Installation. Bash-Syntax und Manifest-Prüfsummen werden zusätzlich geprüft.
 
-Die laufende Box wurde zur Archivierung nur gelesen. Das Restore-Werkzeug wurde nicht als Root auf ihr ausgeführt; ihre Dashboard-Dateien wurden nicht geändert. Ein vollständiger Neuinstallations-/Kaltstarttest ist noch offen. CPU-/RAM-Spannungen, Bootparameter, Bluetooth, Samba und die SSH-Authentifizierung werden durch die Dashboard-Wiederherstellung nicht konfiguriert.
+Bei der ursprünglichen Archivierung wurde die laufende Box nur gelesen;
+das manuelle Restore-Werkzeug wurde dabei nicht als Root auf ihr ausgeführt.
+Am **17.10.2026** bestätigte der Projektbetreiber nach eigener Prüfung, dass
+die dokumentierten Dashboard-Schritte funktionieren. Gesonderte
+Neuinstallations-, Rücknahme- und Kaltstartprüfungen stehen in der
+[Testmatrix](VALIDATION.md#dashboard-und-bluetooth).
+CPU-/RAM-Spannungen, Bootparameter, Bluetooth, Samba und die
+SSH-Authentifizierung werden durch die Dashboard-Wiederherstellung nicht konfiguriert.

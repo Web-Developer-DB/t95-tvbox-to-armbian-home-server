@@ -1,8 +1,8 @@
 e9500fdb8a091ae223f3ce6bc35b2dbdcef64fbdef0bd17cca59fa3229e6f4c4  ./.gitignore
 acb1a324925dde5ac01e24a52c4200ae3ac8dc06e69b58ff5a9cbc37b3fa02b5  ./CHANGELOG.en.md
 3e6faa0de397bedc6fc0d7eeded200d450bb284b457e8b954a67ba6ab6e4e44f  ./CHANGELOG.md
-770b4f03d7a3457afe76d419439c869ddaa8e8432f75638d22547fbbd8749fb2  ./README.en.md
-585c139d7af43db06105d344365a6dca71de042b5c4e49ea86943e31aa82c342  ./README.md
+0606e78ba64ca63e17da50e08f71922613c1c656400383882f747a61958dda73  ./README.en.md
+1540ac5b85ac4ceaeacfd4675c01465fe38622ec886c8d3cfe130f1de8df38e0  ./README.md
 142fda918ab8b1452c7761fabde5e73d259c3b421293c1e6690874db791e96ac  ./config/polkit/50-t95-udisks.rules
 dd1d510824690fa158f4d43f1a81804085c36ea411af9130d39351936e960259  ./config/samba/smb.conf.fragment
 08fe3a3f4c75c8a1cd55e3170d2aa14d78bbf452409c843d321e7135e97e3850  ./config/systemd-user/udiskie.service

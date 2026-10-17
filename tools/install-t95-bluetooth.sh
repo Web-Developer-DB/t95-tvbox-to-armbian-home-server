@@ -8,7 +8,7 @@ if [[ -f "$script_dir/t95-setup.sh" ]]; then
 fi
 
 # Beim Aufruf über curl gibt es keinen lokalen Checkout.
-ref=${T95_SETUP_REF:-codex/archive-ssh-dashboard}
+ref=${T95_SETUP_REF:-main}
 [[ $ref =~ ^[A-Za-z0-9._/-]+$ && $ref != *..* ]] || { printf '%s\n' 'Ungültige Git-Referenz.' >&2; exit 2; }
 task_starter=$(mktemp -t t95-starter.XXXXXXXX)
 trap 'rm -f -- "$task_starter"' EXIT

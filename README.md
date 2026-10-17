@@ -67,8 +67,8 @@ Hardwareprüfung. EXIF-/GPS-Daten sind entfernt; individuelle Aufkleber sind abg
 | Samba-Dateifreigaben, USB-Automount, Auswurf, VLC über SMB | Auf der Referenzinstallation geprüft; separat einzurichten |
 | eMMC als Datenlaufwerk | Auf der Referenzinstallation geprüft; eigene Einrichtung nötig |
 | Armbian von eMMC starten | Nicht erfolgreich; microSD bleibt der unterstützte Bootweg |
-| Dashboard- und Bluetooth-Installer im Codex-Branch | Automatisierte Tests mit simulierten Systemdiensten; frische SD-Abnahme offen |
-| Bluetooth-Musik an Kopfhörer | Manuelle Ausgangseinrichtung geprüft; neuer Installer separat zu validieren |
+| SSH-Dashboard: Einrichtung und Anzeige | Vom Projektbetreiber geprüft und als funktionsfähig bestätigt (17.10.2026) |
+| Bluetooth-Musikplayer: Einrichtung und Bedienung | Vom Projektbetreiber geprüft und als funktionsfähig bestätigt (17.10.2026) |
 | WLAN, HDMI als Serverfunktion, Fernbedienung und weitere Langzeittests | Nicht Bestandteil der Basisabnahme |
 
 Die Basis ist Armbian **26.8.4 / Debian 13 Trixie / Kernel
@@ -76,7 +76,7 @@ Die Basis ist Armbian **26.8.4 / Debian 13 Trixie / Kernel
 und DTB vor unkontrolliertem Ersatz. Ethernet ist auf 100 Mbit/s begrenzt;
 im Referenztest wurden ungefähr 11–12 MB/s Nutzdaten erreicht.
 
-[Öffentliche Testmatrix und offene Abnahme](docs/VALIDATION.md) ·
+[Testnachweise und offene Einzelprüfungen](docs/VALIDATION.md) ·
 [Hardwaredetails, Messwerte und SSH-Beispiel](docs/TECHNICAL_REFERENCE.md)
 
 ## Optionale Erweiterungen
@@ -91,23 +91,18 @@ Erst nach dem funktionierenden Grundsystem und einem privaten SD-Backup:
 | Beide Zusatzmodule über ein Auswahlmenü einrichten | [Gemeinsamer Setup-Einstieg](server/setup/README.md) |
 | Interne eMMC später als Datenlaufwerk verwenden | [Voraussetzungen und Referenz](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
 
-> [!NOTE]
-> Die neuen Dashboard-/Bluetooth-Starter sind im Prüfbranch. Ein vollständiger
-> Installations-/Deinstallationslauf auf einer frischen T95-SD mit Kaltstart
-> steht noch aus. Diese Grenze gilt auch für die gemeinsame Installation.
-
 ## Quellstände
 
 | Bestandteil | Verwendeter Stand |
 | --- | --- |
 | Basisimage | [Release `v1.0.1`](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/tag/v1.0.1) |
 | Startskript für die SD-Vorbereitung | `main`; lädt die Image-Werkzeuge ausdrücklich vom Tag `v1.0.1` |
-| Dokumentation und neue Server-Zusatzmodule | Prüfbranch `codex/archive-ssh-dashboard` |
-| Lokaler Checkout für Servermodule auf der T95 | Explizit dieser Prüfbranch; siehe [Setup-Anleitung](server/setup/README.md#lokaler-checkout) |
+| Dokumentation und optionale Servermodule | `main` |
+| Lokaler Checkout für Servermodule auf der T95 | `main`; siehe [Setup-Anleitung](server/setup/README.md#lokaler-checkout) |
 
 Das Basisimage wird als Release-Asset geladen. Ein Git-Checkout enthält
 Skripte und Dokumentation. Der Release-Werkzeugeordner auf dem PC ist kein
-Checkout der neuen Servermodule. Installationsbefehle stehen jeweils in ihrer
+Checkout der aktuellen Servermodule. Installationsbefehle stehen jeweils in ihrer
 zuständigen Anleitung; Dateien verschiedener Quellstände nicht mischen.
 
 ## Dokumentation und Entwicklerpfad
@@ -135,8 +130,9 @@ oder entfernt die Android-eMMC nicht automatisch.
 
 Persönliche Images, Backups, Zugangsdaten und rohe Diagnoseaufzeichnungen
 bleiben privat. Ein SD-Backup erfasst keine separaten USB-/eMMC-Daten.
-Der vollständige Durchlauf der überarbeiteten Anleitung ist in der
-[Testmatrix](docs/VALIDATION.md#abnahme-der-installationsanleitung) noch offen.
+Der vollständige Durchlauf der Grundinstallation auf einer separaten SD wird
+in der [Abnahme-Checkliste](docs/VALIDATION.md#abnahme-der-installationsanleitung)
+geführt. Die bestätigten Dashboard-/Bluetooth-Schritte sind dort separat dokumentiert.
 
 ## Lizenz
 

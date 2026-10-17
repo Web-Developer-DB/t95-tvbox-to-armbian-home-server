@@ -14,8 +14,8 @@ Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
 
 ## Installation
 
-**[→ Vollständige Anleitung auf Deutsch](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.md)** ·
-**[English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/INSTALLATION.en.md)**
+**[→ Vollständige Anleitung auf Deutsch](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.md)** ·
+**[English installation guide](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/INSTALLATION.en.md)**
 
 1. Exakte Platinenrevision prüfen; Linux-PC und USB-Kartenleser vorbereiten.
 2. Installer verwenden: Release laden, Prüfsumme kontrollieren und persönliche
@@ -31,8 +31,9 @@ Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
    Speicherpfad liegt ausdrücklich auf der System-SD; USB-Freigaben sind separat.
 
 Die Anleitung verwendet das Basisimage und die Image-Werkzeuge von `v1.0.1`.
-Neue Dashboard-/Bluetooth-Installer im Codex-Prüfbranch sind Zusatzmodule;
-ihre vollständige Abnahme auf einer frischen T95-SD steht noch aus.
+Dashboard und Bluetooth sind optionale Zusatzmodule aus `main`. Ihre
+dokumentierten Schritte wurden vom Projektbetreiber am 17.10.2026 geprüft
+und als funktionsfähig bestätigt.
 
 ## Änderung in v1.0.1: DRAM-Stabilität
 
@@ -59,8 +60,8 @@ wurden auf zwei Boxen der exakten Platinenrevision geprüft.
 - Ein kompletter Durchlauf der neu geordneten Anleitung auf einer separaten SD
   ist noch offen; vorhandene Hardwaretests sind davon getrennt.
 
-[Hilfe nach Symptomen](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/TROUBLESHOOTING.md) ·
-[Testmatrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/codex/archive-ssh-dashboard/docs/VALIDATION.md)
+[Hilfe nach Symptomen](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/TROUBLESHOOTING.md) ·
+[Testmatrix](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/blob/main/docs/VALIDATION.md)
 
 ## Download-Dateien
 

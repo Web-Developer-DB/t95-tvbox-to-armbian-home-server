@@ -67,10 +67,33 @@ The loader was compared at byte 8192 with the separate loader file. The
 release asset was compressed with `xz --check=sha256`; its six files are
 verified through `SHA256SUMS`.
 
+## Dashboard and Bluetooth
+
+**Verified and tested, confirmed on 2026-10-17.** The project maintainer
+personally tested the documented Bluetooth and dashboard steps and confirmed
+they work. This feedback supplements automated setup tests and earlier
+reference-installation evidence.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Documented dashboard steps | passed | Project maintainer's confirmation on 2026-10-17 |
+| Documented Bluetooth steps | passed | Project maintainer's confirmation on 2026-10-17 |
+| Setup installation, removal, and failures in a test environment | passed | 16 automated tests with simulated APT/systemd/BlueZ |
+
+The following individual checks have no separate confirmation yet:
+
+- [ ] Full installation and removal on a separate, freshly prepared SD followed by cold boot.
+- [ ] Combined installation of both modules through menu option `0` on that separate SD.
+- [ ] With headphones absent, verify in practice that MPD does not fall back to another audio output.
+
+Preserve the working production SD as recovery for these checks. The feedback
+does not specify a replacement SD or these individual checks, so they are
+tracked separately from the confirmed steps.
+
 ## Optional future work
 
 - Additional USB/SMB stress testing, cold boots, and long-term stability.
-- Wi-Fi, HDMI, audio, and remote control.
+- Wi-Fi, HDMI, other audio outputs, and infrared remote control.
 - A permanent replacement for `clk_ignore_unused nohz=off`.
 - Kernel or bootloader updates.
 
@@ -82,14 +105,15 @@ in the accepted functional scope.
 
 **2026-10-17 status: open.** The reorganized guide received editorial/static
 checks; a full run of this exact user path on a separate SD is outstanding.
-Existing hardware results and simulated optional-installer tests are separate.
+Existing hardware results and the confirmed dashboard/Bluetooth steps are separate.
 
 **Documentation checks on 2026-10-17:** all 16 existing setup tests,
 21 shell syntax checks, and 34 Samba/dashboard checksum entries pass.
 Relative documentation links, image targets, language links, and former README
 section anchors were checked. The start page and navigation to installation
-and Samba were inspected in a local Markdown preview. New command blocks
-received Bash syntax checks; they were not executed against hardware.
+and Samba were inspected in a local Markdown preview. Command blocks received
+Bash syntax checks during this static review. The maintainer's dashboard and
+Bluetooth confirmation is recorded in the preceding section.
 
 A reviewer with basic terminal/SSH skills should follow
 [installation](INSTALLATION.en.md) without extra verbal instructions. Preserve
@@ -109,5 +133,7 @@ the working production card as recovery.
 
 Record actual card/client types, outcome, and deviations without private
 credentials. Leave unchecked items open; hashes and syntax checks do not count
-as hardware acceptance. Dashboard/Bluetooth additionally need their own
-install/removal tests per [setup verification](../server/setup/README.en.md#verify-before-publishing).
+as hardware acceptance. Confirmed dashboard/Bluetooth steps and their remaining
+individual checks are recorded under [Dashboard and Bluetooth](#dashboard-and-bluetooth).
+[Setup verification](../server/setup/README.en.md#verify-before-publishing)
+describes the automated checks.

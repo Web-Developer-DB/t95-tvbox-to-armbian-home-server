@@ -13,23 +13,22 @@ Complete [base installation, kernel holds, and SD backup](../../docs/INSTALLATIO
 For missing tools, see [preparation](../setup/README.en.md#requirements).
 
 > [!NOTE]
-> **Still in testing:** music and headphone buttons were verified on the
-> reference box. Automatic setup still needs a full test on a freshly
-> prepared SD card. Back up your working system first.
+> **Verified and tested:** the project maintainer tested the documented
+> Bluetooth steps on **2026-10-17** and confirmed they work.
+> [Test evidence and remaining individual checks](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
 The matching T95 uses built-in Bluetooth; this setup does not require an
 additional USB Bluetooth adapter.
 
 ## Install
 
-Download commands use `codex/archive-ssh-dashboard`. A later reviewed merge
-requires coordinated updates of links and the default ref.
+The download commands and installer obtain their files from `main`.
 
 **Once, on the T95:** copy the entire next line, paste it into the terminal
 window connected to the box, and press Enter.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-bluetooth.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-bluetooth.sh)
 ```
 
 If asked for a password, enter your T95 Linux password and press Enter.
@@ -42,7 +41,7 @@ folder; existing music is preserved.
 <details>
 <summary>Additional setup options for experienced users</summary>
 
-From a [local review-branch checkout](../setup/README.en.md#local-checkout),
+From a [local checkout](../setup/README.en.md#local-checkout),
 run at the repository root **on the T95 as normal SSH user with `sudo`**:
 
 ```bash
@@ -101,7 +100,7 @@ t95-bluetooth remove --remove-packages
 Alternatively, use the dedicated download launcher without a menu:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-bluetooth.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-bluetooth.sh)
 ```
 
 Removal stops/disables the user's MPD, mpDris2, and `mpris-proxy`, blocks radio,
@@ -152,10 +151,11 @@ overwrites those edits with the saved files.
   not configured here. The BCM43342 Wi-Fi side is not set up.
 
 The manual reference box passed A2DP/SBC, clear test tones, and
-play/pause/next/previous with MX42H headphones. The **new installers** passed
-temporary-filesystem/simulated APT/systemd tests only. Real fresh-SD
-installation/removal and cold boot remain open; the working box was not
-uninstalled for these tests.
+play/pause/next/previous with MX42H headphones. The setup scripts also passed
+temporary-filesystem/simulated APT/systemd tests. On **2026-10-17**, the project
+maintainer confirmed after testing that the documented Bluetooth steps work.
+Separate fresh-SD, removal, and cold-boot checks are tracked in the
+[test matrix](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
 [Bluetooth cheat sheet](../../docs/BLUETOOTH_CHEATSHEET.en.md) ·
 [Music player cheat sheet](../../docs/MUSIKPLAYER_CHEATSHEET.en.md) ·

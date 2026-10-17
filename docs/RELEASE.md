@@ -115,7 +115,7 @@ Der maßgebliche Endanwenderweg steht in der [Installation](INSTALLATION.md).
 Die [manuelle Alternative](INSTALLATION.md#manuelle-alternative-zur-sd-vorbereitung)
 ersetzt ausschließlich deren SD-Vorbereitung. Beide Wege verwenden das Image
 und die Image-Werkzeuge vom Tag `v1.0.1`; die neuen Server-Zusatzmodule kommen
-separat aus `codex/archive-ssh-dashboard`.
+separat aus `main`.
 
 Persönliche Images und `.t95-provisioned-manifest`-Dateien bleiben privat.
 Der Schreiber akzeptiert wechselbare USB-Karten, prüft Manifest und Rücklese-

@@ -56,11 +56,12 @@ Early loader/RAM faults cannot be repaired by changing Samba or the rootfs.
 | SD boot, clean shutdown, DHCP, SSH, file access | Passed on the exact PCB |
 | Samba, USB automount, safe eject/reinsert, VLC over SMB | Passed on the reference installation |
 | eMMC Armbian boot | Unsuccessful; SD remains required |
-| New dashboard/Bluetooth installers | Simulated-system tests; full fresh-SD/cold-boot acceptance outstanding |
+| SSH dashboard | Documented steps tested and confirmed by the project maintainer on 2026-10-17 |
+| Bluetooth player | Documented steps tested and confirmed by the project maintainer on 2026-10-17; separate setup |
 
 The base image's DRAM fix was cold-boot verified on two boxes with the exact
 PCB revision. The [validation matrix](VALIDATION.en.md) separates these
-existing results from the still-open revised-guide and installer acceptance.
+existing results and confirmed module steps from the remaining individual checks.
 
 ## eMMC as an internal data drive
 

@@ -103,7 +103,9 @@ festgehalten.
 | microSD-I/O | ✅ | etwa 22–23 MB/s Lesen und 21,5 MB/s Schreiben |
 | eMMC-I/O | ✅ | ca. 63,8–77,4 MB/s Lesen; Schreiben für diesen Stand nicht belastbar gemessen |
 | eMMC-Gesundheit | ✅ | Life Time A/B und Pre-EOL jeweils `0x01` |
-| WLAN / Bluetooth / GPU / Audio | ⚠️ | nicht Bestandteil des Basisreleases; Bluetooth-Audio manuell geprüft, neue Installer noch nicht auf frischer SD abgenommen |
+| SSH-Dashboard | ✅ | dokumentierte Schritte vom Projektbetreiber am 17.10.2026 geprüft und bestätigt |
+| Bluetooth-Musikplayer | ✅ | dokumentierte Schritte vom Projektbetreiber am 17.10.2026 geprüft und bestätigt; separat einzurichten |
+| WLAN / GPU / weitere Audio-Ausgänge | ⚠️ | nicht Bestandteil des abgenommenen Funktionsumfangs |
 | Samba `T95-DATA` | ✅ | authentifizierte SMB2/SMB3-Freigabe getestet |
 | USB-Automount und dynamische Usershares | ✅ | Label-/Fallback-Namen, Auswurf und Wiedereinstecken getestet |
 | VLC-Wiedergabe über SMB | ✅ | lokale Netzwerk-Wiedergabe erfolgreich geprüft |

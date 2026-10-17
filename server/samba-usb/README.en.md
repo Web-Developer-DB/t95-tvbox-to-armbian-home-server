@@ -93,7 +93,7 @@ Run these commands **on the T95 as your normal SSH user with sudo**.
 `T95_USER` automatically selects that user; `id` must show your normal
 username, not `root`. First apply the
 [kernel holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
-and back up the SD. This checkout uses the review branch; it is separate from
+and back up the SD. This checkout uses `main`; it is separate from
 the release-tools directory on your PC. If Git is missing, run on the T95:
 
 ```bash
@@ -102,7 +102,7 @@ sudo apt install -y git
 ```
 
 ```bash
-git clone --branch codex/archive-ssh-dashboard --depth 1 \
+git clone --branch main --depth 1 \
   https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
 cd t95-tvbox-to-armbian-home-server/server/samba-usb
 sha256sum -c MANIFEST.sha256

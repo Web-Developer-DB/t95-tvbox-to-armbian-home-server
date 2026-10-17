@@ -9,16 +9,16 @@ This dashboard displays system information at SSH login; it is not a web interfa
 Launcher requirements: [Bash, curl, tar, Python 3, sudo](../server/setup/README.en.md#requirements).
 
 > [!NOTE]
-> The archived display comes from the reference box. New installation/removal
-> scripts passed simulated-service tests; a full fresh-T95-SD run and cold
-> boot remain open.
+> **Verified and tested:** the project maintainer tested the documented
+> dashboard steps on **2026-10-17** and confirmed they work.
+> [Test evidence and remaining individual checks](VALIDATION.en.md#dashboard-and-bluetooth).
 
 ## Install and remove
 
-The download commands use `codex/archive-ssh-dashboard`. On the T95:
+The download commands use `main`. On the T95:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/install-t95-dashboard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/install-t95-dashboard.sh)
 ```
 
 Inspect the state locally, then open a new SSH session to see the display:
@@ -36,7 +36,7 @@ t95-dashboard remove
 A separate download launcher performs the same removal without a menu:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/uninstall-t95-dashboard.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/uninstall-t95-dashboard.sh)
 ```
 
 Removal restores files present before installation; it does not delete the
@@ -49,7 +49,7 @@ Later manual edits block removal; save/check them before `remove --force`.
 Packages remain by default; `remove --remove-packages` requests checked
 removal of newly added target packages only. See [shared setup](../server/setup/README.en.md).
 
-From a [local review-branch checkout](../server/setup/README.en.md#local-checkout),
+From a [local checkout](../server/setup/README.en.md#local-checkout),
 run at the repository root **on the T95 as normal SSH user with `sudo`**:
 
 ```bash
@@ -86,7 +86,7 @@ the same payloads. Keep unredacted captures, credentials, and private keys priva
 ## Manual restore alternative with preview
 
 This alternative is not an extra step after launcher installation. From the
-review-branch repository root, preview **as normal user on the Linux PC or T95**:
+local repository root, preview **as normal user on the Linux PC or T95**:
 
 ```bash
 python3 tools/restore-ssh-dashboard.py
@@ -139,7 +139,10 @@ hardcoded by the restore tool.
 
 Temporary-filesystem checks covered preview, byte/mode-exact installation,
 idempotence, rollback, rejected redirected targets, rejected modified
-payloads, and automatic rollback after interruption. Source collection read
-the running box only; no root restore was applied to it. Full reinstall/cold
-boot acceptance remains open. The tool does not configure boot parameters,
-voltages, Bluetooth, Samba, or SSH authentication.
+payloads, and automatic rollback after interruption. Original source collection
+only read the running box; no root restore was applied during that collection.
+On **2026-10-17**, the project maintainer confirmed after testing that the
+documented dashboard steps work. Separate fresh-SD, removal, and cold-boot
+checks are tracked in the [test matrix](VALIDATION.en.md#dashboard-and-bluetooth).
+The tool does not configure boot parameters, voltages, Bluetooth, Samba,
+or SSH authentication.

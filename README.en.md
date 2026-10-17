@@ -66,8 +66,8 @@ EXIF/GPS data was removed and individual stickers are covered.
 | Samba shares, USB automount/eject, VLC over SMB | Tested on the reference installation; separate setup |
 | eMMC as a data drive | Tested on the reference installation; separate preparation required |
 | Armbian boot from eMMC | Unsuccessful; microSD remains the supported boot path |
-| Codex-branch dashboard/Bluetooth installers | Automated tests with simulated services; fresh-SD acceptance still open |
-| Music to Bluetooth headphones | Manual reference setup tested; new installer needs separate validation |
+| SSH dashboard: setup and display | Tested and confirmed working by the project maintainer (2026-10-17) |
+| Bluetooth player: setup and operation | Tested and confirmed working by the project maintainer (2026-10-17) |
 | Wi-Fi, HDMI as a server function, remote control, further long-term tests | Outside base acceptance |
 
 The base is Armbian **26.8.4 / Debian 13 Trixie / kernel
@@ -75,7 +75,7 @@ The base is Armbian **26.8.4 / Debian 13 Trixie / kernel
 uncontrolled replacement after first login. Ethernet is limited to 100 Mbit/s;
 the reference measured approximately 11–12 MB/s payload throughput.
 
-[Public test matrix and open acceptance](docs/VALIDATION.en.md) ·
+[Test evidence and remaining individual checks](docs/VALIDATION.en.md) ·
 [Hardware details, measurements, SSH example](docs/TECHNICAL_REFERENCE.en.md)
 
 ## Optional extensions
@@ -90,22 +90,17 @@ After the working base system and a private SD backup:
 | Set up both optional modules through a menu | [Shared setup entry](server/setup/README.en.md) |
 | Later use eMMC as a data drive | [Requirements and reference](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
 
-> [!NOTE]
-> The new dashboard/Bluetooth launchers use the review branch. Full
-> installation/removal on a fresh T95 SD and cold boot are still outstanding.
-> This limitation also applies to combined installation.
-
 ## Source versions
 
 | Component | Source |
 | --- | --- |
 | Base image | [Release `v1.0.1`](https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/releases/tag/v1.0.1) |
 | SD preparation launcher | `main`; explicitly obtains image tools from tag `v1.0.1` |
-| Documentation and new optional server modules | Review branch `codex/archive-ssh-dashboard` |
-| Local server-module checkout on the T95 | Explicitly this review branch; see [setup guide](server/setup/README.en.md#local-checkout) |
+| Documentation and optional server modules | `main` |
+| Local server-module checkout on the T95 | `main`; see [setup guide](server/setup/README.en.md#local-checkout) |
 
 The base image is a release asset. A Git checkout contains tools and docs.
-The PC's release-tools folder is not a checkout of the new server modules.
+The PC's release-tools folder is not a checkout of the current server modules.
 Each guide owns its installation commands; do not mix files from different
 source versions.
 
@@ -133,9 +128,10 @@ operating system or trust source. It does not automatically clean or remove
 Android eMMC.
 
 Keep personal images, backups, credentials, and raw diagnostic captures
-private. An SD backup excludes separate USB/eMMC data. A full run of the
-revised guide remains open in the
-[test matrix](docs/VALIDATION.en.md#installation-guide-acceptance).
+private. An SD backup excludes separate USB/eMMC data. A full base-installation
+run on a separate SD is tracked in the
+[acceptance checklist](docs/VALIDATION.en.md#installation-guide-acceptance).
+The confirmed dashboard/Bluetooth steps are documented separately there.
 
 ## License
 

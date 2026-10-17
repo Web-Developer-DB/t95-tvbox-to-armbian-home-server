@@ -68,10 +68,33 @@ Der Loader wurde bei Byte 8192 gegen die separate Loaderdatei verglichen. Das
 Release-Asset wurde mit `xz --check=sha256` komprimiert; seine sechs Dateien
 werden über `SHA256SUMS` geprüft.
 
+## Dashboard und Bluetooth
+
+**Geprüft und getestet, bestätigt am 17.10.2026.** Der Projektbetreiber hat
+die dokumentierten Schritte für Bluetooth und Dashboard selbst geprüft und
+als funktionsfähig bestätigt. Diese Rückmeldung ergänzt die automatisierten
+Setup-Tests und die bisherigen Funktionsnachweise der Referenzinstallation.
+
+| Prüfung | Ergebnis | Nachweis |
+| --- | --- | --- |
+| Dokumentierte Dashboard-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
+| Dokumentierte Bluetooth-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
+| Setup-Installation, Rücknahme und Fehlerfälle in Testumgebung | bestanden | 16 automatisierte Tests mit simuliertem APT/systemd/BlueZ |
+
+Für folgende Einzelprüfungen liegt noch keine gesonderte Bestätigung vor:
+
+- [ ] Vollständige Neuinstallation und Rücknahme auf einer separaten, frisch eingerichteten SD mit anschließendem Kaltstart.
+- [ ] Gemeinsame Einrichtung beider Module über Menüpunkt `0` auf dieser separaten SD.
+- [ ] Bei fehlendem Kopfhörer praktisch prüfen, dass MPD nicht auf einen anderen Audio-Ausgang ausweicht.
+
+Für diese Prüfungen die funktionierende Produktiv-SD als Rückweg erhalten.
+Die Rückmeldung enthält keine Angaben zu einer Ersatz-SD oder diesen
+Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten geführt.
+
 ## Optionale Weiterentwicklung
 
 - zusätzliche USB-/SMB-Dauerlast, weitere Kaltstarts und Langzeitstabilität;
-- WLAN, HDMI, Audio und Fernbedienung;
+- WLAN, HDMI, weitere Audio-Ausgänge und Infrarot-Fernbedienung;
 - dauerhafter Ersatz für `clk_ignore_unused nohz=off`;
 - Kernel- oder Bootloader-Aktualisierungen.
 
@@ -84,14 +107,16 @@ Erweiterungen und keine bekannten Fehler im abgenommenen Funktionsumfang.
 **Stand 17.10.2026: offen.** Die neu geordnete Anleitung wurde redaktionell
 und statisch geprüft. Ein vollständiger Durchlauf genau dieses Nutzerwegs
 auf einer separaten SD ist noch nicht durchgeführt. Vorhandene Hardwaretests
-oben und simulierte Tests der neuen Zusatzinstaller sind davon getrennt.
+oben und die bestätigten Dashboard-/Bluetooth-Schritte sind davon getrennt.
 
 **Dokumentationsprüfung am 17.10.2026:** Alle 16 vorhandenen Setup-Tests,
 21 Shell-Syntaxprüfungen und 34 Samba-/Dashboard-Prüfsummeneinträge bestehen.
 Relative Dokumentationsverweise, Bildziele, Übersetzungslinks und die früheren
 README-Sprungmarken wurden geprüft. Startseite und Übergang zur Installation
 und Samba-Anleitung wurden in einer lokalen Markdown-Vorschau kontrolliert.
-Die neuen Befehlsblöcke wurden auf Bash-Syntax geprüft, nicht auf Hardware ausgeführt.
+Die Befehlsblöcke wurden bei dieser statischen Prüfung auf Bash-Syntax geprüft.
+Der Funktionsnachweis des Projektbetreibers für Dashboard und Bluetooth ist
+im vorigen Abschnitt dokumentiert.
 
 Ein Prüfer mit grundlegenden Terminal-/SSH-Kenntnissen soll der
 [Installation](INSTALLATION.md) ohne zusätzliche mündliche Anleitung folgen.
@@ -111,6 +136,8 @@ Die funktionierende Produktiv-SD bleibt als Rückweg erhalten.
 
 Ergebnis, tatsächlich verwendete Karten-/Clienttypen und Abweichungen ohne
 private Zugangsdaten protokollieren. Ungeprüfte Punkte bleiben offen; eine
-Prüfsummen- oder Syntaxprüfung zählt nicht als Hardwareabnahme. Dashboard und
-Bluetooth erhalten zusätzlich ihren eigenen Installations-/Rücknahmetest nach
-[Setup-Prüfanleitung](../server/setup/README.md#prüfen-vor-veröffentlichung).
+Prüfsummen- oder Syntaxprüfung zählt nicht als Hardwareabnahme. Die bestätigten
+Dashboard-/Bluetooth-Schritte und ihre offenen Einzelprüfungen stehen unter
+[Dashboard und Bluetooth](#dashboard-und-bluetooth). Die
+[Setup-Prüfanleitung](../server/setup/README.md#prüfen-vor-veröffentlichung)
+beschreibt die automatisierten Prüfungen.

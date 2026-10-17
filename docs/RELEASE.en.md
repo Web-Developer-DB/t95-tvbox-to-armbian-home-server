@@ -95,7 +95,7 @@ The authoritative user path is [installation](INSTALLATION.en.md). Its
 [manual alternative](INSTALLATION.en.md#manual-alternative-for-sd-preparation)
 replaces SD preparation only. Both use the image and image tools from tag
 `v1.0.1`; new optional server modules separately use
-`codex/archive-ssh-dashboard`.
+`main`.
 
 Keep personal images and `.t95-provisioned-manifest` files private. The writer
 requires removable USB cards, checks manifest/read-back hash, and opens neither

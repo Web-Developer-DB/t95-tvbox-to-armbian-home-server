@@ -8,9 +8,9 @@ first. This menu installs optional modules on a running box; it does not
 prepare an Armbian SD or set up Samba.
 
 > [!NOTE]
-> **Review branch:** the new installers passed simulated APT/systemd tests.
-> Full installation, removal, and cold boot on a fresh T95 SD remain open.
-> Hardware tests of the manual reference setup do not validate these installers.
+> **Verified and tested:** the project maintainer tested the documented
+> dashboard and Bluetooth steps on **2026-10-17** and confirmed they work.
+> [Test evidence and remaining individual checks](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
 ## Requirements
 
@@ -28,7 +28,7 @@ needed for the download launcher.
 ## Quick start on the running T95
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/codex/archive-ssh-dashboard/tools/t95-setup.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/main/tools/t95-setup.sh)
 ```
 
 Select an action; `0` installs dashboard and Bluetooth/player sequentially.
@@ -66,27 +66,26 @@ checkout. Both components use one source archive and independent journals.
 If the second fails, the first remains installed and can be removed separately.
 Choose `--music-dir` through the separate Bluetooth invocation.
 
-The default ref is `codex/archive-ssh-dashboard`. `T95_SETUP_REF` may select
+The default ref is `main`. `T95_SETUP_REF` may select
 another existing branch/tag/commit in the same repository. HTTPS protects
-transport; it is not an independent release signature. A later merge and
-switch to `main` require separate verification and coordinated link/ref updates.
+transport; it is not an independent release signature.
 
 ## Local checkout
 
 **T95 · normal SSH user with `sudo` for package preparation, then Git as that user.**
-Use a separate checkout for new modules; the PC's `v1.0.1` release tools do
+Use a separate checkout of `main`; the PC's `v1.0.1` release tools do
 not include them:
 
 ```bash
 sudo apt update
 sudo apt install -y git
-git clone --branch codex/archive-ssh-dashboard --depth 1 \
+git clone --branch main --depth 1 \
   https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git "$HOME/t95-server-tools"
 cd "$HOME/t95-server-tools"
 git branch --show-current
 ```
 
-**Expected:** `codex/archive-ssh-dashboard`, with `server/setup/t95_setup.py`
+**Expected:** `main`, with `server/setup/t95_setup.py`
 present. If the directory exists already, inspect its branch and local
 changes instead of overwriting it. Local commands in module guides run from
 this repository root.
@@ -113,7 +112,7 @@ are retained.
 
 ## Verify before publishing
 
-**Linux PC · normal user · from the review-branch repository root:**
+**Linux PC · normal user · from the repository root:**
 
 ```bash
 for script in tools/t95-setup.sh tools/{install,uninstall}-t95-{dashboard,bluetooth}.sh; do bash -n "$script"; done
@@ -135,9 +134,10 @@ The MPD routing rule was additionally parsed with the reference box's
 actual routing with headphones absent remains unverified. No active
 configuration or service was changed by that check.
 
-**Open:** full real-package installation/removal on a fresh T95 SD followed
-by cold boot. Preserve the working production card as recovery. Manual
-reference audio/button tests are documented separately.
+The project maintainer additionally tested the documented dashboard and
+Bluetooth steps on **2026-10-17** and confirmed they work. Separate fresh-SD,
+removal, and cold-boot checks are tracked in the
+[test matrix](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
 
 [Bluetooth cheat sheet](../../docs/BLUETOOTH_CHEATSHEET.en.md) ·
 [Music player cheat sheet](../../docs/MUSIKPLAYER_CHEATSHEET.en.md)

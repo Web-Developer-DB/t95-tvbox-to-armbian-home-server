@@ -3,8 +3,8 @@
 set -Eeuo pipefail
 
 repo=Web-Developer-DB/t95-tvbox-to-armbian-home-server
-# Die Schnellstarts verwenden bis zur Freigabe den Prüfbranch.
-ref=${T95_SETUP_REF:-codex/archive-ssh-dashboard}
+# Schnellstarts und Quellarchiv verwenden dieselbe Git-Referenz.
+ref=${T95_SETUP_REF:-main}
 
 if (($# == 0)); then
     printf '%s\n' 'T95: 0 Dashboard + Bluetooth/Player gemeinsam installieren' \

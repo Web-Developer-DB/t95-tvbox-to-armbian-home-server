@@ -86,9 +86,9 @@ Before replacing the public description, publish the docs on the named
 branch and open each linked page on GitHub. A new local path is not yet a
 reachable web target. The text must state mandatory local password
 personalization, exact board support, kernel holds, and optional-installer
-validation status. After a later merge, review branch links and the default
-installer ref together. This documentation change does not alter image
-assets or release hashes.
+validation status. Before publishing, check that the `main` documentation links
+and default installer ref agree. Image assets and release hashes are separate
+from these documentation and module updates.
 
 ## License and upstream review
 

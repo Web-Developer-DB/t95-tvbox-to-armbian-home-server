@@ -10,8 +10,9 @@ create an Armbian SD card or set up Samba.
 
 ## Requirements
 
-Finish [base setup, kernel holds, and SD backup](../../docs/INSTALLATION.en.md)
-and log in as your normal T95 user. Bash, curl, tar, Python 3, and sudo must
+Finish [base setup and kernel holds](../../docs/INSTALLATION.en.md)
+and log in as your normal T95 user. A [full SD backup](../../docs/BACKUP.en.md)
+is optional. Bash, curl, tar, Python 3, and sudo must
 exist. If tools are missing, prepare them first:
 
 **On the T95, normal SSH user; `sudo` where shown:**

@@ -22,9 +22,11 @@ Internal eMMC is not formatted or configured.
 ## Requirements
 
 - T95 runs from the verified SD and you are logged in over SSH as a normal user.
-- [Kernel/DTB holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates) and a private SD backup are complete.
+- [Kernel/DTB holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates) are enabled.
 - Your T95 user can use `sudo`; installation requires internet access.
 - USB disks have adequate external power when needed.
+
+A [full SD backup](../../docs/BACKUP.en.md) is optional.
 
 > [!WARNING]
 > Existing Samba configuration is backed up and replaced. For a customized

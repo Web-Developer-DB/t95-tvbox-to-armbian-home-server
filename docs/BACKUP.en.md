@@ -2,6 +2,12 @@
 
 [Deutsch](BACKUP.md) | **English**
 
+**Optional recovery path:** you can reinstall the base system at any time
+using the [installation guide](INSTALLATION.en.md). A full SD backup saves
+having to recreate your accounts, settings, and services, and preserves SD
+files at the time of backup. A fresh installation overwrites the selected SD;
+keep any personal files you want to retain separately.
+
 This procedure backs up the **entire** Armbian SD card: bootloader, partition
 table, hardware description (DTB), kernel, system, accounts, and configuration.
 It excludes data on separate USB drives or internal eMMC storage.

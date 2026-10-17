@@ -234,6 +234,6 @@ ist. Lokale Aufrufe mit `server/setup/t95_setup.py` benötigen einen Checkout
 von **`main`**; der PC-Checkout vom Release-Tag enthält die aktuellen
 Zusatzmodule nicht. Siehe [Setup-Quellstand](../server/setup/README.md#lokaler-checkout).
 
-Vor Änderungen ein Backup verwenden. Einzelheiten, Rücknahme
+Ein vollständiges [SD-Backup](BACKUP.md) ist ein optionaler Rückweg. Einzelheiten, Rücknahme
 und Audio-Diagnose stehen in [Dashboard](SSH_DASHBOARD.md),
 [Bluetooth](../server/bluetooth/README.md) und [Musikplayer](MUSIKPLAYER_CHEATSHEET.md).

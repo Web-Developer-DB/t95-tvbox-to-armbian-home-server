@@ -7,7 +7,7 @@ The steps explain terminal use and the connection to your box. Use the recommend
 [manual alternative](#manual-alternative-for-sd-preparation) replaces only
 step 2. Do not perform both paths in sequence.
 
-**Route:** hardware → Linux PC → SD → SSH → kernel holds → backup → Samba.
+**Route:** hardware → Linux PC → SD → SSH → kernel holds → optional backup → Samba.
 
 [Home](../README.en.md) · [Troubleshooting by symptom](TROUBLESHOOTING.en.md)
 
@@ -44,9 +44,10 @@ you paste and run with **Enter**. You do not need to memorize it.
   not a minimum. Allow **at least 6 GB free** on the PC for the download, raw
   image, personal copy, and temporary filesystem; `/tmp` also needs about
   1.6 GB free.
-- **Backup space is additional:** reserve at least the entire SD card's size
-  on another drive. A 128-GB card may require close to that amount of free
-  backup space; the 6 GB above only covers image preparation.
+- **Only for an optional SD backup:** reserve at least the entire SD card's
+  size on another drive. A 128-GB card may require close to that amount of
+  free backup space. The 6 GB above covers image preparation; this additional
+  backup space is unnecessary if you skip the backup.
 - This server path uses **Ethernet and SSH**. Wi-Fi and an HDMI display are
   not verified prerequisites.
 
@@ -294,7 +295,21 @@ Normal Debian/Armbian packages may then be updated. Deliberate kernel/DTB
 updates require a backup and renewed hardware checks; see the
 [release handbook](RELEASE.en.md).
 
-## 6. Back up the base system
+<a id="6-back-up-the-base-system"></a>
+
+## 6. Back up the base system (optional)
+
+**This step is optional.** You can reinstall the base system on SD at any
+time using this installation guide, then set up accounts and services again.
+A full SD backup preserves your configured state, including accounts,
+settings, and files on the SD at the time of backup. Personal files can also
+be backed up separately.
+
+**Skip the backup:** leave the box running and continue directly with
+[step 7](#7-set-up-file-sharing). Do not run the shutdown command below.
+
+<details>
+<summary>Optional: create a base-system backup now</summary>
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -309,6 +324,8 @@ base system before adding services and contains private credentials.
 **Expected:** the backup and checksum are saved on another drive. Reinsert
 the SD while the box is off, connect Ethernet, boot, and reconnect as the
 normal SSH user from step 4.
+
+</details>
 
 ## 7. Set up file sharing
 
@@ -333,8 +350,8 @@ Use [everyday use](DAILY_USE.en.md) to reconnect, reboot, or shut down.
 
 - [Eject USB safely](../server/samba-usb/README.en.md#safely-eject-usb-storage)
   before unplugging; reinsert and test access afterward.
-- Make another [SD backup](BACKUP.en.md) after setup. SD backups exclude USB
-  and eMMC data; back up those separately and regularly.
+- Optionally make an [SD backup](BACKUP.en.md) of the configured system.
+  It excludes USB/eMMC data; back up personal data there separately and regularly.
 - Add the [dashboard](SSH_DASHBOARD.en.md) and
   [Bluetooth player](../server/bluetooth/README.en.md) after the base system.
   The project maintainer tested the documented steps on 2026-10-17 and

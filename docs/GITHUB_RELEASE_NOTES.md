@@ -32,7 +32,7 @@ Andere als „T95“ verkaufte Boxen sind nicht automatisch kompatibel.
    die DHCP-Adresse im Router suchen. Per SSH als `root` mit dem in Schritt 2
    gewählten Passwort anmelden; den Hostschlüssel der richtigen Box zuordnen.
 5. Armbian-Ersteinrichtung abschließen, als normaler Benutzer erneut anmelden,
-   Kernel-/DTB-Pakete vor Updates sperren und ein privates SD-Backup erstellen.
+   Kernel-/DTB-Pakete vor Updates sperren. Ein privates SD-Backup ist ein optionaler Rückweg.
 6. Optional Samba installieren und Dateizugriff prüfen. Der empfohlene feste
    Speicherpfad liegt ausdrücklich auf der System-SD; USB-Freigaben sind separat.
 

@@ -21,7 +21,8 @@ The overview refreshes at a new SSH login. You do not need a separate web interf
 ## Requirements
 
 The T95 is running and you are logged in over SSH as a normal user.
-Complete [base setup, kernel holds, and SD backup](INSTALLATION.en.md) first.
+Complete [base setup and kernel holds](INSTALLATION.en.md) first.
+A [full SD backup](BACKUP.en.md) is optional.
 [Launcher tools](../server/setup/README.en.md#requirements) must exist; the
 launcher installs display packages.
 

@@ -146,12 +146,12 @@ Die funktionierende Produktiv-SD bleibt als Rückweg erhalten.
 - [ ] Download/Prüfung, Passwort-Personalisierung und verifiziertes SD-Schreiben abschließen.
 - [ ] Kaltstart, Routeradresse, erstes Root-Login und Armbian-Ersteinrichtung prüfen.
 - [ ] Als normaler Benutzer erneut anmelden; `sudo`, Kernelversion und beide Holds prüfen.
-- [ ] Grundsystem-Backup erstellen und Archiv/Prüfsumme prüfen.
+- [ ] Optionaler Backup-Weg: Grundsystem-Backup erstellen und Archiv/Prüfsumme prüfen.
 - [ ] Samba mit ausdrücklich gewähltem SD-Pfad installieren; feste Freigabe ohne USB prüfen.
 - [ ] Testdatei vom Client schreiben und lesen; Samba-Passwort richtig zuordnen.
 - [ ] USB anschließen, dynamische Freigabe prüfen, sicher auswerfen, erneut anschließen und zugreifen.
 - [ ] Sauber herunterfahren, kalt starten und SSH/Dateizugriff erneut prüfen.
-- [ ] Konfiguriertes SD-Backup erstellen; Wiederherstellung auf Ersatzkarte und Boot separat prüfen.
+- [ ] Optionaler Backup-Weg: Konfiguriertes SD-Backup erstellen; Wiederherstellung auf Ersatzkarte und Boot separat prüfen.
 - [ ] Optionaler Player: neuen Erstdatei-Durchlauf mit SCP zum tatsächlichen Musikordner, Kopfhörerausgang, Pause und Stopp prüfen.
 
 Ergebnis, tatsächlich verwendete Karten-/Clienttypen und Abweichungen ohne

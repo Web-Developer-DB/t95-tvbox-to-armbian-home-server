@@ -24,9 +24,11 @@ Der eingebaute eMMC-Speicher wird nicht formatiert oder eingerichtet.
 ## Voraussetzungen
 
 - T95 läuft von der geprüften SD und du bist als normaler Benutzer per SSH angemeldet.
-- [Kernel-/DTB-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen) und privates SD-Backup sind erledigt.
+- [Kernel-/DTB-Sperre](../../docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen) ist gesetzt.
 - Dein T95-Benutzer kann `sudo` verwenden; für die Installation ist Internet nötig.
 - USB-Festplatten haben bei Bedarf eine eigene ausreichende Stromversorgung.
+
+Ein [vollständiges SD-Backup](../../docs/BACKUP.md) ist optional.
 
 > [!WARNING]
 > Eine vorhandene Samba-Konfiguration wird nach einer Sicherung ersetzt.

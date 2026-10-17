@@ -10,8 +10,9 @@ erstellt keine Armbian-SD und richtet Samba nicht ein.
 
 ## Voraussetzungen
 
-Zuerst [Grundsystem, Kernel-Sperre und SD-Backup](../../docs/INSTALLATION.md)
-abschließen und als normaler T95-Benutzer anmelden. Bash, curl, tar,
+Zuerst [Grundsystem und Kernel-Sperre](../../docs/INSTALLATION.md)
+abschließen und als normaler T95-Benutzer anmelden. Ein
+[vollständiges SD-Backup](../../docs/BACKUP.md) ist optional. Bash, curl, tar,
 Python 3 und sudo müssen vorhanden sein. Fehlende Werkzeuge zuerst vorbereiten:
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**

@@ -30,7 +30,7 @@ Allwinner H616, 2 GiB DDR3L, Armbian 26.8.4 / Debian 13 Trixie /
    router DHCP address. Log in over SSH as root with the step-2 password;
    identify the box before accepting its host key.
 5. Finish Armbian first-run setup, reconnect as a normal user, hold kernel/DTB
-   packages before updates, and create a private SD backup.
+   packages before updates. A private SD backup is optional for full-state recovery.
 6. Optionally install Samba and test file access. The recommended fixed
    storage path is explicitly on the system SD; USB shares are separate.
 

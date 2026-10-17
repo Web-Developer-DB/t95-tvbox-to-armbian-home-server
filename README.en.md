@@ -5,13 +5,13 @@
 Turn a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** into a
 small home server. Armbian boots from microSD; Ethernet connects the box to your network.
 
-**[Set up a new box](docs/INSTALLATION.en.md)** · **[Everyday use](docs/DAILY_USE.en.md)** · **[Solve a problem](docs/TROUBLESHOOTING.en.md)**
+**[🚀 Set up a new box](docs/INSTALLATION.en.md)** · **[🧭 Everyday use](docs/DAILY_USE.en.md)** · **[🛟 Solve a problem](docs/TROUBLESHOOTING.en.md)**
 
 Armbian is a full Linux system based on Debian 13. Project scripts are
 **optional additions for the maintainer's personal use**. Find other applications
 in the **[Armbian software catalog](https://docs.armbian.com/software/)** and
 [Docker guide](https://docs.armbian.com/software/docker/) — for use **after
-base installation, kernel holds, and backup**.
+base installation and kernel holds**.
 
 ![Base release: hardware tested](https://img.shields.io/badge/Base_release-hardware_tested-brightgreen)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
@@ -32,21 +32,26 @@ base installation, kernel holds, and backup**.
 >
 > **[→ Required kernel/DTB protection step](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)**
 
-## Install the home server
+<a id="install-the-home-server"></a>
+
+## 🚀 Install the home server
 
 **[→ Begin with installation step 1](docs/INSTALLATION.en.md)**
 
-You need:
+**What to prepare:**
 
-- the verified box and its correct power supply;
-- an expendable microSD and USB card reader;
-- a Linux PC, internet, and Ethernet to the router;
-- space for image preparation **plus a separate full-SD backup**.
+| You need | Purpose |
+| --- | --- |
+| 📺 Verified T95 and correct power supply | Run Armbian on the supported PCB |
+| 💾 Expendable microSD and USB card reader | Write the system and boot from SD |
+| 🖥️ Linux PC with internet | Prepare SD and connect over SSH |
+| 🌐 Ethernet cable and router | Connect the box to your home network |
+| 📁 At least 6 GB free on the PC | Prepare the image; extra space only for an optional SD backup |
 
 The guide explains Terminal and SSH, the remote connection to your box.
 Windows/WSL2 has a separate section with additional device requirements.
 
-**Hardware → PC → SD → SSH → hold kernel → backup → optional file server**
+**Hardware → PC → SD → SSH → hold kernel → optional backup → optional file server**
 
 > [!IMPORTANT]
 > **No default password:** create a personal image copy with your own password
@@ -54,7 +59,9 @@ Windows/WSL2 has a separate section with additional device requirements.
 > **Writing erases the entire selected SD.** Internal Android storage (eMMC)
 > is not written by this route.
 
-## Hardware photos
+<a id="hardware-photos"></a>
+
+## 📷 Hardware photos
 
 Disconnect all power before opening the box. **Look for `H616-T95MAX-AXP313A-V3.0`**
 on the connector side above the heatsink. Compare it with your PCB;
@@ -69,7 +76,7 @@ the case name alone is insufficient.
 marking. Use the unchanged original photo as the reference for hardware inspection.
 
 <details>
-<summary>Show more hardware photos</summary>
+<summary>📷 Show more hardware photos</summary>
 
 <p>
   <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original memory side of the PCB" width="200"></a>
@@ -81,7 +88,9 @@ Click to enlarge originals. EXIF/GPS data was removed and individual stickers ar
 
 </details>
 
-## What works?
+<a id="what-works"></a>
+
+## ✅ What works?
 
 | Function | Status |
 | --- | --- |
@@ -89,47 +98,70 @@ Click to enlarge originals. EXIF/GPS data was removed and individual stickers ar
 | Samba, USB drives, VLC over SMB | ✅ Tested; optional setup |
 | SSH dashboard and Bluetooth music player | ✅ Tested; optional setup |
 | eMMC as a data drive | ✅ Tested; separate preparation |
-| Armbian boot from eMMC | Unsupported; use microSD |
-| Wi-Fi, HDMI as a server function, infrared remote | Not tested |
+| Armbian boot from eMMC | 🚫 Unsupported; use microSD |
+| Wi-Fi, HDMI as a server function, infrared remote | ❔ Not tested |
 
 Reference: **Armbian 26.8.4 / Debian 13 / kernel `6.18.48-current-sunxi64`**.
 The maintainer confirmed the dashboard/Bluetooth steps work on **2026-10-17**.
 [Test evidence](docs/VALIDATION.en.md) tracks further acceptance and long-term tests.
 Ethernet: 100 Mbit/s, measured at about 11–12 MB/s.
 
-## Daily use
+<a id="daily-use"></a>
+
+## 🧭 Daily use
 
 **[→ Open everyday use](docs/DAILY_USE.en.md)** for reconnecting, file access,
 safe USB ejection, Bluetooth, music, rebooting, and shutting down.
 Use [troubleshooting by symptom](docs/TROUBLESHOOTING.en.md) for errors.
 
-## Optional extensions
+<a id="optional-extensions"></a>
 
-After base installation, kernel holds, and a private SD backup:
+## 🧩 Optional extensions
+
+After base installation with kernel holds enabled, choose the features you
+want. A [full SD backup](docs/INSTALLATION.en.md#6-back-up-the-base-system) is optional.
+
+> [!TIP]
+> ### 🔌 USB file server: plug in storage and share files
+>
+> **Turn your TV box's USB ports into file storage for your home network.**
+>
+> - **Less manual work:** After initial setup, USB sticks, SSDs, and external
+>   hard drives with supported filesystems are mounted and shared over SMB
+>   automatically. You do not need to mount each drive or create its share yourself.
+> - **Each storage volume accessible separately:** USB shares show the capacity
+>   and free space of their own filesystem.
+> - **Tailored to the T95:** Regular Samba packages are combined with the custom
+>   project configuration and USB helpers for automatic mounting and safe ejection.
+>
+> **[→ Set up USB file sharing](server/samba-usb/README.en.md)** ·
+> [Eject a drive safely](server/samba-usb/README.en.md#safely-eject-usb-storage)
+
+> [!NOTE]
+> ### 📊 Dashboard: see storage and SD writes at a glance
+>
+> **See what is happening on your box and its drives at every SSH login.**
+>
+> - **Track SD writes:** `SD-Writes` shows how much has been written to the SD
+>   card since the last boot.
+> - **Identify USB storage:** The mounted-drive overview includes connected USB
+>   storage, with device names and mount paths.
+> - **Spot storage pressure:** Total capacity, free space, and usage are shown
+>   together; usage of 90% or more is highlighted in red.
+>
+> **[→ Set up the SSH dashboard](docs/SSH_DASHBOARD.en.md)**
+
+**Other optional paths:**
 
 | Your goal | Guide |
 | --- | --- |
-| Share files and use USB drives | [Set up file sharing](server/samba-usb/README.en.md) |
-| See system information at SSH login | [Dashboard](docs/SSH_DASHBOARD.en.md) |
 | Send music to headphones or speakers | [Bluetooth music player](server/bluetooth/README.en.md) |
 | Set up dashboard and player through a menu | [Shared setup](server/setup/README.en.md) |
 | Use internal eMMC for data | [Requirements for experienced users](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
 
-**File sharing tailored to the TV box's USB ports:** the Samba module uses
-regular Samba packages with a custom project configuration and USB helpers.
-Once set up, USB sticks, SSDs, external hard drives, and other USB storage
-with supported filesystems are **mounted automatically and made available
-as separate SMB network shares**. You do not need to mount them manually or
-create individual shares during everyday use.
-[Eject the drive safely](server/samba-usb/README.en.md#safely-eject-usb-storage) before unplugging it.
+<a id="install-other-applications"></a>
 
-**Dashboard with extra storage information:** the script-installed SSH dashboard
-adds the **amount written to the SD card since the last boot** and an **overview
-of mounted drives, including USB storage**, to Armbian's login display.
-Device names, total capacity, free space, usage, and mount paths appear directly
-at SSH login. The [dashboard guide](docs/SSH_DASHBOARD.en.md) explains these readings.
-
-## Install other applications
+## 📦 Install other applications
 
 Choose **ARM64-compatible** applications that fit the box's CPU,
 **2 GiB RAM**, and free storage. Leave capacity for Armbian and existing services;
@@ -151,9 +183,11 @@ then a category and application. Docker is under **Software → Containers → D
 See requirements and instructions in the [software catalog](https://docs.armbian.com/software/).
 
 <details>
-<summary>Source versions and developer details</summary>
+<summary>🛠️ Source versions and developer details</summary>
 
-## Source versions
+<a id="source-versions"></a>
+
+## 🛠️ Source versions
 
 | Component | Source |
 | --- | --- |
@@ -167,7 +201,9 @@ The PC's release-tools folder is not a checkout of the current server modules.
 Each guide owns its installation commands; do not mix files from different
 source versions.
 
-## Documentation and developer path
+<a id="documentation-and-developer-path"></a>
+
+## 📚 Documentation and developer path
 
 | Task | Start here |
 | --- | --- |
@@ -185,7 +221,9 @@ Hardware details and wiring belong to the developer path.
 
 </details>
 
-## Project and boundaries
+<a id="project-and-boundaries"></a>
+
+## ℹ️ Project and boundaries
 
 This private project began with an Android installation classified or
 suspected as BadBox-affected. The SD conversion does not use Android as its
@@ -198,14 +236,16 @@ run on a separate SD is tracked in the
 [acceptance checklist](docs/VALIDATION.en.md#installation-guide-acceptance).
 The confirmed dashboard/Bluetooth steps are documented separately there.
 
-## License
+<a id="license"></a>
+
+## 📄 License
 
 No repository license has been selected yet. Before redistribution, review
 the project license and adopted upstream licenses. Existing Armbian license
 notices remain in place.
 
 <details>
-<summary>Earlier section links</summary>
+<summary>🔗 Earlier section links</summary>
 
 <a id="uart-before-porting"></a><a id="uart-diagnostics-with-rp2040-zero"></a><a id="developer-build-and-porting"></a>
 

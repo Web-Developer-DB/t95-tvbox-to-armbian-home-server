@@ -6,14 +6,14 @@ Eine T95 mit **Allwinner H616 und der Platine `H616-T95MAX-AXP313A-V3.0`**
 als kleinen Home-Server nutzen: Armbian startet von microSD und verbindet die
 Box per Ethernet mit deinem Heimnetz.
 
-**[Neu einrichten](docs/INSTALLATION.md)** · **[Im Alltag benutzen](docs/DAILY_USE.md)** · **[Problem lösen](docs/TROUBLESHOOTING.md)**
+**[🚀 Neu einrichten](docs/INSTALLATION.md)** · **[🧭 Im Alltag benutzen](docs/DAILY_USE.md)** · **[🛟 Problem lösen](docs/TROUBLESHOOTING.md)**
 
 Armbian ist ein vollständiges Linux-System auf Basis von Debian 13.
 Die Projektskripte sind **optionale Ergänzungen für die private Nutzung des
 Projektbetreibers**. Weitere Anwendungen findest du im
 **[Armbian-Software-Katalog](https://docs.armbian.com/software/)** und in der
 [Docker-Anleitung](https://docs.armbian.com/software/docker/) — für die Zeit
-**nach der Grundinstallation mit Kernel-Sperre und Backup**.
+**nach der Grundinstallation mit Kernel-Sperre**.
 
 ![Basisrelease: hardwaregeprüft](https://img.shields.io/badge/Basisrelease-hardwaregepr%C3%BCft-brightgreen)
 ![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
@@ -34,21 +34,26 @@ Projektbetreibers**. Weitere Anwendungen findest du im
 >
 > **[→ Pflichtschritt zur Kernel-/DTB-Sperre](docs/INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)**
 
-## Home-Server installieren
+<a id="home-server-installieren"></a>
+
+## 🚀 Home-Server installieren
 
 **[→ Mit Schritt 1 der Installationsanleitung beginnen](docs/INSTALLATION.md)**
 
-Du brauchst:
+**Das legst du bereit:**
 
-- die geprüfte Box mit passender Stromversorgung;
-- eine entbehrliche microSD und einen USB-Kartenleser;
-- einen Linux-PC, Internet und Ethernet zum Router;
-- Platz für die Image-Vorbereitung **und zusätzlich für ein vollständiges SD-Backup**.
+| Du brauchst | Wofür? |
+| --- | --- |
+| 📺 Geprüfte T95 mit passendem Netzteil | Armbian auf der unterstützten Platine betreiben |
+| 💾 Entbehrliche microSD und USB-Kartenleser | System schreiben und von SD starten |
+| 🖥️ Linux-PC mit Internet | SD vorbereiten und per SSH zugreifen |
+| 🌐 Ethernet-Kabel und Router | Die Box mit deinem Heimnetz verbinden |
+| 📁 Mindestens 6 GB freier PC-Speicher | Image vorbereiten; zusätzlicher Platz nur für ein optionales SD-Backup |
 
 Die Anleitung erklärt Terminal und SSH, also den Fernzugriff auf die Box.
 Windows/WSL2 hat einen eigenen Abschnitt mit zusätzlichen Gerätevoraussetzungen.
 
-**Hardware → PC → SD → SSH → Kernel sperren → Backup → optionaler Dateiserver**
+**Hardware → PC → SD → SSH → Kernel sperren → optionales Backup → optionaler Dateiserver**
 
 > [!IMPORTANT]
 > **Kein Standardpasswort:** Vor dem Schreiben eine persönliche Image-Kopie
@@ -56,7 +61,9 @@ Windows/WSL2 hat einen eigenen Abschnitt mit zusätzlichen Gerätevoraussetzunge
 > **Schreiben löscht die ausgewählte SD vollständig.** Die eMMC, der fest
 > eingebaute Android-Speicher der Box, wird dabei nicht beschrieben.
 
-## Hardware-Fotos
+<a id="hardware-fotos"></a>
+
+## 📷 Hardware-Fotos
 
 Box vor dem Öffnen vollständig von der Stromversorgung trennen.
 **Gesuchter Aufdruck: `H616-T95MAX-AXP313A-V3.0`**, auf der Anschlussseite
@@ -71,7 +78,7 @@ oberhalb des Kühlkörpers. Vergleiche ihn mit deiner Platine; der Gehäusename 
 den Platinenaufdruck. Für den Hardwareabgleich ist das unveränderte Originalfoto maßgeblich.
 
 <details>
-<summary>Weitere Hardwarefotos anzeigen</summary>
+<summary>📷 Weitere Hardwarefotos anzeigen</summary>
 
 <p>
   <a href="docs/images/t95-board-memory.jpg"><img src="docs/images/t95-board-memory.jpg" alt="Original: Speicherbausteine auf der Rückseite" width="200"></a>
@@ -84,7 +91,9 @@ individuelle Aufkleber sind abgedeckt.
 
 </details>
 
-## Was funktioniert?
+<a id="was-funktioniert"></a>
+
+## ✅ Was funktioniert?
 
 | Funktion | Stand |
 | --- | --- |
@@ -92,48 +101,71 @@ individuelle Aufkleber sind abgedeckt.
 | Samba, USB-Laufwerke und VLC über SMB | ✅ Getestet; optional einzurichten |
 | SSH-Dashboard und Bluetooth-Musikplayer | ✅ Getestet; optional einzurichten |
 | eMMC als Datenlaufwerk | ✅ Getestet; eigene Vorbereitung nötig |
-| Armbian von eMMC starten | Nicht unterstützt; microSD verwenden |
-| WLAN, HDMI als Serverfunktion, Infrarot-Fernbedienung | Nicht geprüft |
+| Armbian von eMMC starten | 🚫 Nicht unterstützt; microSD verwenden |
+| WLAN, HDMI als Serverfunktion, Infrarot-Fernbedienung | ❔ Nicht geprüft |
 
 Referenz: **Armbian 26.8.4 / Debian 13 / Kernel `6.18.48-current-sunxi64`**.
 Die Dashboard-/Bluetooth-Schritte hat der Projektbetreiber am **17.10.2026**
 als funktionsfähig bestätigt. Weitere Abnahmen und Langzeittests stehen in den
 [Testnachweisen](docs/VALIDATION.md). Ethernet: 100 Mbit/s, gemessen etwa 11–12 MB/s.
 
-## Alltag
+<a id="alltag"></a>
+
+## 🧭 Alltag
 
 **[→ Zur Alltagsanleitung](docs/DAILY_USE.md)**: erneut anmelden, Dateien öffnen,
 USB sicher auswerfen, Bluetooth bedienen, Musik hören, neu starten oder herunterfahren.
 Für Fehler verwende die [Hilfe nach Symptomen](docs/TROUBLESHOOTING.md).
 
-## Optionale Erweiterungen
+<a id="optionale-erweiterungen"></a>
 
-Erst nach funktionierendem Grundsystem, Kernel-Sperre und privatem SD-Backup:
+## 🧩 Optionale Erweiterungen
+
+Wähle nach der Grundinstallation mit Kernel-Sperre die Funktionen, die du
+nutzen möchtest. Ein [vollständiges SD-Backup](docs/INSTALLATION.md#6-grundsystem-sichern)
+ist optional.
+
+> [!TIP]
+> ### 🔌 USB-Dateiserver: einstecken und Dateien teilen
+>
+> **Mach die USB-Anschlüsse deiner TV-Box zum Dateiserver für dein Heimnetz.**
+>
+> - **Weniger Handarbeit:** Nach einmaliger Einrichtung werden USB-Sticks, SSDs und
+>   externe Festplatten mit unterstütztem Dateisystem automatisch eingebunden und
+>   über SMB freigegeben. Du musst nicht jedes Laufwerk selbst mounten oder eine Freigabe anlegen.
+> - **Jeder Speicher einzeln erreichbar:** Die USB-Freigaben zeigen die passende
+>   Kapazität und den freien Platz des jeweiligen Dateisystems.
+> - **Auf die T95 abgestimmt:** Reguläre Samba-Pakete, ergänzt um die eigene
+>   Projektkonfiguration und die USB-Helfer für automatisches Einbinden und sicheres Auswerfen.
+>
+> **[→ USB-Dateiserver einrichten](server/samba-usb/README.md)** ·
+> [Laufwerk sicher auswerfen](server/samba-usb/README.md#usb-sicher-auswerfen)
+
+> [!NOTE]
+> ### 📊 Dashboard: Speicher und SD-Schreiblast sofort im Blick
+>
+> **Sieh bei jeder SSH-Anmeldung, was auf deiner Box und ihren Laufwerken los ist.**
+>
+> - **SD-Schreiblast verfolgen:** `SD-Writes` zeigt die seit dem letzten Systemstart
+>   auf die SD-Karte geschriebene Datenmenge.
+> - **USB-Speicher zuordnen:** Die Übersicht der eingebundenen Laufwerke zeigt
+>   Gerätenamen und Einhängepfade, einschließlich angeschlossener USB-Speicher.
+> - **Platzprobleme erkennen:** Gesamtgröße, freier Platz und Belegung stehen direkt
+>   dabei; ab 90 % Belegung wird der Prozentwert rot hervorgehoben.
+>
+> **[→ SSH-Dashboard einrichten](docs/SSH_DASHBOARD.md)**
+
+**Weitere optionale Wege:**
 
 | Dein Ziel | Anleitung |
 | --- | --- |
-| Dateien teilen und USB-Laufwerke nutzen | [Dateiserver einrichten](server/samba-usb/README.md) |
-| Systeminformationen bei der SSH-Anmeldung sehen | [Dashboard](docs/SSH_DASHBOARD.md) |
 | Musik an Kopfhörer oder Lautsprecher senden | [Bluetooth-Musikplayer](server/bluetooth/README.md) |
 | Dashboard und Player über ein Menü einrichten | [Gemeinsame Einrichtung](server/setup/README.md) |
 | Interne eMMC als Datenlaufwerk nutzen | [Voraussetzungen für Fortgeschrittene](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
 
-**Dateiserver für die USB-Anschlüsse der TV-Box:** Das Samba-Modul verwendet
-die regulären Samba-Pakete mit einer eigenen Projektkonfiguration und USB-Helfern.
-Nach der Einrichtung werden USB-Sticks, SSDs, externe Festplatten und andere
-USB-Datenträger mit unterstütztem Dateisystem **automatisch eingebunden
-(„gemountet“) und als eigene SMB-Netzwerkfreigaben bereitgestellt**.
-Du musst sie im Alltag weder manuell einbinden noch einzelne Freigaben anlegen.
-Vor dem Abziehen das Laufwerk [sicher auswerfen](server/samba-usb/README.md#usb-sicher-auswerfen).
+<a id="weitere-anwendungen-installieren"></a>
 
-**Dashboard mit zusätzlichen Speicherinformationen:** Das per Skript installierte
-SSH-Dashboard ergänzt die Armbian-Anmeldeanzeige um die **seit dem letzten
-Systemstart auf die SD-Karte geschriebene Datenmenge** und eine **Übersicht der
-eingebundenen Laufwerke einschließlich USB-Speicher**. Du siehst Gerätenamen,
-Gesamtgröße, freien Platz, Belegung und Einhängepfad – direkt bei der SSH-Anmeldung.
-Die [Dashboard-Anleitung](docs/SSH_DASHBOARD.md) erklärt die Anzeigen.
-
-## Weitere Anwendungen installieren
+## 📦 Weitere Anwendungen installieren
 
 Wähle Anwendungen mit **ARM64-Unterstützung**, die zur Prozessorleistung,
 zu **2 GiB RAM** und dem freien Speicher passen. Reserven für Armbian und
@@ -156,9 +188,11 @@ In der [Armbian-Konfiguration](https://docs.armbian.com/config/) unter
 im [Software-Katalog](https://docs.armbian.com/software/).
 
 <details>
-<summary>Quellstände und Entwicklerdetails</summary>
+<summary>🛠️ Quellstände und Entwicklerdetails</summary>
 
-## Quellstände
+<a id="quellstände"></a>
+
+## 🛠️ Quellstände
 
 | Bestandteil | Verwendeter Stand |
 | --- | --- |
@@ -172,7 +206,9 @@ Skripte und Dokumentation. Der Release-Werkzeugeordner auf dem PC ist kein
 Checkout der aktuellen Servermodule. Installationsbefehle stehen jeweils in ihrer
 zuständigen Anleitung; Dateien verschiedener Quellstände nicht mischen.
 
-## Dokumentation und Entwicklerpfad
+<a id="dokumentation-und-entwicklerpfad"></a>
+
+## 📚 Dokumentation und Entwicklerpfad
 
 | Aufgabe | Einstieg |
 | --- | --- |
@@ -190,7 +226,9 @@ anschließen. Hardwaredetails und sichere Verdrahtung stehen im Entwicklerpfad.
 
 </details>
 
-## Projekt und Grenzen
+<a id="projekt-und-grenzen"></a>
+
+## ℹ️ Projekt und Grenzen
 
 Ausgangspunkt dieses privaten Projekts war eine als BadBox-belastet oder
 -verdächtig eingestufte Android-Installation. Der SD-Umbau verwendet dieses
@@ -203,14 +241,16 @@ Der vollständige Durchlauf der Grundinstallation auf einer separaten SD wird
 in der [Abnahme-Checkliste](docs/VALIDATION.md#abnahme-der-installationsanleitung)
 geführt. Die bestätigten Dashboard-/Bluetooth-Schritte sind dort separat dokumentiert.
 
-## Lizenz
+<a id="lizenz"></a>
+
+## 📄 Lizenz
 
 Für das Repository ist noch keine eigene Lizenz festgelegt. Vor einer
 Weiterveröffentlichung sind Projektlizenz und übernommene Upstream-Lizenzen
 zu prüfen; die vorhandenen Armbian-Lizenzhinweise bleiben erhalten.
 
 <details>
-<summary>Links zu früheren Abschnitten</summary>
+<summary>🔗 Links zu früheren Abschnitten</summary>
 
 <a id="schnellinstallation-dashboard-und-bluetooth"></a><a id="ssh-anmeldedashboard"></a><a id="bluetooth-musikplayer"></a>
 

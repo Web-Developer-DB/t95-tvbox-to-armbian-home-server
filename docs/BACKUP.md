@@ -2,6 +2,13 @@
 
 **Deutsch** | [English](BACKUP.en.md)
 
+**Optionaler Rückweg:** Das Grundsystem kannst du über die
+[Installationsanleitung](INSTALLATION.md) jederzeit neu installieren.
+Ein vollständiges SD-Backup erspart das erneute Einrichten von Konten,
+Einstellungen und Diensten und bewahrt die SD-Dateien zum Sicherungszeitpunkt.
+Eine Neuinstallation überschreibt die ausgewählte SD; bewahre gewünschte
+persönliche Dateien daher separat auf.
+
 Diese Anleitung erstellt ein sektorgetreues Backup der **gesamten** Armbian-
 SD-Karte und stellt es auf derselben oder einer mindestens gleich großen
 Ersatzkarte wieder her. Bootloader, Partitionstabelle, DTB, Kernel, Rootfs,

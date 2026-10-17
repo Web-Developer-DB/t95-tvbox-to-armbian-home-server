@@ -24,9 +24,10 @@ keine zusätzliche Weboberfläche zu öffnen.
 ## Voraussetzungen
 
 Die T95 läuft und du bist als normaler Benutzer per SSH angemeldet.
-[Grundsystem, Kernel-Sperre und SD-Backup](INSTALLATION.md) müssen abgeschlossen
-sein. Die nötigen [Startwerkzeuge](../server/setup/README.md#voraussetzungen)
-sind vorhanden; Anzeige-Pakete installiert der Starter.
+[Grundsystem und Kernel-Sperre](INSTALLATION.md) müssen abgeschlossen sein.
+Ein [vollständiges SD-Backup](BACKUP.md) ist optional. Die nötigen
+[Startwerkzeuge](../server/setup/README.md#voraussetzungen) sind vorhanden;
+Anzeige-Pakete installiert der Starter.
 
 **Geprüft:** Der Projektbetreiber hat die dokumentierten Dashboard-Schritte
 am **17.10.2026** als funktionsfähig bestätigt. [Testnachweise](VALIDATION.md#dashboard-und-bluetooth).

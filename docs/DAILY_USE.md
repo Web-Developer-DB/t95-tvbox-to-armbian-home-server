@@ -87,6 +87,8 @@ Zum nächsten Start die Box wieder mit der passenden Stromversorgung einschalten
 
 ## Vor neuen Anwendungen
 
-[Kernel-/DTB-Sperre beibehalten](INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen)
-und ein aktuelles Backup anlegen. Danach passende optionale Module oder
+[Kernel-/DTB-Sperre beibehalten](INSTALLATION.md#5-kernel-und-dtb-vor-updates-schützen).
+Bei gesetzter Sperre kannst du passende optionale Module oder
 [weitere Armbian-Anwendungen](../README.md#weitere-anwendungen-installieren) auswählen.
+Ein [vollständiges SD-Backup](BACKUP.md) ist optional und bewahrt den aktuellen
+Einrichtungsstand für eine spätere Wiederherstellung.

@@ -84,6 +84,8 @@ with its correct supply.
 
 ## Before adding applications
 
-[Keep kernel/DTB holds enabled](INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
-and make a current backup. Then select optional modules or
+[Keep kernel/DTB holds enabled](INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates).
+With those holds enabled, you can select optional modules or
 [other Armbian applications](../README.en.md#install-other-applications).
+A [full SD backup](BACKUP.en.md) is optional and preserves the current setup
+for recovery.

@@ -7,7 +7,7 @@ Terminalbedienung und die Verbindung zur Box werden erklärt. Verwende den
 empfohlenen Skriptweg; die [manuelle Alternative](#manuelle-alternative-zur-sd-vorbereitung)
 ersetzt ausschließlich die SD-Vorbereitung in Schritt 2.
 
-**Ablauf:** Hardware → Linux-PC → SD → SSH → Kernel-Schutz → Backup → Samba.
+**Ablauf:** Hardware → Linux-PC → SD → SSH → Kernel-Schutz → optionales Backup → Samba.
 
 [Startseite](../README.md) · [Hilfe nach Symptomen](TROUBLESHOOTING.md)
 
@@ -45,9 +45,10 @@ du in das Fenster und führst ihn mit **Enter** aus. Auswendiglernen ist nicht n
   und Pakete wird zusätzlich freier Platz benötigt. Auf dem PC sollten für
   Download, Rohimage, persönliche Kopie und temporäres Dateisystem zusammen
   **mindestens 6 GB** frei sein; auch `/tmp` braucht etwa 1,6 GB freien Platz.
-- **Platz für das Backup kommt hinzu:** Auf einem anderen Datenträger mindestens
+- **Nur für ein optionales SD-Backup:** Auf einem anderen Datenträger mindestens
   die gesamte SD-Kartengröße freihalten. Bei einer 128-GB-Karte kann das Backup
-  fast so viel Platz benötigen; die 6 GB oben gelten nur für die Image-Vorbereitung.
+  fast so viel Platz benötigen. Die 6 GB oben gelten für die Image-Vorbereitung;
+  ohne SD-Backup brauchst du diesen zusätzlichen Backup-Platz nicht.
 - Die Box wird per **Ethernet und SSH** bedient. WLAN und eine HDMI-Anzeige
   gehören nicht zu den bestätigten Voraussetzungen dieses Serverwegs.
 
@@ -303,7 +304,22 @@ Normale Debian-/Armbian-Pakete dürfen danach aktualisiert werden.
 Ein bewusstes Kernel-/DTB-Update benötigt ein Backup und erneute
 Hardwareprüfung; siehe [Release-Handbuch](RELEASE.md#den-geprüften-kernel-dtb-stand-schützen).
 
-## 6. Grundsystem sichern
+<a id="6-grundsystem-sichern"></a>
+
+## 6. Grundsystem sichern (optional)
+
+**Dieser Schritt ist freiwillig.** Du kannst das Grundsystem über diese
+Installationsanleitung jederzeit neu auf SD installieren und Konten sowie
+Dienste erneut einrichten. Ein vollständiges SD-Backup bewahrt stattdessen
+den eingerichteten Zustand mit Benutzerkonten, Einstellungen und Dateien
+auf der SD zum Sicherungszeitpunkt. Persönliche Dateien kannst du auch
+einzeln sichern.
+
+**Ohne Backup weiter:** Lass die Box eingeschaltet und gehe direkt zu
+[Schritt 7](#7-dateiserver-einrichten). Den folgenden Abschaltbefehl dann überspringen.
+
+<details>
+<summary>Optional: Backup des Grundsystems jetzt erstellen</summary>
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -319,6 +335,8 @@ Es enthält persönliche Zugangsdaten und bleibt privat.
 **Ergebnis:** Backup und Prüfsumme liegen auf einem anderen Datenträger.
 Die SD wieder in die ausgeschaltete Box einsetzen, Ethernet verbinden,
 starten und wie in Schritt 4 als normaler Benutzer per SSH anmelden.
+
+</details>
 
 ## 7. Dateiserver einrichten
 
@@ -344,8 +362,8 @@ Die [Alltagsanleitung](DAILY_USE.md) erklärt erneutes Anmelden, Neustart und He
 
 - [USB sicher auswerfen](../server/samba-usb/README.md#usb-sicher-auswerfen),
   bevor du ein Laufwerk abziehst; danach Wiedereinstecken und Zugriff testen.
-- Nach erfolgreicher Einrichtung ein weiteres [SD-Backup](BACKUP.md) anlegen.
-  Es erfasst keine Daten auf USB oder eMMC: Diese separat regelmäßig sichern.
+- Optional ein [SD-Backup](BACKUP.md) des fertig eingerichteten Systems anlegen.
+  Es erfasst keine Daten auf USB oder eMMC: Eigene Daten dort separat regelmäßig sichern.
 - [Dashboard](SSH_DASHBOARD.md) und [Bluetooth-Musikplayer](../server/bluetooth/README.md)
   erst nach dem Grundsystem einrichten. Die dokumentierten Schritte wurden vom
   Projektbetreiber am 17.10.2026 geprüft und als funktionsfähig bestätigt.

@@ -10,7 +10,8 @@ for showing, connecting, disconnecting, and forgetting devices.
 
 For initial setup, the T95 must be running and you must be logged in as your
 normal user. [Open your connection to the box](../../docs/BLUETOOTH_CHEATSHEET.en.md#start-here-connect-to-the-box).
-Complete [base installation, kernel holds, and SD backup](../../docs/INSTALLATION.en.md) first.
+Complete [base installation and kernel holds](../../docs/INSTALLATION.en.md) first.
+A [full SD backup](../../docs/BACKUP.en.md) is optional.
 
 For missing tools, see [preparation](../setup/README.en.md#requirements).
 

@@ -10,7 +10,8 @@ dort stehen Geräte anzeigen, verbinden, trennen und vergessen im Vordergrund.
 
 Für die einmalige Einrichtung muss die T95 laufen und du musst mit deinem
 normalen Benutzer angemeldet sein. [So öffnest du die Verbindung zur Box](../../docs/BLUETOOTH_CHEATSHEET.md#hier-anfangen-mit-der-box-verbinden).
-Zuerst [Grundsystem, Kernel-Sperre und SD-Backup](../../docs/INSTALLATION.md) abschließen.
+Zuerst [Grundsystem und Kernel-Sperre](../../docs/INSTALLATION.md) abschließen.
+Ein [vollständiges SD-Backup](../../docs/BACKUP.md) ist optional.
 
 Bei fehlenden Werkzeugen hilft die [Vorbereitung](../setup/README.md#voraussetzungen).
 

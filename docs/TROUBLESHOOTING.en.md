@@ -220,6 +220,6 @@ t95-bluetooth status
 PC's release-tag checkout does not contain the current modules. See
 [local setup checkout](../server/setup/README.en.md#local-checkout).
 
-Back up before changes. Instructions, removal, and audio diagnosis:
+A full [SD backup](BACKUP.en.md) is an optional recovery path. Instructions, removal, and audio diagnosis:
 [dashboard](SSH_DASHBOARD.en.md), [Bluetooth](../server/bluetooth/README.en.md),
 [music player](MUSIKPLAYER_CHEATSHEET.en.md).

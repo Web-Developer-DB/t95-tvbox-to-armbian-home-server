@@ -142,12 +142,12 @@ the working production card as recovery.
 - [ ] Complete download/checks, password personalization, and verified SD writing.
 - [ ] Cold boot, locate router address, log in as root, and finish Armbian first-run setup.
 - [ ] Reconnect as normal user; check sudo, kernel version, and both holds.
-- [ ] Create the base-system backup and verify archive/checksum.
+- [ ] Optional backup path: create the base-system backup and verify archive/checksum.
 - [ ] Install Samba with explicit SD storage; test the fixed share without USB.
 - [ ] Write/read a client test file; identify the Samba password correctly.
 - [ ] Attach USB, check its dynamic share, eject safely, reinsert, and access again.
 - [ ] Shut down cleanly, cold boot, and recheck SSH/file access.
-- [ ] Back up the configured SD; separately verify restoring a replacement and booting it.
+- [ ] Optional backup path: back up the configured SD; separately verify restoring a replacement and booting it.
 - [ ] Optional player: follow the new first-file guide, check SCP to the configured music folder, headphone output, pause, and stop.
 
 Record actual card/client types, outcome, and deviations without private

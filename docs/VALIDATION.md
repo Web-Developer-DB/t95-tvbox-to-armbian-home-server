@@ -114,7 +114,7 @@ oben und die bestätigten Dashboard-/Bluetooth-Schritte sind davon getrennt.
 | Prüfung | Ergebnis |
 | --- | --- |
 | Relative Links, Bilder und Sprachverweise in allen 65 Markdown-Dokumenten | bestanden; bisherige Anker der bearbeiteten Dokumente erhalten |
-| Ausführbare Bash-Beispiele und die 21 Shellskripte | 330 Beispielblöcke und 21 Skripte bestehen `bash -n` |
+| Ausführbare Bash-Beispiele und die 21 Shellskripte | 338 Beispielblöcke und 21 Skripte bestehen `bash -n` |
 | Vorhandene Setup-Tests | 16 bestanden; simuliertes APT/systemd/BlueZ |
 | Samba-/Dashboard-Manifeste | alle 34 Einträge stimmen; geänderte Dokumentationswerte aktualisiert |
 | Backup-Beispiele direkt aus beiden Anleitungen | 22 Prüfungen in temporären Verzeichnissen bestanden |
@@ -133,6 +133,9 @@ Die korrigierte Kompressionsoption lautet `zstd --check`.
 Diese Ergebnisse betreffen Dokumentation und Testumgebung. Die frühere
 Hardwarebestätigung des Projektbetreibers für Dashboard/Bluetooth steht separat
 oben. Ein vollständiger Durchlauf auf einer separaten SD bleibt offen.
+
+Die ergänzte Ubuntu-Netzwerksuche wurde auf Befehlsoptionen, Bash-Syntax,
+Verweise und Darstellung geprüft; ein echter Heimnetz-Scan wurde dabei nicht ausgeführt.
 
 Ein Prüfer mit grundlegenden Terminal-/SSH-Kenntnissen soll der
 [Installation](INSTALLATION.md) ohne zusätzliche mündliche Anleitung folgen.

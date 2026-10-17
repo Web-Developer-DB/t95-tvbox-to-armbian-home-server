@@ -127,7 +127,7 @@ nicht erforderlich. Das Passwort der wiederverwendeten Kopie bleibt dasselbe.
 
 ## 3. Box starten und Netzwerkadresse finden
 
-**Ort: ausgeschaltete T95 und Routeroberfläche auf dem PC.**
+**Ort: ausgeschaltete T95 und PC im selben Heimnetz.**
 
 1. Die geprüfte SD in die vollständig ausgeschaltete T95 einsetzen.
 2. Ethernet mit dem Router verbinden, dann die Box einschalten.
@@ -135,10 +135,80 @@ nicht erforderlich. Das Passwort der wiederverwendeten Kopie bleibt dasselbe.
    bedeutet, dass der Router der Box automatisch eine IP-Adresse zuweist.
    PC und Box müssen sich für den folgenden Zugriff im selben erreichbaren LAN befinden.
 
-**Ergebnis:** Der Router zeigt eine Netzwerkadresse für die Box. Eine Anzeige
+**Ergebnis:** Die im Router angezeigte IP-Adresse der T95 für SSH notieren. Eine Anzeige
 am Fernseher ist kein Erfolgskriterium. Eine garantierte Erststartdauer wurde
-nicht gemessen. Ohne Adresse zuerst [Kabel, Router und SD prüfen](TROUBLESHOOTING.md#keine-ip-adresse),
-dann bei Bedarf die UART-Diagnose verwenden.
+nicht gemessen. Falls du die Adresse im Router nicht findest, hilft die
+Ubuntu-Alternative im nächsten Abschnitt.
+
+### Alternative unter Ubuntu: die T95 im Heimnetz finden
+
+Kennst du die Adresse bereits aus dem Router? Dann direkt mit
+[Schritt 4](#4-erstes-ssh-login-und-normalen-benutzer-einrichten) fortfahren.
+Sonst auf dem **Ubuntu-PC** mit **Strg + Alt + T** ein Terminal öffnen.
+Der PC muss im selben Heimnetz wie die per Ethernet angeschlossene T95 sein;
+ein Gastnetz oder eine VPN-Verbindung kann die Suche verhindern.
+
+**1. Suchwerkzeug installieren — auf dem Ubuntu-PC, normaler Benutzer mit `sudo`:**
+
+```bash
+sudo apt update
+sudo apt install -y nmap
+```
+
+**2. Eigenes IPv4-Heimnetz ablesen — auf dem Ubuntu-PC, normaler Benutzer:**
+
+```bash
+ip -4 route
+```
+
+**Beispielantwort — nur lesen; deine Adressen können anders aussehen:**
+
+```text
+default via 192.168.178.1 dev enp3s0 proto dhcp src 192.168.178.20
+192.168.178.0/24 dev enp3s0 proto kernel scope link src 192.168.178.20
+```
+
+Hier ist `192.168.178.1` der Router, `192.168.178.20` dein PC und
+**`192.168.178.0/24` der zu durchsuchende Netzbereich**. Übernimm den Bereich
+aus deiner eigenen Ausgabe, einschließlich `/24` beziehungsweise der dort
+angegebenen Zahl. Die passende Zeile verwendet dieselbe Schnittstelle (`dev`)
+wie die Heimnetz-Verbindung zum Router; bei WLAN kann sie etwa `wlp2s0` heißen.
+Netze von Docker, virtuellen Maschinen oder VPN nicht für diese Suche wählen.
+
+**3. Netzbereich eingeben — auf dem Ubuntu-PC, normaler Benutzer:**
+
+```bash
+read -r -p 'Eigenes IPv4-Heimnetz aus ip route, z. B. 192.168.178.0/24: ' T95_LAN
+```
+
+Deinen Netzbereich eingeben und Enter drücken. Dann die aktiven Geräte in
+diesem eigenen Heimnetz suchen:
+
+**Auf dem Ubuntu-PC, normaler Benutzer mit `sudo`:**
+
+```bash
+sudo nmap -sn "$T95_LAN"
+```
+
+`-sn` sucht erreichbare Geräte ohne anschließenden Portscan. Nach dem Ende
+erscheint eine Liste; zu einem gefundenen Gerät gehört zum Beispiel:
+
+```text
+Nmap scan report for 192.168.178.50
+Host is up (0.0010s latency).
+```
+
+**4. Die T95 zuordnen:** In der Liste stehen auch Router, PC und andere Geräte.
+Ein Name wie `t95` oder `armbian` kann helfen, ist aber nicht garantiert.
+Bei unklarer Zuordnung **nur das Ethernet-Kabel an der T95 abziehen**, den
+Scan wiederholen, das Kabel wieder einstecken und erneut scannen. Der dabei
+verschwindende und wieder auftauchende Eintrag ist ein Hinweis auf die Box;
+bei verbleibenden Zweifeln die Router-Geräteliste abgleichen.
+Die Stromversorgung bleibt dabei angeschlossen.
+
+**Ergebnis:** Die zugeordnete IPv4-Adresse notieren und in Schritt 4 verwenden.
+Bleibt die Box unsichtbar, zuerst [Netzwerk und Start prüfen](TROUBLESHOOTING.md#keine-ip-adresse).
+Hintergrund: [offizielle Nmap-Anleitung zur Gerätesuche](https://nmap.org/book/man-host-discovery.html).
 
 ## 4. Erstes SSH-Login und normalen Benutzer einrichten
 
@@ -148,7 +218,8 @@ dann bei Bedarf die UART-Diagnose verwenden.
 read -r -p 'IP-Adresse der T95: ' T95_IP
 ```
 
-Die Adresse aus dem Router eingeben und Enter drücken. Danach verbinden:
+Die in Schritt 3 per Router oder Netzwerksuche ermittelte Adresse eingeben und
+Enter drücken. Danach verbinden:
 
 **Auf dem Linux-PC, normaler Benutzer; `sudo` wo angegeben:**
 
@@ -157,8 +228,8 @@ ssh "root@$T95_IP"
 ```
 
 Beim ersten Kontakt zeigt SSH einen neuen Hostschlüssel-Fingerprint. Das ist
-der Schlüssel der Box, nicht dein Passwort. Prüfe die Gerätezuordnung im
-Router; ein unabhängiger Fingerprint-Abgleich ist über eine vertrauenswürdige
+der Schlüssel der Box, nicht dein Passwort. Prüfe die Gerätezuordnung wie in
+Schritt 3 beschrieben; ein unabhängiger Fingerprint-Abgleich ist über eine vertrauenswürdige
 lokale UART-Konsole mit `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`
 möglich. Bestätige den Schlüssel erst nach der Zuordnung. Bei einer
 Schlüsselwarnung nach einem früheren Login [hier weiter](TROUBLESHOOTING.md#ssh-anmeldung-scheitert).

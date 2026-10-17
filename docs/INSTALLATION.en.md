@@ -121,7 +121,7 @@ copy. Reusing a copy preserves its password; a new directory is unnecessary.
 
 ## 3. Boot the box and find its network address
 
-**Location: powered-off T95 and router interface on the PC.**
+**Location: powered-off T95 and PC on the same home network.**
 
 1. Insert the verified SD while the T95 is fully powered off.
 2. Connect Ethernet to the router, then power on.
@@ -129,10 +129,78 @@ copy. Reusing a copy preserves its password; a new directory is unnecessary.
    router assigns an IP address automatically. PC and box must be in the same
    reachable LAN for the following access.
 
-**Expected:** a network address for the box in the router. A TV display is not
-an acceptance criterion. A guaranteed first-boot duration has not been
-measured. If no address appears, [check cables, router, and SD](TROUBLESHOOTING.en.md#no-ip-address)
-before escalating to UART diagnostics.
+**Expected:** note the T95 address reported by the router for SSH login. A TV display is
+not an acceptance criterion. A guaranteed first-boot duration has not been
+measured. If you cannot find the address in the router, try the Ubuntu
+alternative below.
+
+### Ubuntu alternative: find the T95 on your home network
+
+Already know the router-reported address? Continue with
+[step 4](#4-first-ssh-login-and-normal-user). Otherwise, open a terminal on
+the **Ubuntu PC** with **Ctrl + Alt + T**. The PC must share the home network
+with the Ethernet-connected T95; a guest network or VPN connection can prevent discovery.
+
+**1. Install the discovery tool — on the Ubuntu PC, normal user with `sudo`:**
+
+```bash
+sudo apt update
+sudo apt install -y nmap
+```
+
+**2. Read your IPv4 home network — on the Ubuntu PC, normal user:**
+
+```bash
+ip -4 route
+```
+
+**Example response — read only; your addresses may differ:**
+
+```text
+default via 192.168.178.1 dev enp3s0 proto dhcp src 192.168.178.20
+192.168.178.0/24 dev enp3s0 proto kernel scope link src 192.168.178.20
+```
+
+Here, `192.168.178.1` is the router, `192.168.178.20` is your PC, and
+**`192.168.178.0/24` is the network range to search**. Use the range from your
+own output, including `/24` or whichever number it actually shows. Choose the
+line with the same interface (`dev`) as your home-network connection to the
+router; Wi-Fi might use a name such as `wlp2s0`. Do not choose Docker,
+virtual-machine, or VPN networks for this search.
+
+**3. Enter the network range — on the Ubuntu PC, normal user:**
+
+```bash
+read -r -p 'Your IPv4 home network from ip route, e.g. 192.168.178.0/24: ' T95_LAN
+```
+
+Enter your network range and press Enter. Then discover active devices on
+that home network of your own:
+
+**On the Ubuntu PC, normal user with `sudo`:**
+
+```bash
+sudo nmap -sn "$T95_LAN"
+```
+
+`-sn` discovers reachable devices without a subsequent port scan. When it
+finishes, a list appears; an entry for one discovered device might look like:
+
+```text
+Nmap scan report for 192.168.178.50
+Host is up (0.0010s latency).
+```
+
+**4. Identify the T95:** the list also includes the router, PC, and other devices.
+A name such as `t95` or `armbian` may help but is not guaranteed. If unsure,
+disconnect **only the T95's Ethernet cable**, repeat the scan, reconnect the
+cable, and scan again. An entry that disappears and reappears points to the
+box; cross-check the router's device list if doubts remain. Keep the power
+supply connected throughout.
+
+**Expected:** note the identified IPv4 address and use it in step 4. If the
+box remains absent, [check networking and boot](TROUBLESHOOTING.en.md#no-ip-address) first.
+Background: [official Nmap host-discovery guide](https://nmap.org/book/man-host-discovery.html).
 
 ## 4. First SSH login and normal user
 
@@ -142,7 +210,8 @@ before escalating to UART diagnostics.
 read -r -p 'T95 IP address: ' T95_IP
 ```
 
-Enter the address from the router and press Enter. Then connect:
+Enter the address found through the router or network scan in step 3, then
+press Enter and connect:
 
 **On the Linux PC, normal user; `sudo` where shown:**
 
@@ -151,7 +220,7 @@ ssh "root@$T95_IP"
 ```
 
 SSH shows a new host-key fingerprint on first contact. This identifies the
-box's key; it is not your password. Check the device in the router. An
+box's key; it is not your password. Identify the device as described in step 3. An
 independent comparison is possible from a trusted local UART console using
 `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`. Accept the key only after
 identifying the box. For a changed-key warning after an earlier login,

@@ -4,9 +4,17 @@
 
 **Deutsch** | [English](README.en.md)
 
-Teile Dateien im Heimnetz mit PC, Handy oder VLC. Die feste Freigabe
+Teile Dateien im Heimnetz mit PC, Handy oder VLC. Das Modul verwendet die
+regulären Samba-Pakete mit einer **eigenen, auf diese TV-Box und ihre
+USB-Anschlüsse abgestimmten Projektkonfiguration** sowie USB-Helfern.
+Nach der Einrichtung werden USB-Sticks, SSDs, externe Festplatten und andere
+USB-Datenträger mit unterstütztem Dateisystem automatisch eingebunden
+(„gemountet“) und als eigene SMB-Netzwerkfreigaben bereitgestellt.
+**Manuelles Mounten oder Anlegen einer Freigabe entfällt im Alltag.**
+
+Die feste Freigabe
 **`T95-DATA` liegt beim empfohlenen Erststart auf der System-SD** unter
-`/srv/t95-sd-data/Share`. Eingesteckte USB-Laufwerke erhalten eigene Freigaben.
+`/srv/t95-sd-data/Share`; sie ist von den USB-Freigaben unabhängig.
 Der eingebaute eMMC-Speicher wird nicht formatiert oder eingerichtet.
 
 [Einrichten](#dateiserver-einrichten) · [Dateien öffnen](#zugriff-von-clients-und-vlc) · [USB auswerfen](#usb-sicher-auswerfen)

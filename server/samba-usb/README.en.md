@@ -4,9 +4,16 @@
 
 [Deutsch](README.md) | **English**
 
-Share files with PCs, phones, and VLC on your home network. The recommended
-fixed **`T95-DATA` share uses the system SD** at `/srv/t95-sd-data/Share`.
-USB drives get their own shares. Internal eMMC is not formatted or configured.
+Share files with PCs, phones, and VLC on your home network. The module uses
+regular Samba packages with a **custom project configuration tailored to
+this TV box and its USB ports**, together with USB helpers. Once set up,
+USB sticks, SSDs, external hard drives, and other USB storage with supported
+filesystems are mounted automatically and made available as separate SMB
+network shares. **Everyday use needs no manual mounting or share creation.**
+
+The recommended fixed **`T95-DATA` share uses the system SD** at
+`/srv/t95-sd-data/Share`, independently of the USB shares.
+Internal eMMC is not formatted or configured.
 
 [Set up](#set-up-file-sharing) · [Open files](#client-and-vlc-access) · [Eject USB](#safely-eject-usb-storage)
 

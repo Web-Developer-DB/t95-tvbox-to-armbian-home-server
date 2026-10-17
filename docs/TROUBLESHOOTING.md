@@ -69,6 +69,10 @@ wählen; nach jedem Einstecken kann sich der Gerätename ändern.
    durch ein Gastnetz oder Client-Isolation voneinander getrennt sein.
 4. Ein schwarzer HDMI-Bildschirm allein beweist keinen Bootfehler.
 
+Unter Ubuntu kannst du auch [das eigene Heimnetz nach der T95 durchsuchen](INSTALLATION.md#alternative-unter-ubuntu-die-t95-im-heimnetz-finden).
+Ein fehlender Scan-Eintrag allein beweist keinen Bootfehler; Netzwerkisolation
+oder die Auswahl eines falschen Netzbereichs kann die Box verbergen.
+
 **Ergebnis:** Mit einer gefundenen Adresse zur
 [SSH-Anmeldung](INSTALLATION.md#4-erstes-ssh-login-und-normalen-benutzer-einrichten)
 zurückkehren. Bleibt die Box ohne Adresse, den

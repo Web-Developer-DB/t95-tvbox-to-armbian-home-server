@@ -4,8 +4,17 @@
 
 [Deutsch](SSH_DASHBOARD.md) | **English**
 
-The dashboard shows T95 system information at each SSH login, including load,
-storage, and drives. You do not need to open a separate web interface.
+The script-installed custom dashboard adds storage information to Armbian's
+login display. At each SSH login, alongside load and memory information, you see:
+
+- **`SD-Writes`:** the amount written to the SD card since the last boot.
+  This counter starts over after a reboot.
+- **Drive overview:** mounted filesystems, including connected and mounted
+  USB sticks, SSDs, and external hard drives. Each entry shows its device name
+  (such as `sda1`), total capacity, free space, usage percentage, and mount path.
+  Usage of 90% or more is highlighted in red.
+
+The overview refreshes at a new SSH login. You do not need a separate web interface.
 
 [Set up](#set-up) · [Verify](#verify-success) · [Remove](#remove) · [Daily use](DAILY_USE.en.md)
 

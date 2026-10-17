@@ -65,6 +65,10 @@ device names can change whenever storage is reconnected.
 3. Find a new DHCP lease in the router. Guest-network or client isolation must not block PC-to-box access.
 4. A black HDMI screen alone does not establish a boot failure.
 
+On Ubuntu, you can also [search your home network for the T95](INSTALLATION.en.md#ubuntu-alternative-find-the-t95-on-your-home-network).
+A missing scan entry alone does not establish a boot failure: network
+isolation or selecting the wrong network range can hide the box.
+
 **Expected:** return to [SSH login](INSTALLATION.en.md#4-first-ssh-login-and-normal-user)
 with the address. If none appears, [diagnose boot over UART](BOOT_TROUBLESHOOTING.en.md)
 after verifying the adapter and wiring using [UART setup](UART_BRINGUP.en.md).

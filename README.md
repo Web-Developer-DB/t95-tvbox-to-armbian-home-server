@@ -118,6 +118,21 @@ Erst nach funktionierendem Grundsystem, Kernel-Sperre und privatem SD-Backup:
 | Dashboard und Player über ein Menü einrichten | [Gemeinsame Einrichtung](server/setup/README.md) |
 | Interne eMMC als Datenlaufwerk nutzen | [Voraussetzungen für Fortgeschrittene](docs/TECHNICAL_REFERENCE.md#emmc-als-internes-datenlaufwerk) |
 
+**Dateiserver für die USB-Anschlüsse der TV-Box:** Das Samba-Modul verwendet
+die regulären Samba-Pakete mit einer eigenen Projektkonfiguration und USB-Helfern.
+Nach der Einrichtung werden USB-Sticks, SSDs, externe Festplatten und andere
+USB-Datenträger mit unterstütztem Dateisystem **automatisch eingebunden
+(„gemountet“) und als eigene SMB-Netzwerkfreigaben bereitgestellt**.
+Du musst sie im Alltag weder manuell einbinden noch einzelne Freigaben anlegen.
+Vor dem Abziehen das Laufwerk [sicher auswerfen](server/samba-usb/README.md#usb-sicher-auswerfen).
+
+**Dashboard mit zusätzlichen Speicherinformationen:** Das per Skript installierte
+SSH-Dashboard ergänzt die Armbian-Anmeldeanzeige um die **seit dem letzten
+Systemstart auf die SD-Karte geschriebene Datenmenge** und eine **Übersicht der
+eingebundenen Laufwerke einschließlich USB-Speicher**. Du siehst Gerätenamen,
+Gesamtgröße, freien Platz, Belegung und Einhängepfad – direkt bei der SSH-Anmeldung.
+Die [Dashboard-Anleitung](docs/SSH_DASHBOARD.md) erklärt die Anzeigen.
+
 ## Weitere Anwendungen installieren
 
 Wähle Anwendungen mit **ARM64-Unterstützung**, die zur Prozessorleistung,

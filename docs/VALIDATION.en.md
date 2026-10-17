@@ -112,7 +112,7 @@ Existing hardware results and the confirmed dashboard/Bluetooth steps are separa
 | Check | Result |
 | --- | --- |
 | Relative links, images, language links in all 65 Markdown documents | passed; existing anchors in the edited documents preserved |
-| Executable Bash examples and the 21 shell scripts | 330 example blocks and 21 scripts pass `bash -n` |
+| Executable Bash examples and the 21 shell scripts | 338 example blocks and 21 scripts pass `bash -n` |
 | Existing setup tests | 16 passed; simulated APT/systemd/BlueZ |
 | Samba/dashboard manifests | all 34 entries match; changed documentation hashes refreshed |
 | Backup examples taken directly from both guides | 22 checks passed in temporary directories |
@@ -129,6 +129,9 @@ service operations were performed. The corrected compression option is `zstd --c
 These are documentation and test-environment results. The maintainer's earlier
 hardware confirmation for dashboard/Bluetooth remains recorded separately above.
 A complete run on a separate SD remains open.
+
+The added Ubuntu network-discovery guide was checked for command options,
+Bash syntax, links, and layout; no real home-network scan was performed.
 
 A reviewer with basic terminal/SSH skills should follow
 [installation](INSTALLATION.en.md) without extra verbal instructions. Preserve

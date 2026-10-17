@@ -4,9 +4,20 @@
 
 **Deutsch** | [English](SSH_DASHBOARD.en.md)
 
-Das Dashboard zeigt bei jeder SSH-Anmeldung Systeminformationen der T95:
-unter anderem Auslastung, Speicher und Laufwerke. Du brauchst keine zusätzliche
-Weboberfläche zu öffnen.
+Das per Skript installierte, benutzerdefinierte Dashboard ergänzt die
+Armbian-Anmeldeanzeige um zusätzliche Speicherinformationen. Bei jeder
+SSH-Anmeldung siehst du neben Auslastung und Arbeitsspeicher:
+
+- **`SD-Writes`:** die seit dem letzten Systemstart auf die SD-Karte geschriebene
+  Datenmenge. Nach einem Neustart beginnt dieser Zähler von vorn.
+- **Laufwerksübersicht:** die eingebundenen Dateisysteme, einschließlich der
+  angeschlossenen und gemounteten USB-Sticks, SSDs und externen Festplatten.
+  Pro Eintrag erscheinen Gerätename (etwa `sda1`), Gesamtgröße, freier Platz,
+  prozentuale Belegung und Einhängepfad (Mountpfad). Ab 90 % Belegung wird der
+  Prozentwert rot hervorgehoben.
+
+Die Übersicht wird bei einer neuen SSH-Anmeldung aktualisiert. Du brauchst
+keine zusätzliche Weboberfläche zu öffnen.
 
 [Einrichten](#einrichten) · [Prüfen](#erfolg-prüfen) · [Entfernen](#entfernen) · [Alltag](DAILY_USE.md)
 

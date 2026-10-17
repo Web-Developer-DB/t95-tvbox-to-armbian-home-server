@@ -115,6 +115,20 @@ After base installation, kernel holds, and a private SD backup:
 | Set up dashboard and player through a menu | [Shared setup](server/setup/README.en.md) |
 | Use internal eMMC for data | [Requirements for experienced users](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
 
+**File sharing tailored to the TV box's USB ports:** the Samba module uses
+regular Samba packages with a custom project configuration and USB helpers.
+Once set up, USB sticks, SSDs, external hard drives, and other USB storage
+with supported filesystems are **mounted automatically and made available
+as separate SMB network shares**. You do not need to mount them manually or
+create individual shares during everyday use.
+[Eject the drive safely](server/samba-usb/README.en.md#safely-eject-usb-storage) before unplugging it.
+
+**Dashboard with extra storage information:** the script-installed SSH dashboard
+adds the **amount written to the SD card since the last boot** and an **overview
+of mounted drives, including USB storage**, to Armbian's login display.
+Device names, total capacity, free space, usage, and mount paths appear directly
+at SSH login. The [dashboard guide](docs/SSH_DASHBOARD.en.md) explains these readings.
+
 ## Install other applications
 
 Choose **ARM64-compatible** applications that fit the box's CPU,

@@ -204,6 +204,13 @@ Rücknahme wird auf spätere Dateiänderungen geprüft. `remove --force` darf di
 Änderungen bewusst überschreiben; vorher separat sichern. Alte Journale werden
 bei Neuinstallation archiviert.
 
+Bei einem bereits installierten Dashboard ersetzt ein erneuter `install` nur
+die wechselnden Tipps durch
+die neue [USB-Kurzhilfe](../../docs/SSH_DASHBOARD.md#-usb-laufwerke-sicher-entfernen).
+Die übrigen Dashboard-Dateien und ursprünglichen Sicherungen bleiben erhalten;
+diese Aktualisierung benötigt keine erneute Paketinstallation.
+Die Kurzhilfe zeigt `usb-eject`-Befehle nur an, wenn das Werkzeug vorhanden ist.
+
 Der gemeinsame Quellcache unter `/usr/local/lib/t95-setup` und die beiden kurzen
 Befehle unter `/usr/local/bin` bleiben auch nach Rücknahme erhalten. So sind
 Status und erneute Einrichtung lokal verfügbar. Die Sicherungen enthalten
@@ -250,12 +257,16 @@ Konfiguration/Audio-Auswahl, Erhalt von Daten und schon vorhandenem Firmware-
 Alias, Rücknahme bei Dienstfehlern, begrenzte Paketentfernung, falsche Hardware
 sowie aus/an ohne Neustart und ohne Löschen der Kopplungen.
 
-Die 32 automatisierten Tests bestehen, einschließlich lokaler und
+Die 37 automatisierten Tests bestehen, einschließlich lokaler und
 heruntergeladener Einzelstarter, gemeinsamem Menü und Abbruch bei Fehlern.
 Neue Rücknahmefälle prüfen Sicherung vor Paketänderungen, private Archivrechte,
 alte MPD-Konfiguration, vorher aktive Dienste, fehlgeschlagene Stopps, falsche
 Dienst-Erfolgsmeldungen, Paketfehler, Runtime-Autostart, alte Rücknahmejournale,
 fehlendes rfkill-Paket und eine Statusabfrage ohne Dienstaktivierung.
+Die USB-Kurzhilfe wird auf deutsche/englische Ausgabe, höchstens 80 Zeichen
+pro Anzeigezeile, Ausblenden ohne Werkzeug und unterlassene Befehlsausführung
+geprüft. Weitere Fälle prüfen Ergänzung eines alten Dashboards ohne APT,
+Erhalt der ersten Sicherung, Rücknahme und Schutz manueller Änderungen.
 
 Zusätzlich wurde die neue MPD-
 Streamregel mit dem auf der Ausgangsbox installierten `pw-config` eingelesen:

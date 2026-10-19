@@ -2,9 +2,10 @@
 
 ## 2026-10-19
 
+- Hardware confirmation at `52b6be1`: exFAT eject/power-off, reconnection and Samba read/write access. Historical eject operations now show diskseq and are distinguished from the current attachment; 73 module tests pass.
 - Corrected the exFAT eject hardware finding: share definitions remain readable after the mount directory disappears; cleanup/resumption do not require an existing share target.
 - Newly created shares are confirmed individually by Samba. Malformed definitions no longer hide device/operation diagnostics; incomplete status still returns failure.
-- Regression tests model Samba definition files and disappearing mount directories; 70 Samba/USB tests pass, another hardware eject check is pending.
+- Regression tests model Samba definition files and disappearing mount directories; the first correction passed 70 tests; see the later hardware confirmation above.
 - Shared Python core for device identity, atomic mappings and locked share-name allocation.
 - Per-attachment udev guards replace stopping the automounter during eject.
 - Whole-drive eject covers all partitions, Btrfs/FUSE sources, sibling protection and resumable failures.

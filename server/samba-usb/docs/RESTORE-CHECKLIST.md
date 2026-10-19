@@ -15,13 +15,18 @@ tatsächlichen Datei-/SMB-Zugriff und keinen Auswurf. [Nachweis und Grenzen](../
 **Anschließender Auswurf fehlgeschlagen:** Bei `aef4e9f` blockierte ein nicht mehr
 als Verzeichnis lesbarer Freigabepfad Bereinigung und Statusabfrage. Wiederholung
 ohne offenes Samba-Fenster ebenfalls fehlgeschlagen. Die Korrektur ist mit
-dateibasierten Samba-Fixtures geprüft; die Auswurf-Abnahme bleibt bis zum
-erfolgreichen neuen Hardwaredurchlauf offen.
+dateibasierten Samba-Fixtures geprüft.
+
+**Wiederholung bei `52b6be1`: erfolgreich.** Der zuvor fehlgeschlagene exFAT-Auswurf
+endete mit `powered-off`, entfernter Freigabe und erloschener LED; udiskie blieb
+aktiv. Nach Wiedereinstecken wurden neue diskseq, ausgeschaltete Sperre, Mount
+und Freigabe bestätigt. Auch tatsächliches Lesen/Schreiben über Samba wurde
+bestätigt. Ein gesonderter Inhaltsvergleich ist noch nicht protokolliert.
 
 | Dateisystem | Client lesen/schreiben mit Inhaltsprüfung | Auswurf und Wiedereinstecken | Ergebnis |
 | --- | --- | --- | --- |
 | ext4 | ☐ | ☐ 20 Zyklen | Nicht geprüft |
-| exFAT | ☐ | ☐ | Nicht geprüft |
+| exFAT | Lesen/Schreiben bestätigt; Inhaltsvergleich offen | ✅ | Teilabnahme bei `52b6be1` |
 | FAT32 | ☐ | ☐ | Nicht geprüft |
 | NTFS | ☐ | ☐ | Nicht geprüft |
 | Btrfs auf einem Laufwerk mit Subvolumes | ☐ | ☐ | Nicht geprüft |
@@ -31,7 +36,10 @@ erfolgreichen neuen Hardwaredurchlauf offen.
 - [ ] Neueinrichtung; Passwortabfrage und `T95-DATA` lesen/schreiben ohne USB.
 - [x] Update einer vorhandenen Einrichtung; Sicherung angelegt und Samba-Konfiguration einschließlich eigener fester Freigaben unverändert.
 - [x] Bereits gemountete exFAT-Freigabe nach Update erkannt; Automounter aktiv und Benutzerrechte-Prüfung positiv.
-- [ ] Mit bisherigem Samba-Passwort vom Client anmelden; tatsächliches Lesen/Schreiben und Inhalt prüfen.
+- [x] Tatsächliches Lesen und Schreiben über Samba beim getesteten exFAT-Stick bestätigt.
+- [x] Fehlgeschlagenen exFAT-Auswurf nach Update fortgesetzt; Freigabe entfernt und Power-off mit erloschener LED bestätigt.
+- [x] exFAT nach Wiedereinstecken automatisch gemountet/freigegeben; neue diskseq ohne geerbte Sperre.
+- [ ] Bisheriges Samba-Passwort und Inhaltsvergleich gesondert bestätigen.
 - [ ] Vorhandene YAML-Konfiguration; ausdrücklich gewählte Projekt-JSON bestätigen.
 - [ ] A auswerfen, während B les-/schreibbar bleibt und neu angeschlossenes C eingebunden/freigegeben wird.
 - [ ] An beiden eingebauten Anschlüssen und mit versorgtem USB-Hub wiederholen.

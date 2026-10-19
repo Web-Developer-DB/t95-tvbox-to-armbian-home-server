@@ -727,6 +727,34 @@ class USBTests(unittest.TestCase):
         self.assertEqual(before, {p.name: p.read_bytes() for p in self.user.state.iterdir()})
         self.assertTrue(all(c[0] == "service" and c[1] == "is-active" for c in self.system.calls))
 
+    def test_status_marks_current_failed_operation_with_attachment_id(self):
+        name = self.ready()
+        disk = self.system.snapshot().disk('/dev/sda')
+        self.runtime.operation(disk, 'failed', {name}, 'busy')
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('diskseq=10; aktuelle Verbindung): failed; busy', output.getvalue())
+
+    def test_status_distinguishes_old_eject_from_reused_device_name(self):
+        name = self.ready()
+        self.manager.eject(name)
+        self.system.path('/sys/class/block/sda/diskseq').write_text('18')
+        self.system.mount_list.append({'target': str(self.user.base / 'sda1'), 'source': '/dev/sda1',
+                                      'maj:min': '8:1', 'fstype': 'ext4', 'fsroot': '/'})
+        self.manager.reconcile()
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('diskseq=18; Auswurfsperre=aus', output.getvalue())
+        self.assertIn('diskseq=10; frühere Verbindung): ejected', output.getvalue())
+        self.assertNotIn('aktuelle Verbindung): ejected', output.getvalue())
+
+    def test_status_marks_powered_off_removed_device_as_previous_attachment(self):
+        name = self.ready(power=True)
+        self.manager.eject(name)
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('diskseq=10; frühere Verbindung): powered-off', output.getvalue())
+
     def test_actual_net_adapter_distinguishes_empty_and_failed_queries(self):
         registry = self.real_net()
         self.assertEqual(self.manager.net.shares(), {})

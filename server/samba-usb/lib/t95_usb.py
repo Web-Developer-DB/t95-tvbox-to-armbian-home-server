@@ -944,7 +944,7 @@ class Manager:
             print(f"  FEHLER: {error}")
         for name, path in shares.items():
             print(f"  {name}: {path}")
-        seen = set()
+        seen, identities = set(), {}
         for node in snapshot.nodes.values():
             if node["type"] != "disk":
                 continue
@@ -956,6 +956,7 @@ class Manager:
             if disk.seq in seen:
                 continue
             seen.add(disk.seq)
+            identities[disk.device] = disk.identity()
             print(f"USB: {disk.device}; diskseq={disk.seq}; Auswurfsperre={'aktiv' if self.runtime.guarded(disk) else 'aus'}")
             for device in disk.nodes:
                 node = snapshot.nodes[device]
@@ -973,7 +974,11 @@ class Manager:
                 read, write, traverse = self.system.permissions(self.user, mount["target"])
                 print(f"  {mount['target']} ({mount['fstype']}); Benutzerrechte: lesen={read and traverse}, schreiben={write and traverse}")
         for operation in self.runtime.operations():
-            print(f"Vorgang {operation['device']}: {operation['phase']}; {operation.get('error') or '–'}")
+            current = identities.get(operation['device'])
+            same_attachment = current is not None and all(operation.get(k) == v for k, v in current.items())
+            connection = "aktuelle Verbindung" if same_attachment else "frühere Verbindung"
+            print(f"Vorgang {operation['device']} (diskseq={operation['diskseq']}; {connection}): "
+                  f"{operation['phase']}; {operation.get('error') or '–'}")
         print("ext4: Linux-Dateirechte gelten weiter. NTFS: dirty/hiberniert kann Mount verhindern. Keine automatische Reparatur.")
         if share_error is not None:
             raise USBError("Status unvollständig: Samba-Freigabedefinitionen konnten nicht vollständig geprüft werden") from share_error

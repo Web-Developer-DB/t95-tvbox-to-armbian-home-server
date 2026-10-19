@@ -183,6 +183,12 @@ content, mode, and owner. Repeated installation preserves the initial backup.
 Later edits block removal; save/check those files before deliberately using
 `remove --force`. Old journals are archived on reinstallation.
 
+For an installed dashboard, repeating `install` replaces rotating tips with the
+[USB quick help](../../docs/SSH_DASHBOARD.en.md#-safely-remove-usb-drives).
+Other dashboard files and their original backups are preserved;
+this update does not reinstall packages. The hint shows `usb-eject` commands
+only when the tool is available.
+
 The shared cache at `/usr/local/lib/t95-setup`, command helpers in
 `/usr/local/bin`, and private backups remain for diagnosis/reinstallation.
 By default packages remain. `remove --remove-packages` proposes only packages
@@ -213,13 +219,17 @@ python3 tools/restore-ssh-dashboard.py
 git diff --check
 ```
 
-The 32 automated tests use temporary filesystems and simulated APT/systemd/BlueZ;
+The 37 automated tests use temporary filesystems and simulated APT/systemd/BlueZ;
 they do not change PC packages or services. They cover dashboard install,
 idempotence, rollback, hashes, redirected targets, later edits, Bluetooth
 configuration/output choice, data and firmware-alias preservation, service
 failure rollback, bounded package removal, wrong hardware, offline on/off,
 individual starters, and the combined menu. Ownership changes are simulated;
 the original firmware payload is not copied into tests.
+The USB hint is checked for German/English output, at most 80 characters per
+display line, hiding without the tool and never executing shown commands.
+Other cases cover updating an old dashboard's tips without APT, preserving the first
+backup, rollback and protecting manual edits.
 
 New rollback fixtures cover backup before package mutation, private archive
 permissions, legacy MPD configuration, restoration of previously active services,

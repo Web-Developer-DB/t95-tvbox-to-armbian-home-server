@@ -39,6 +39,34 @@ USER_AUDIO_CONFIGS = [
     ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf",
 ]
 
+DASHBOARD_USB_HELP_PATH = "/etc/update-motd.d/35-armbian-tips"
+DASHBOARD_USB_HELP = r'''#!/bin/bash
+# T95 dashboard: display-only USB cheat sheet. Never execute the shown commands.
+command -v usb-eject >/dev/null 2>&1 || exit 0
+printf '\n\033[0;90m Tips:\033[0m\n'
+
+case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
+    de*)
+        printf '%s\n' '' \
+            ' USB-Laufwerke sicher entfernen' \
+            '   Status und Freigaben: sudo usb-eject --status' \
+            '   Laufwerk auswerfen:   sudo usb-eject "NAME"' \
+            '   NAME durch den Freigabenamen aus dem Status ersetzen.' \
+            '   Betrifft das ganze USB-Laufwerk mit allen Partitionen.' \
+            '   Dateiübertragungen beenden. Erst nach Erfolgsmeldung abziehen.' ''
+        ;;
+    *)
+        printf '%s\n' '' \
+            ' Safely remove USB drives' \
+            '   Status and shares: sudo usb-eject --status' \
+            '   Eject a drive:     sudo usb-eject "NAME"' \
+            '   Replace NAME with the share name shown by status.' \
+            '   Ejects the whole USB drive, including all its partitions.' \
+            '   Finish file transfers. Unplug only after the success message.' ''
+        ;;
+esac
+'''.encode('utf-8')
+
 
 def run(command, check=True, timeout=120):
     try:
@@ -404,9 +432,47 @@ class Setup:
             if fingerprint(archive / "rootfs" / p)["sha256"] != e["sha256"]:
                 raise ValueError("Dashboard-Prüfsumme falsch")
             check_destination(self.path("/" + e["path"]))
+        self.remember(self.path(DASHBOARD_USB_HELP_PATH))
         self.install_packages()
         for e in entries:
             self.write(self.path("/" + e["path"]), (archive / "rootfs" / e["path"]).read_bytes(), int(e["mode"], 8))
+        self.write(self.path(DASHBOARD_USB_HELP_PATH), DASHBOARD_USB_HELP, 0o755)
+
+    def refresh_dashboard_help(self):
+        """Add/update only the hint on existing installs, keeping the first backup."""
+        target = self.path(DASHBOARD_USB_HELP_PATH)
+        check_destination(target)
+        before = fingerprint(target)
+        record = next((r for r in self.state["files"] if r["path"] == str(target)), None)
+        if record and "installed" in record and before != record["installed"]:
+            raise ValueError("Seit Installation geänderte USB-Dashboard-Hilfe; separat sichern/prüfen")
+        if (record and before.get("sha256") == hashlib.sha256(DASHBOARD_USB_HELP).hexdigest()
+                and before.get("mode") == 0o755):
+            print("Dashboard-Tipps mit USB-Hilfe bereits installiert.")
+            return
+        previous_state = json.loads(json.dumps(self.state))
+        previous_content = target.read_bytes() if before["kind"] == "file" else None
+        self.state["phase"] = "updating"
+        self.save()
+        try:
+            self.write(target, DASHBOARD_USB_HELP, 0o755)
+            self.cache_tools()
+            self.state["phase"] = "installed"
+            self.save()
+        except (Exception, KeyboardInterrupt) as original:
+            try:
+                if before["kind"] == "file":
+                    atomic_file(target, previous_content, before["mode"], (before["uid"], before["gid"]))
+                else:
+                    target.unlink(missing_ok=True)
+                self.state = previous_state
+                self.save()
+            except Exception as rollback:
+                self.state["phase"] = "rollback-failed"
+                self.save()
+                raise RuntimeError(f"USB-Dashboard-Hilfe fehlgeschlagen: {original}; Rücknahme fehlgeschlagen: {rollback}") from rollback
+            raise
+        print("Dashboard-Tipps auf USB-Hilfe aktualisiert. Übriges Dashboard und ursprüngliche Sicherung erhalten.")
 
     def firmware_paths(self):
         base = self.path("/lib/firmware/brcm").resolve(strict=True)
@@ -710,6 +776,9 @@ audio_output {{
     def install(self, music=None):
         if not self.path("/etc/armbian-release").is_file():
             raise ValueError("Eine bestehende Armbian-Installation ist erforderlich")
+        if self.component == "dashboard" and self.state and self.state["phase"] == "installed":
+            self.refresh_dashboard_help()
+            return
         if self.component == "bluetooth":
             if not self.user:
                 raise ValueError("Für den Player --user NAME angeben")

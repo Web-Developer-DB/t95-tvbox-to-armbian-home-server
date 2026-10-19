@@ -2,9 +2,10 @@
 
 ## 2026-10-19
 
+- Hardwarebestätigung bei `52b6be1`: exFAT-Auswurf/Power-off, Wiederanstecken und Samba-Lesen/-Schreiben. Historische Auswurfvorgänge zeigen jetzt ihre diskseq und werden von der aktuellen Verbindung unterschieden; 73 Modul-Tests bestanden.
 - Hardwarebefund beim exFAT-Auswurf korrigiert: Freigabedefinitionen bleiben nach dem Entfernen des Mountordners lesbar; Bereinigung und Wiederaufnahme benötigen keinen existierenden Freigabepfad.
 - Neue Freigaben werden einzeln durch Samba bestätigt. Fehlerhafte Definitionen verhindern keine Geräte-/Vorgangsdiagnose mehr; unvollständiger Status liefert weiterhin einen Fehlerstatus.
-- Regressionstests bilden die Samba-Dateien und den verschwundenen Mountordner nach; 70 Samba-/USB-Tests bestanden, erneute Hardwareprüfung des Auswurfs offen.
+- Regressionstests bilden die Samba-Dateien und den verschwundenen Mountordner nach; erster Korrekturstand mit 70 Tests geprüft; spätere Hardwarebestätigung siehe oben.
 - Gemeinsamer Python-Kern für Geräteidentität, atomare Zuordnungen und gesperrte Namensvergabe.
 - Gerätebezogene udev-Sperre ersetzt das Stoppen des Automounters beim Auswurf.
 - Auswurf aller Partitionen mit Btrfs-/FUSE-Zuordnung, Nachbarschutz und Wiederaufnahme nach Fehlern.

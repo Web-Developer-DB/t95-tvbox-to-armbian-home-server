@@ -91,13 +91,22 @@ reference-installation evidence.
 | --- | --- | --- |
 | Documented dashboard steps | passed | Project maintainer's confirmation on 2026-10-17 |
 | Documented Bluetooth steps | passed | Project maintainer's confirmation on 2026-10-17 |
-| Setup installation, removal, and failures in a test environment | passed | 32 automated tests with simulated APT/systemd/BlueZ; updated 2026-10-19 |
+| Setup installation, removal, and failures in a test environment | passed | 37 automated tests with simulated APT/systemd/BlueZ; updated 2026-10-19 |
 
 **2026-10-19 — changed audio rollback:** configuration archives are now created
 before APT; existing legacy MPD configuration and recorded service states are
 restored. Automated fixtures cover these changes and failure/retry paths. The
 2026-10-17 hardware confirmation applies to the earlier setup behavior, not this
 new rollback. Its dedicated hardware run remains open.
+
+**2026-10-19 — dashboard USB quick help:** the setup installer replaces rotating
+Armbian tips in `/etc/update-motd.d/35-armbian-tips` with fixed USB help. Historical
+archive files remain as a reference. With `usb-eject` available, the existing
+Tips section shows status/eject commands, share-name selection,
+whole-drive scope and the required success message before unplugging. It does
+not execute these commands. Five additional setup tests cover both languages,
+line width, absent tools, upgrading existing installs without APT, backups,
+rollback and manual changes. This addition is not yet accepted on the T95.
 
 The [Samba/USB audit](SAMBA_USB_AUDIT.en.md) separately records confirmed error
 paths and filesystem limits; general USB acceptance is not a per-filesystem or
@@ -117,15 +126,17 @@ tracked separately from the confirmed steps.
 
 | Check | Status |
 | --- | --- |
-| 70 Samba/USB tests with simulated system effects | Passed; includes share definitions with missing mount directories |
-| Existing 32 setup tests | Passed |
+| 73 Samba/USB tests with simulated system effects | Passed; includes missing mount directories and historical status operations |
+| 37 setup tests including dashboard USB help | Passed |
 | udev rule syntax | Passed |
 | Package manifests: 25 Samba + 14 dashboard entries | Passed |
 | All eight audit findings addressed in code | Covered by automated tests |
 | Update of an existing T95 setup at `aef4e9f` | Confirmed on hardware; see partial acceptance below |
 | Existing fixed shares and Samba configuration after update | Unchanged; file comparison reported no differences |
 | Already mounted exFAT drive after update | Share detected; read/write permission checks passed |
-| New per-drive guard and eject on physical T95 | Eject failed at `aef4e9f`; correction tested automatically, hardware retry pending |
+| exFAT eject with power-off and resumption after failure | Confirmed on T95 at `52b6be1`; LED off, operation `powered-off` |
+| exFAT after reconnection | New diskseq, no inherited guard, automatically mounted and shared |
+| exFAT: actual Samba read/write access | Confirmed by the maintainer; separate content/checksum comparison not recorded |
 | Filesystem matrix, 20 ext4 cycles and multiple devices | Pending |
 
 **Partial acceptance on 2026-10-19, revision `aef4e9f`:** The maintainer ran
@@ -156,7 +167,23 @@ of target directory existence and continues device/operation diagnostics when
 definitions fail validation. Fifteen additional tests cover cleanup, resuming
 after update reconciliation, multiple partitions, neighbour drives, all four
 intended filesystems, power-off and file/directory security checks. All 70
-module tests and 32 setup tests pass. Corrected eject on the T95 remains unconfirmed.
+module tests and 32 setup tests passed for this correction.
+
+**Hardware retry on 2026-10-19, revision `52b6be1`: passed for the tested exFAT
+stick.** Another `--update` checked all 25 module files, created a private backup
+and reported preserved Samba configuration. Eject resumed using the original
+share name and completed with `USB-Datenträger kann entfernt werden.` Status
+reported `powered-off`, no remaining USB share and an active automounter.
+The maintainer confirmed that the LED went off. After unplugging/reconnecting,
+diskseq changed from 13 to 18; the eject guard was off, exFAT was mounted again
+and its usershare restored. Actual Samba reading and writing were then
+explicitly confirmed. No separate content/checksum comparison was provided.
+
+The old operation remained visible in status after reconnection. Status now
+shows diskseq and distinguishes current from previous attachments, covered by
+three additional tests. The display change itself is only automatically tested.
+This exFAT test does not accept ext4/FAT32/NTFS, 20 ext4 cycles, Btrfs or
+multiple-device operation.
 
 Earlier USB reference acceptance applies to the earlier scripts. It does not
 confirm the new implementation. [Audit and limits](SAMBA_USB_AUDIT.en.md) ·

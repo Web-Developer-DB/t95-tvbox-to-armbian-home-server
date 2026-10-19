@@ -15,7 +15,8 @@ simulations do not replace tests with physical storage.
 > setup update and exFAT status are partially confirmed. The originally reported
 > intermittent ext4 issue is not yet proven fixed on physical hardware.
 > The subsequent exFAT eject exposed an additional missing-mount-directory bug.
-> Its correction passes automated tests; another hardware run is pending.
+> At `52b6be1`, corrected eject/power-off, reconnection and actual Samba
+> read/write access are confirmed for the exFAT stick.
 
 [Set up Samba](../server/samba-usb/README.en.md) · [Troubleshooting](TROUBLESHOOTING.en.md#usb-drive-missing-or-busy)
 
@@ -124,13 +125,14 @@ power-off, reboot, and reinsertion.
 
 ## ✅ New USB implementation acceptance
 
-- **70 automated module tests pass:** shares/eject, parsers and update/rollback fixtures, including 15 additional cases following the hardware finding. The existing 32 dashboard/Bluetooth tests also pass.
-- **udev rule syntax verified**; runtime effect on the T95 is not yet demonstrated.
+- **73 automated module tests pass:** shares/eject, parsers and update/rollback fixtures, including 15 cases following the hardware finding and three tests for historical attachment status. All 37 setup tests, including the new dashboard USB hint, also pass.
+- **udev rule syntax verified**; guard verification completed during the confirmed exFAT eject. Other persistence/multiple-device cases remain pending.
 - **Simulations modify no physical storage or services.** They use temporary directories and system doubles.
 - **Partial T95 acceptance at `aef4e9f`:** an existing setup was updated successfully; a private backup was created, Samba configuration including custom fixed shares remained unchanged, the automounter was active and an existing exFAT share was detected with positive user permission checks. Evidence: maintainer-provided terminal output dated 2026-10-19; no file/SMB access or eject confirmed yet. [Details and limits](VALIDATION.en.md#-new-sambausb-implementation--2026-10-19).
 - **Subsequent eject at `aef4e9f` failed:** `net usershare info` refuses the query if it cannot open the share path as a directory. This blocked cleanup and status; retrying without an open Samba window failed too. The previous dictionary-only share simulation did not model this Samba check. New file-backed CLI fixtures reproduce the failure with a removed mount directory.
-- **Correction of this additional finding:** read owner/format-checked usershare definitions independently of target existence; confirm new shares individually through Samba; retain device/operation diagnostics when definition validation fails and still return failure for incomplete status. No replacement directories or blanket ignoring of query failures. Resumption after update reconciliation passes automated tests; hardware retry is pending. The underlying path check is in the [Samba parser](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/param/loadparm.c), used by info/list in the [usershare command](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/utils/net_usershare.c).
-- **Hardware pending:** client write/read with content verification for ext4, exFAT, FAT32 and NTFS; Btrfs subvolumes; 20 ext4 reconnect/eject cycles; multiple devices on both ports and with a hub; power-off and resumption.
+- **Correction of this additional finding:** read owner/format-checked usershare definitions independently of target existence; confirm new shares individually through Samba; retain device/operation diagnostics when definition validation fails and still return failure for incomplete status. No replacement directories or blanket ignoring of query failures. Resumption after update reconciliation passes automated tests and is confirmed by the exFAT hardware retry below. The underlying path check is in the [Samba parser](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/param/loadparm.c), used by info/list in the [usershare command](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/utils/net_usershare.c).
+- **Hardware retry passed at `52b6be1`:** exFAT eject resumed after update, the share was cleaned up and power-off confirmed (`powered-off`, LED off). udiskie remained active. Reconnection gave a new diskseq without a guard and restored the share. The maintainer confirmed Samba reading/writing; a separate content comparison is missing. Status now labels historical operations using diskseq.
+- **Hardware pending:** content comparison for the exFAT stick; client read/write and eject for ext4, FAT32 and NTFS; Btrfs subvolumes; 20 ext4 reconnect/eject cycles; multiple devices on both ports and with a hub; unsupported power-off and additional interruption cases.
 
 The [acceptance checklist](../server/samba-usb/docs/RESTORE-CHECKLIST.en.md)
 tracks these cases separately. Mark hardware cases passed only after executing

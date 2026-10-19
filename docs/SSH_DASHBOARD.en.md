@@ -14,6 +14,7 @@ login display. At each SSH login, alongside load and memory information, you see
 | ✍️ **`SD-Writes`** | Amount written to SD since the last boot; starts over after a reboot. |
 | 🔌 **Drives** | Mounted filesystems, including mounted USB sticks, SSDs, and hard drives: device name (e.g. `sda1`) and mount path. |
 | 📊 **Storage** | Total capacity, free space, and usage per filesystem; **90% or more** is highlighted in red. |
+| ⏏️ **Tips: USB quick help** | Replaces rotating promotions: when `usb-eject` is installed, shows status, eject by share name and safe-unplug guidance. |
 
 The overview refreshes at a new SSH login. You do not need a separate web interface.
 
@@ -89,6 +90,42 @@ values and available drives vary.
 The dashboard appears automatically at later SSH logins. It does not continuously
 refresh an already open window. Continue with normal shell commands after the display.
 
+### ⏏️ Safely remove USB drives
+
+With the [Samba/USB extension](../server/samba-usb/README.en.md) installed,
+the existing **Tips** section shows this fixed quick reference at the next
+SSH login, replacing rotating Armbian recommendations:
+
+```text
+Safely remove USB drives
+  Status and shares: sudo usb-eject --status
+  Eject a drive:     sudo usb-eject "NAME"
+  Replace NAME with the share name shown by status.
+  Ejects the whole USB drive, including all its partitions.
+  Finish file transfers. Unplug only after the success message.
+```
+
+The display does not run these commands. It stays hidden without `usb-eject`.
+German or English follows the login session's language.
+[Eject and success messages](../server/samba-usb/README.en.md#safely-eject-usb-storage).
+
+**Add to an existing dashboard:** rerun the current dashboard launcher or use
+a current repository copy from its root directory:
+
+**On the T95, normal SSH user with `sudo`:**
+
+```bash
+sudo python3 server/setup/t95_setup.py dashboard install --user "$(id -un)"
+```
+
+For an already recorded installation this adds/updates only the USB help.
+Other dashboard files, custom settings and the original backup are preserved;
+no packages are reinstalled for this update. Manual changes to the managed
+hint are reported. Log in again and use `t95-dashboard status` to check the
+managed files. The new display is automatically tested; the
+[earlier hardware confirmation](VALIDATION.en.md#dashboard-and-bluetooth)
+still applies to the previously tested dashboard version.
+
 <a id="remove"></a>
 
 ## ↩️ Remove
@@ -149,6 +186,12 @@ upgrade counts are snapshots and are recalculated on later logins.
 
 `manifest.json` records destinations, modes, and hashes; `SHA256SUMS` checks
 the same payloads. Keep unredacted captures, credentials, and private keys private.
+
+The current setup installer uses `/etc/update-motd.d/35-armbian-tips` for
+USB help. The 14 historical source files remain archived as a reference;
+their capture still shows the former tips. The setup journal preserves the
+original tips file and restores it on `remove`. For an older recorded
+installation, setup updates only this tips component.
 
 The launcher installs display/system packages via APT and preserves its
 first backup at `/var/lib/t95-setup/dashboard`. Reinstalling does not replace

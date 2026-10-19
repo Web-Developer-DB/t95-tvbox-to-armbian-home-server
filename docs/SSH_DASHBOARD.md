@@ -15,6 +15,7 @@ SSH-Anmeldung siehst du neben Auslastung und Arbeitsspeicher:
 | ✍️ **`SD-Writes`** | Seit dem letzten Start auf die SD geschriebene Datenmenge; beginnt nach einem Neustart von vorn. |
 | 🔌 **Laufwerke** | Eingebundene Dateisysteme, auch gemountete USB-Sticks, SSDs und Festplatten: Gerätename (z. B. `sda1`) und Einhängepfad (Mountpfad). |
 | 📊 **Speicherplatz** | Gesamtgröße, freier Platz und Belegung pro Dateisystem; **ab 90 %** wird der Prozentwert rot. |
+| ⏏️ **Tipps: USB-Kurzhilfe** | Ersetzt die wechselnden Werbetipps: bei installiertem `usb-eject` Statusbefehl, Auswurf nach Freigabenamen und Hinweis zum sicheren Abziehen. |
 
 Die Übersicht wird bei einer neuen SSH-Anmeldung aktualisiert. Du brauchst
 keine zusätzliche Weboberfläche zu öffnen.
@@ -95,6 +96,43 @@ Das Dashboard erscheint automatisch bei späteren SSH-Anmeldungen. Ein laufendes
 Fenster wird dadurch nicht ständig aktualisiert. Für normales Arbeiten kannst
 du nach der Anzeige deine weiteren Befehle eingeben.
 
+### ⏏️ USB-Laufwerke sicher entfernen
+
+Ist die [Samba-/USB-Erweiterung](../server/samba-usb/README.md) installiert,
+steht beim nächsten SSH-Login im vorhandenen Bereich **Tips** diese feste
+Kurzhilfe anstelle der wechselnden Armbian-Empfehlungen:
+
+```text
+USB-Laufwerke sicher entfernen
+  Status und Freigaben: sudo usb-eject --status
+  Laufwerk auswerfen:   sudo usb-eject "NAME"
+  NAME durch den Freigabenamen aus dem Status ersetzen.
+  Betrifft das ganze USB-Laufwerk mit allen Partitionen.
+  Dateiübertragungen beenden. Erst nach Erfolgsmeldung abziehen.
+```
+
+Die Anzeige führt diese Befehle nicht aus. Ohne installiertes `usb-eject`
+bleibt sie verborgen. Deutsch oder Englisch richtet sich nach der Sprache der
+Anmeldesitzung. [Auswurf und Erfolgsmeldungen](../server/samba-usb/README.md#usb-sicher-auswerfen).
+
+**Vorhandenes Dashboard ergänzen:** Den aktuellen Dashboard-Starter erneut
+ausführen oder aus einer aktuellen Repository-Kopie im Hauptverzeichnis:
+
+**Auf der T95, normaler SSH-Benutzer mit `sudo`:**
+
+```bash
+sudo python3 server/setup/t95_setup.py dashboard install --user "$(id -un)"
+```
+
+Bei einer bereits protokollierten Installation ergänzt/aktualisiert dies nur
+die USB-Kurzhilfe. Die übrigen Dashboard-Dateien, eigene Einstellungen und die
+ursprüngliche Sicherung bleiben erhalten; dafür werden keine Pakete erneut
+installiert. Manuelle Änderungen an der bereits verwalteten Kurzhilfe werden
+gemeldet. Danach neu per SSH anmelden; `t95-dashboard status` kontrolliert die
+verwalteten Dateien. Die neue Anzeige ist automatisiert geprüft; die
+[bisherige Hardwarebestätigung](VALIDATION.md#dashboard-und-bluetooth) gilt
+weiter für den zuvor getesteten Dashboard-Stand.
+
 <a id="entfernen"></a>
 
 ## ↩️ Entfernen
@@ -146,6 +184,13 @@ Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [
 | `/usr/lib/armbian/armbian-allwinner-battery` | Vom Systeminfo-Baustein gelesene Hilfsfunktionen |
 
 `manifest.json` ist die maschinenlesbare Grundlage für eine eigene Ein-Klick-Oberfläche: relatives Ziel, Modus und SHA-256 je Datei. `SHA256SUMS` prüft dieselben Dateien mit Standardwerkzeugen. Das bereits vorhandene Wiederherstellungswerkzeug verwendet dieses Manifest.
+
+Der aktuelle Setup-Installer verwendet `/etc/update-motd.d/35-armbian-tips`
+für die USB-Kurzhilfe. Die 14 Quelldateien im historischen Archiv bleiben als
+Referenz erhalten; dessen Mitschnitt zeigt deshalb noch die damaligen Tipps.
+Die ursprüngliche Tipps-Datei wird über das Setup-Journal gesichert und bei
+`remove` wiederhergestellt. Bei einer älteren protokollierten Installation
+aktualisiert das Setup nur diesen Tipps-Baustein.
 
 Der Starter installiert die benötigten Anzeige-/Systemwerkzeuge über APT und
 führt das erste Installationsbackup unter `/var/lib/t95-setup/dashboard`.

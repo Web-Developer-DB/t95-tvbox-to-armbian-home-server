@@ -92,13 +92,23 @@ Setup-Tests und die bisherigen Funktionsnachweise der Referenzinstallation.
 | --- | --- | --- |
 | Dokumentierte Dashboard-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
 | Dokumentierte Bluetooth-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
-| Setup-Installation, Rücknahme und Fehlerfälle in Testumgebung | bestanden | 32 automatisierte Tests mit simuliertem APT/systemd/BlueZ; Stand 19.10.2026 |
+| Setup-Installation, Rücknahme und Fehlerfälle in Testumgebung | bestanden | 37 automatisierte Tests mit simuliertem APT/systemd/BlueZ; Stand 19.10.2026 |
 
 **19.10.2026 — geänderte Audio-Rücknahme:** Konfigurationsarchive entstehen jetzt
 vor APT; alte MPD-Konfiguration und gespeicherte Dienstzustände werden wiederhergestellt.
 Automatisierte Fixtures prüfen dies einschließlich Fehlern und Wiederaufnahme.
 Die Hardwarebestätigung vom 17.10.2026 gilt für das frühere Setup-Verhalten,
 nicht für diese neue Rücknahme. Ihr eigener Hardwaredurchlauf ist noch offen.
+
+**19.10.2026 — USB-Kurzhilfe im Dashboard:** Der Setup-Installer ersetzt die
+wechselnden Armbian-Tipps in `/etc/update-motd.d/35-armbian-tips` durch eine
+feste USB-Kurzhilfe. Die historischen Archivdateien bleiben als Referenz erhalten.
+Bei vorhandenem `usb-eject` zeigt der vorhandene Tipps-Bereich Status-/Auswurfbefehl,
+Freigabenamen, Geltung für alle Partitionen und die nötige Erfolgsmeldung vor
+dem Abziehen. Die Anzeige läuft ohne Ausführung dieser Befehle. Fünf zusätzliche
+Setup-Tests prüfen Ausgabe in beiden Sprachen, Zeilenbreite, fehlendes Werkzeug,
+Ergänzung bestehender Installationen ohne APT, Sicherung, Rücknahme und
+manuelle Änderungen. Die Ergänzung ist noch nicht auf der T95 abgenommen.
 
 Der [Samba-/USB-Audit](SAMBA_USB_AUDIT.md) hält separat bestätigte Fehlerpfade und
 Dateisystemgrenzen fest. Die allgemeine USB-Abnahme ist keine Zertifizierung
@@ -118,15 +128,17 @@ Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten gefü
 
 | Prüfung | Stand |
 | --- | --- |
-| 70 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden; einschließlich Freigabedateien ohne Mountordner |
-| Bisherige 32 Setup-Tests | Bestanden |
+| 73 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden; einschließlich Freigabedateien ohne Mountordner und historischer Statusvorgänge |
+| 37 Setup-Tests einschließlich USB-Dashboard-Hilfe | Bestanden |
 | udev-Regel: Syntax | Bestanden |
 | Paketmanifeste: 25 Samba- und 14 Dashboard-Einträge | Bestanden |
 | Alle acht Auditbefunde im Code bearbeitet | Automatisiert abgesichert |
 | Update einer vorhandenen T95-Einrichtung bei `aef4e9f` | Auf Hardware bestätigt; siehe Teilabnahme unten |
 | Bestehende feste Freigaben und Samba-Konfiguration nach Update | Unverändert; Dateivergleich ohne Unterschiede |
 | Bereits gemountetes exFAT-Laufwerk nach Update | Freigabe erkannt; Rechteprüfung für Lesen/Schreiben positiv |
-| Neue Geräte-Sperre und Auswurf auf echter T95 | Auswurf bei `aef4e9f` fehlgeschlagen; Korrektur automatisiert geprüft, erneuter Hardwaretest offen |
+| exFAT-Auswurf mit Abschaltung und Wiederaufnahme nach Fehler | Bei `52b6be1` auf T95 bestätigt; LED aus, Vorgang `powered-off` |
+| exFAT nach Wiedereinstecken | Neue diskseq, keine geerbte Sperre, automatisch gemountet und freigegeben |
+| exFAT: tatsächliches Lesen/Schreiben über Samba | Vom Projektbetreiber bestätigt; separater Inhalts-/Prüfsummenvergleich nicht protokolliert |
 | Dateisystemmatrix, 20 ext4-Zyklen und Mehrgerätebetrieb | Offen |
 
 **Teilabnahme am 19.10.2026, Revision `aef4e9f`:** Der Projektbetreiber hat
@@ -159,7 +171,25 @@ fehlerhaften Definitionen weiter an. 15 zusätzliche Tests prüfen unter anderem
 Bereinigung, Wiederaufnahme nach Update-Abgleich, mehrere Partitionen,
 Nachbarlaufwerke, alle vier vorgesehenen Dateisysteme, Power-off sowie
 Datei-/Verzeichnis-Sicherheitsprüfungen. Insgesamt bestehen 70 Modul- und 32
-Setup-Tests. Der korrigierte Auswurf ist noch nicht auf der T95 bestätigt.
+Setup-Tests bestanden für diese Korrektur.
+
+**Hardware-Wiederholung am 19.10.2026, Revision `52b6be1`: bestanden für den
+getesteten exFAT-Stick.** Das erneute `--update` prüfte alle 25 Moduldateien,
+legte eine private Sicherung an und meldete erhaltene Samba-Konfiguration.
+Der zuvor fehlgeschlagene Auswurf konnte mit dem bisherigen Freigabenamen
+fortgesetzt werden. Er endete mit `USB-Datenträger kann entfernt werden.`;
+der Status zeigte `powered-off`, keine verbleibende USB-Freigabe und einen
+weiterhin aktiven Automounter. Der Projektbetreiber bestätigte die erloschene LED.
+Nach Abziehen und Wiedereinstecken wechselte die diskseq von 13 auf 18; die
+Auswurfsperre war aus, exFAT wurde wieder gemountet und als Usershare angeboten.
+Lesen und Schreiben über Samba wurden anschließend ausdrücklich bestätigt.
+Ein gesonderter Inhalts-/Prüfsummenvergleich wurde nicht übermittelt.
+
+Der Status des älteren Vorgangs blieb nach dem Wiedereinstecken sichtbar.
+Die Anzeige nennt deshalb jetzt die diskseq und unterscheidet aktuelle von
+früheren Geräteverbindungen; drei zusätzliche Tests sichern diese Zuordnung ab.
+Die Statusdarstellung selbst ist bisher automatisiert geprüft. ext4/FAT32/NTFS,
+20 ext4-Zyklen, Btrfs und Mehrgerätebetrieb sind durch diesen exFAT-Test nicht abgenommen.
 
 Die frühere USB-Referenzabnahme bestätigt die damaligen Skripte. Die neue
 Implementierung übernimmt diese Bestätigung nicht. [Audit und Testgrenzen](SAMBA_USB_AUDIT.md) ·

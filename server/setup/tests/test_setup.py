@@ -170,6 +170,7 @@ class SetupTests(unittest.TestCase):
         manager = self.manager("dashboard")
         manager.install()
         self.assertEqual(len(manager.state["files"]), 14)
+        self.assertEqual(self.root.joinpath(setup.DASHBOARD_USB_HELP_PATH.lstrip('/')).read_bytes(), setup.DASHBOARD_USB_HELP)
         baseline = manager.state_file.read_bytes()
         self.backend.calls.clear()
         manager.install()
@@ -181,6 +182,99 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(setup.fingerprint(before), original)
         self.assertEqual(extra.read_text(), "other module\n")
         self.assertFalse((self.root / "etc/update-motd.d/95-sd-card-stats").exists())
+        self.assertFalse(self.root.joinpath(setup.DASHBOARD_USB_HELP_PATH.lstrip('/')).exists())
+
+    def old_dashboard(self):
+        manager = self.manager('dashboard')
+        manager.install()
+        target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
+        archived = setup.SOURCE / 'server/ssh-dashboard/2026-10-16/rootfs' / setup.DASHBOARD_USB_HELP_PATH.lstrip('/')
+        target.write_bytes(archived.read_bytes())
+        record = next(r for r in manager.state['files'] if r['path'] == str(target))
+        record['installed'] = setup.fingerprint(target)
+        manager.save()
+        self.backend.calls.clear()
+        return manager, target
+
+    def test_existing_dashboard_gets_usb_hint_without_reinstalling_or_replacing_backup(self):
+        manager, target = self.old_dashboard()
+        original_records = json.loads(json.dumps(manager.state['files']))
+        original_packages = list(manager.state['new_packages'])
+        custom = self.root / 'etc/default/armbian-motd'
+        custom.write_text('custom dashboard setting\n')
+        manager.install()
+        self.assertEqual(len(manager.state['files']), 14)
+        for current, original in zip(manager.state['files'], original_records):
+            self.assertEqual(current['before'], original['before'])
+            self.assertEqual(current.get('backup'), original.get('backup'))
+            if current['path'] != str(target):
+                self.assertEqual(current, original)
+        self.assertEqual(manager.state['new_packages'], original_packages)
+        self.assertEqual(custom.read_text(), 'custom dashboard setting\n')
+        self.assertEqual(target.read_bytes(), setup.DASHBOARD_USB_HELP)
+        self.assertFalse(any(c[0] == 'apt-get' for c in self.backend.calls))
+
+    def test_dashboard_hint_update_restores_existing_foreign_hint_on_removal(self):
+        manager = self.manager('dashboard')
+        target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
+        target.parent.mkdir(parents=True)
+        target.write_text('previous hint\n')
+        target.chmod(0o640)
+        before = setup.fingerprint(target)
+        manager.install()
+        manager.remove()
+        self.assertEqual(setup.fingerprint(target), before)
+        self.assertEqual(target.read_text(), 'previous hint\n')
+
+    def test_dashboard_hint_manual_edit_is_not_overwritten_by_repeat_install(self):
+        manager = self.manager('dashboard')
+        manager.install()
+        target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
+        target.write_text('manual hint\n')
+        original = manager.state_file.read_bytes()
+        with self.assertRaisesRegex(ValueError, 'geänderte USB-Dashboard-Hilfe'):
+            manager.install()
+        self.assertEqual(target.read_text(), 'manual hint\n')
+        self.assertEqual(manager.state_file.read_bytes(), original)
+
+    def test_dashboard_hint_failed_update_leaves_existing_dashboard_and_journal_intact(self):
+        manager, target = self.old_dashboard()
+        original = manager.state_file.read_bytes()
+        existing = {r['path']: Path(r['path']).read_bytes() for r in manager.state['files']}
+        with patch.object(manager, 'cache_tools', side_effect=OSError('simulated cache failure')):
+            with self.assertRaises(OSError): manager.install()
+        self.assertTrue(target.exists())
+        self.assertEqual(manager.state_file.read_bytes(), original)
+        self.assertEqual(existing, {p: Path(p).read_bytes() for p in existing})
+
+    def test_dashboard_hint_is_quiet_without_usb_tool_and_never_executes_it(self):
+        script = self.root / 'hint.sh'
+        script.write_bytes(setup.DASHBOARD_USB_HELP)
+        syntax = subprocess.run(['/bin/bash', '-n', str(script)], capture_output=True, text=True)
+        self.assertEqual(syntax.returncode, 0, syntax.stderr)
+        binaries = self.root / 'bin'
+        binaries.mkdir()
+        marker = self.root / 'must-not-exist'
+        env = {'PATH': str(binaries), 'LANG': 'C', 'T95_TEST_MARKER': str(marker)}
+        result = subprocess.run(['/bin/bash', str(script)], env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, '')
+        executable = binaries / 'usb-eject'
+        executable.write_text('#!/bin/sh\n: > "$T95_TEST_MARKER"\nexit 99\n')
+        executable.chmod(0o755)
+        for locale, label in [('C', 'Safely remove USB drives'), ('de_DE.UTF-8', 'USB-Laufwerke sicher entfernen')]:
+            with self.subTest(locale=locale):
+                env['LANG'] = locale
+                result = subprocess.run(['/bin/bash', str(script)], env=env, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(label, result.stdout)
+                self.assertIn('sudo usb-eject --status', result.stdout)
+                self.assertIn('sudo usb-eject "NAME"', result.stdout)
+                self.assertIn('Tips:', result.stdout)
+                self.assertNotIn('Imager', result.stdout)
+                self.assertNotIn('Proxmox', result.stdout)
+                self.assertTrue(all(len(line) <= 80 for line in result.stdout.splitlines()))
+                self.assertFalse(marker.exists())
 
     def test_dashboard_tampered_payload_refused_before_apt(self):
         source = self.root / "payload"

@@ -14,13 +14,18 @@ access or eject. [Evidence and limits](../../../docs/VALIDATION.en.md#-new-samba
 
 **Subsequent eject failed:** at `aef4e9f`, a share path no longer accessible as
 a directory blocked cleanup and status. Retrying without an open Samba window
-also failed. The correction is covered by file-backed Samba fixtures; eject
-acceptance remains pending until a successful new hardware run.
+also failed. The correction is covered by file-backed Samba fixtures.
+
+**Retry at `52b6be1`: passed.** The failed exFAT eject resumed and completed
+with `powered-off`, removed share and LED off; udiskie remained active.
+Reconnection confirmed a new diskseq, no inherited guard, mount and share.
+Actual Samba reading/writing was also confirmed. A separate content comparison
+is not yet recorded.
 
 | Filesystem | Client read/write with content verification | Eject and reconnect | Result |
 | --- | --- | --- | --- |
 | ext4 | ☐ | ☐ 20 cycles | Not tested |
-| exFAT | ☐ | ☐ | Not tested |
+| exFAT | Read/write confirmed; content comparison pending | ✅ | Partial acceptance at `52b6be1` |
 | FAT32 | ☐ | ☐ | Not tested |
 | NTFS | ☐ | ☐ | Not tested |
 | Single-drive Btrfs with subvolumes | ☐ | ☐ | Not tested |
@@ -30,7 +35,10 @@ acceptance remains pending until a successful new hardware run.
 - [ ] Fresh setup; password prompt and `T95-DATA` read/write without USB.
 - [x] Update an existing setup; backup created and Samba configuration including custom fixed shares unchanged.
 - [x] Already mounted exFAT share detected after update; automounter active and user permission checks passed.
-- [ ] Authenticate from a client with the existing Samba password; verify actual read/write access and file contents.
+- [x] Actual Samba reading and writing confirmed for the tested exFAT stick.
+- [x] Failed exFAT eject resumed after update; share removed and power-off confirmed by LED off.
+- [x] Reconnected exFAT automatically mounted/shared; new diskseq without inherited guard.
+- [ ] Separately confirm the existing Samba password and content comparison.
 - [ ] Existing YAML configuration; confirm the explicit project JSON is selected.
 - [ ] Drive A ejects while B stays readable/writable and newly attached C is mounted/shared.
 - [ ] Repeat on both built-in ports and with a powered USB hub.

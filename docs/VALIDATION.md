@@ -114,6 +114,22 @@ Für diese Prüfungen die funktionierende Produktiv-SD als Rückweg erhalten.
 Die Rückmeldung enthält keine Angaben zu einer Ersatz-SD oder diesen
 Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten geführt.
 
+## 🔌 Neue Samba-/USB-Verwaltung — 19.10.2026
+
+| Prüfung | Stand |
+| --- | --- |
+| 55 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden |
+| Bisherige 32 Setup-Tests | Bestanden |
+| udev-Regel: Syntax | Bestanden |
+| Paketmanifeste: 25 Samba- und 14 Dashboard-Einträge | Bestanden |
+| Alle acht Auditbefunde im Code bearbeitet | Automatisiert abgesichert |
+| Neue Geräte-Sperre und Auswurf auf echter T95 | Offen |
+| Dateisystemmatrix, 20 ext4-Zyklen und Mehrgerätebetrieb | Offen |
+
+Die frühere USB-Referenzabnahme bestätigt die damaligen Skripte. Die neue
+Implementierung übernimmt diese Bestätigung nicht. [Audit und Testgrenzen](SAMBA_USB_AUDIT.md) ·
+[Hardwarecheckliste](../server/samba-usb/docs/RESTORE-CHECKLIST.md).
+
 <a id="optionale-weiterentwicklung"></a>
 
 ## 🔭 Optionale Weiterentwicklung

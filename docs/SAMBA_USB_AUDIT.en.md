@@ -9,10 +9,10 @@ event hook, safe eject, and audio rollback. Source inspection and isolated
 simulations do not replace tests with physical storage.
 
 > [!IMPORTANT]
-> **Result:** the normal path is understandable, but errors and concurrent
-> events are not fully handled. A promise of support for every filesystem
-> would not be justified. These Samba findings remain open; this audit does
-> not modify the USB scripts.
+> **Fix status, 2026-10-19:** all eight findings are addressed in code and covered
+> by automated tests. Eject is now per-drive; udiskie keeps running.
+> **Hardware acceptance of this version is pending.** The originally reported
+> intermittent ext4 issue is not yet proven fixed on physical hardware.
 
 [Set up Samba](../server/samba-usb/README.en.md) · [Troubleshooting](TROUBLESHOOTING.en.md#usb-drive-missing-or-busy)
 
@@ -36,33 +36,33 @@ and an unambiguously identified volume.
 
 <a id="open-sambausb-findings"></a>
 
-## 🛠️ Open Samba/USB findings
+## 🛠️ Samba/USB findings and fix status
 
-| Priority | Finding | Impact and proposed correction |
-| --- | --- | --- |
-| High | `usb-eject` treats every power-off failure as unsupported power-off | Restarting udiskie may remount the still-attached volume after the script says it is safe to unplug. Distinguish errors, verify final mounts, and prevent remount until removal. |
-| High | Device-enumeration failure disappears inside process substitution | If partition enumeration fails, the loop can be empty, yet shares/state are removed and a success message may follow. Check output and exit status first. |
-| High | Automounter restart errors are hidden by `|| true` | Successful exit can leave udiskie stopped, preventing later automounts. Check restart outcome and report failure. |
-| Medium | Share-name allocation and state updates lack a common lock | Simultaneous mount events can select the same free name, after which `net usershare add` replaces a mapping. Serialize allocation, publication, and state writing. |
-| Medium | udiskie starts without an explicit configuration file | An existing `config.yml` takes precedence over the installed `config.json`, changing automount and hook behavior. Select the project config explicitly and back up existing settings. |
-| Medium | `enable --now` does not reload an already running udiskie process | Repeating setup can retain the old process/configuration. Restart deliberately and reconcile existing mounts. |
-| Medium | Failed Samba query prevents the intended state fallback | `set -e` with `pipefail` aborts `MOUNTPOINT=...` before fallback. Handle query failure explicitly; distinguish this from a successful empty result. |
-| Medium | Btrfs subvolume source is passed as a block-device name | A source such as `/dev/sda1[/@]` is unsuitable for `lsblk`. Use `--nofsroot` or another unambiguous device identity. |
+| Original finding | Code correction | Automated | Hardware |
+| --- | --- | --- | --- |
+| Every power-off error treated as unsupported | Distinguish errors; per-drive guard and final checks | Passed | Pending |
+| Enumeration failure lost | Structured inventory; errors/empty inventory prevent unsafe steps | Passed | Pending |
+| Automounter restart error hidden | No automounter stop/start during eject; other drives keep working | Passed | Pending |
+| Concurrent share names collide | Short common lock, reserved names and atomic JSON state | Passed | Pending |
+| YAML overrides project JSON | Explicit service config path; existing files backed up | Passed | Pending |
+| Repeated setup retains old running config | Deliberate restart and reconciliation of existing mounts | Passed | Pending |
+| Samba error prevents state fallback | Explicit error handling; only validated current mappings accepted | Passed | Pending |
+| Btrfs source suffix is unsuitable as a device | Resolve block source without FSROOT suffix; handle anonymous Btrfs/FUSE mount numbers | Passed | Pending |
 
-Affected locations:
+Additional coverage includes all partitions/shares of a physical drive,
+interruption/resumption, reused names, foreign mounts and sibling drives.
+Share names remain reserved during eject. Repeated events do not rewrite
+unchanged mappings to SD.
 
-- [usb-eject](../server/samba-usb/scripts/usb-eject): Samba query 46–50,
-  source selection 87–102, restart 125–130, enumeration 144–161, power-off 181–194.
-- [t95-usb-share](../server/samba-usb/scripts/t95-usb-share): allocation 122–157;
-  cleanup and state updates have no shared lock.
-- [udiskie service](../server/samba-usb/config/systemd-user/udiskie.service):
-  launch without `--config`.
-- [Samba installer](../server/samba-usb/scripts/restore-samba-usb-setup.sh):
-  configuration copy followed by `enable --now` only.
+Implementation: [shared core](../server/samba-usb/lib/t95_usb.py),
+[installer](../server/samba-usb/lib/t95_install.py),
+[udev rule](../server/samba-usb/config/udev/99-t95-usb-eject.rules), and
+[regression tests](../server/samba-usb/tests/test_usb.py).
+Existing shell entry points remain available.
 
-The [udiskie 2.5.7 source](https://github.com/coldfix/udiskie/tree/v2.5.7) confirms
-YAML precedence, asynchronous hooks, and startup mounting of available media.
-The remount simulation models that behavior. Frequency on the T95 was not measured.
+The [udiskie 2.5.7 source](https://github.com/coldfix/udiskie/tree/v2.5.7) documents
+the underlying config selection and device hints. The new per-drive guard still
+needs practical acceptance on the T95.
 
 <a id="filesystem-boundaries"></a>
 
@@ -73,7 +73,7 @@ The remount simulation models that behavior. Frequency on the T95 was not measur
 | ext4 | No explicit hook rejection. Stored UID/GID, modes, and ACLs still apply; share ACLs do not override Unix permissions. The reported intermittent mount failure remains open without its own logs. |
 | exFAT / FAT | Driver and volume state govern mounting. Ownership/mask options differ from ext4; filename and file-size limits still apply. |
 | NTFS | UDisks may select `ntfs3` even with `ntfs-3g` installed. Dirty or unclean volumes must not be handled by a blanket force-mount fallback. |
-| Btrfs subvolumes | Mounting may work while the current eject source handling fails. |
+| Btrfs subvolumes | Block sources and anonymous mount device numbers are handled for one physical drive; hardware acceptance remains pending. |
 | LUKS, LVM, RAID, other paths | The hook rejects `/dev/mapper/*` and `/dev/dm-*`. Unlocking, mapper resolution, and complex disk topologies are outside the promised scope. |
 
 UDisks documents its [filesystem-specific mount options](https://storaged.org/udisks/docs/mount_options.html).
@@ -99,6 +99,8 @@ of this changed rollback remains outstanding.
 
 ## 🧪 Method and limits
 
+**Baseline audit at `4f97a5d`, before the fixes:** the following records describe the original inspection. Current regression results are listed separately below.
+
 - All three Samba shell scripts pass `bash -n`; udiskie JSON parses correctly.
 - All 20 Samba and 14 dashboard checksums matched at the audited baseline.
 - The existing 16 setup tests passed; they cover dashboard/Bluetooth rather
@@ -114,3 +116,18 @@ of this changed rollback remains outstanding.
 Hardware acceptance still needs client read/write checks per filesystem,
 multiple partitions, simultaneous events, eject with files open, unsupported
 power-off, reboot, and reinsertion.
+
+<a id="new-usb-implementation-acceptance"></a>
+
+## ✅ New USB implementation acceptance
+
+- **55 new automated tests pass:** shares/eject, parsers and update/rollback fixtures. The existing 32 dashboard/Bluetooth tests also pass.
+- **udev rule syntax verified**; runtime effect on the T95 is not yet demonstrated.
+- **No physical storage or services modified.** Simulations use temporary directories and system doubles.
+- **Hardware pending:** client write/read with content verification for ext4, exFAT, FAT32 and NTFS; Btrfs subvolumes; 20 ext4 reconnect/eject cycles; multiple devices on both ports and with a hub; power-off and resumption.
+
+The [acceptance checklist](../server/samba-usb/docs/RESTORE-CHECKLIST.en.md)
+tracks these cases separately. Mark hardware cases passed only after executing
+them. [Update guide](../server/samba-usb/README.en.md#update-an-existing-setup).
+
+<a id="-open-sambausb-findings"></a>

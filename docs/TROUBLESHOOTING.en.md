@@ -182,7 +182,7 @@ problems, continue below.
 **Expected:** write and read a small file from the client. See
 [Samba verification](../server/samba-usb/README.en.md#verify-after-installation)
 for further checks. Reinstalling the module replaces its Samba configuration;
-it is not the first diagnostic step.
+it is not the first diagnostic step. The [update mode](../server/samba-usb/README.en.md#update-an-existing-setup) preserves existing Samba configuration.
 
 <a id="usb-drive-missing-or-busy"></a>
 
@@ -191,6 +191,7 @@ it is not the first diagnostic step.
 **On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
+sudo usb-eject --status
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
 sudo -u "$(id -un)" net usershare list
 sudo journalctl -t T95-USB-SHARE --no-pager -n 30
@@ -223,7 +224,7 @@ leave the USB directory. Retry ejection. Do not force unmount or unplug
 during writes.
 
 **Expected:** unplug only after successful ejection. Reinsertion creates the
-share again. Further help: [Samba/USB troubleshooting](../server/samba-usb/docs/TROUBLESHOOTING.en.md).
+share again. During eject, other drives continue automounting; a failed/partial eject can be retried. Further help: [Samba/USB troubleshooting](../server/samba-usb/docs/TROUBLESHOOTING.en.md).
 
 <a id="dashboard-or-bluetooth-fails"></a>
 

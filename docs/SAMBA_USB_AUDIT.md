@@ -9,10 +9,11 @@ udiskie-Konfiguration, Event-Hook, sichere Entfernung und Audio-Rücknahme.
 Quellprüfung und isolierte Simulationen ersetzen keinen Datenträgertest.
 
 > [!IMPORTANT]
-> **Ergebnis:** Der normale Ablauf ist nachvollziehbar, Fehlerpfade und
-> gleichzeitige Ereignisse sind aber nicht durchgehend abgesichert. Eine
-> Zusage „funktioniert mit jedem Dateisystem“ wäre nicht gerechtfertigt.
-> Die folgenden Samba-Befunde sind offen; dieser Audit ändert die USB-Skripte nicht.
+> **Korrekturstand 19.10.2026:** Alle acht Befunde sind im Code bearbeitet und
+> durch automatisierte Tests abgesichert. Der Auswurf arbeitet jetzt je Laufwerk;
+> udiskie bleibt aktiv. **Die Hardware-Abnahme dieser Version steht noch aus.**
+> Der ursprüngliche sporadische ext4-Fehler ist damit noch nicht auf echter
+> Hardware als behoben nachgewiesen.
 
 [Samba einrichten](../server/samba-usb/README.md) · [Fehlerhilfe](TROUBLESHOOTING.md#usb-laufwerk-fehlt-oder-ist-belegt)
 
@@ -37,34 +38,34 @@ Schritt mit Datensicherung und eindeutig identifiziertem Medium.
 
 <a id="offene-samba-usb-befunde"></a>
 
-## 🛠️ Offene Samba-/USB-Befunde
+## 🛠️ Samba-/USB-Befunde und Korrekturstand
 
-| Priorität | Befund | Auswirkung und Korrekturvorschlag |
-| --- | --- | --- |
-| Hoch | `usb-eject` behandelt jeden Power-off-Fehler als „nicht unterstützt“ | Nach Neustart von udiskie kann das noch angeschlossene Medium erneut gemountet werden, obwohl die Meldung das Abziehen freigibt. Fehler unterscheiden, Mounts abschließend prüfen und Remount bis zum Abziehen verhindern. |
-| Hoch | Fehler der Geräteauflistung gehen in einer Prozesssubstitution verloren | Schlägt `lsblk` bei der Ermittlung der Partitionen fehl, kann die Schleife leer bleiben. Trotzdem werden Freigabe/State gelöscht und später eine Erfolgsmeldung ausgegeben. Auflistung und Exitstatus zuerst prüfen. |
-| Hoch | Neustart des Automounters wird mit `|| true` verschluckt | Das Skript kann erfolgreich enden, obwohl udiskie gestoppt bleibt. Nachfolgende Datenträger werden dann nicht automatisch gemountet. Neustartstatus prüfen und klar melden. |
-| Mittel | Kein gemeinsames Lock für Freigabenamen und State-Dateien | Zwei zeitgleiche Mount-Ereignisse können denselben freien Namen auswählen; `net usershare add` ersetzt dann eine Zuordnung. Namensvergabe, Anlage und State-Schreiben serialisieren. |
-| Mittel | udiskie wird ohne festen Konfigurationspfad gestartet | Eine vorhandene `config.yml` hat Vorrang vor der installierten `config.json`. Dadurch können Automount und Hook anders konfiguriert sein. Projektdatei explizit auswählen und vorhandene Konfiguration vorher sichern. |
-| Mittel | `enable --now` lädt eine bereits laufende udiskie-Instanz nicht neu | Nach erneutem Setup kann der alte Prozess mit alter Konfiguration weiterlaufen. Kontrolliert neu starten und vorhandene Mounts abgleichen. |
-| Mittel | Fehlgeschlagene Samba-Abfrage verhindert den vorgesehenen State-Fallback | Mit `set -e` und `pipefail` bricht `MOUNTPOINT=...` bei einem Abfragefehler vorher ab. Fehler explizit behandeln. Eine erfolgreiche Abfrage ohne Treffer ist davon zu unterscheiden. |
-| Mittel | Btrfs-Subvolume-Quelle wird als Gerätename übernommen | `findmnt` liefert beispielsweise `/dev/sda1[/@]`; `lsblk` kann das nicht als Blockgerät verwenden. Gerät über `--nofsroot` beziehungsweise eine eindeutige Geräteidentität bestimmen. |
+| Ausgangsbefund | Korrektur im Code | Automatisiert | Hardware |
+| --- | --- | --- | --- |
+| Power-off-Fehler wird als fehlende Unterstützung behandelt | Fehlertypen unterscheiden; gerätebezogene Sperre und abschließende Zustandsprüfung | Bestanden | Offen |
+| Fehler der Geräteauflistung geht verloren | Strukturierte Auflistung; Fehler und leere Ergebnisse verhindern ungesicherte Schritte | Bestanden | Offen |
+| Automounter-Neustartfehler wird unterdrückt | Stoppen/Starten aus dem Auswurf entfernt; andere Geräte laufen weiter | Bestanden | Offen |
+| Gleichzeitige Freigabenamen kollidieren | Gemeinsame kurze Sperre, Namensreservierung und atomare JSON-Zuordnungen | Bestanden | Offen |
+| YAML übersteuert Projekt-JSON | Dienst wählt die Konfigurationsdatei ausdrücklich; vorhandene Dateien werden gesichert | Bestanden | Offen |
+| Erneutes Setup lädt laufenden Dienst nicht neu | Kontrollierter Neustart und Abgleich bereits gemounteter Geräte | Bestanden | Offen |
+| Samba-Abfrage verhindert State-Fallback | Fehler ausdrücklich melden; nur validierte aktuelle Zuordnungen verwenden | Bestanden | Offen |
+| Btrfs-Subvolume-Quelle ist kein Blockgerätename | Blockquelle ohne FSROOT-Suffix auswerten; auch anonyme Btrfs-/FUSE-Mount-Gerätenummern berücksichtigen | Bestanden | Offen |
 
-Betroffene Stellen:
+Zusätzlich abgesichert: alle Partitionen/Freigaben eines physischen Laufwerks,
+Unterbrechungen und Wiederaufnahme, wiederverwendete Gerätenamen, Schutz fremder
+Mounts und Nachbarlaufwerke von Mehrfachgeräten. Freigabenamen bleiben während
+eines Auswurfs reserviert. Doppelte Ereignisse schreiben unveränderte Zuordnungen
+nicht erneut auf die SD.
 
-- [usb-eject](../server/samba-usb/scripts/usb-eject): Samba-Abfrage 46–50,
-  Quellgerät 87–102, Neustart 125–130, Partitionen 144–161, Power-off 181–194.
-- [t95-usb-share](../server/samba-usb/scripts/t95-usb-share): Namensvergabe
-  122–157; Cleanup und State-Schreiben besitzen keine gemeinsame Sperre.
-- [udiskie-Dienst](../server/samba-usb/config/systemd-user/udiskie.service):
-  Startaufruf ohne `--config`.
-- [Samba-Installer](../server/samba-usb/scripts/restore-samba-usb-setup.sh):
-  Konfiguration wird kopiert, danach nur `enable --now` aufgerufen.
+Maßgeblich sind der [gemeinsame Kern](../server/samba-usb/lib/t95_usb.py),
+der [Installer](../server/samba-usb/lib/t95_install.py), die
+[udev-Regel](../server/samba-usb/config/udev/99-t95-usb-eject.rules) und die
+[Regressionstests](../server/samba-usb/tests/test_usb.py).
+Die bisherigen Shell-Aufrufe bleiben als Einstieg erhalten.
 
 Der [udiskie-Quellstand 2.5.7](https://github.com/coldfix/udiskie/tree/v2.5.7)
-bestätigt die YAML-Priorität, nebenläufige Event-Hooks und das Mounten verfügbarer
-Medien beim Start. Die Simulation des Remounts bildet dieses Verhalten nach.
-Die tatsächliche Häufigkeit auf der T95 wurde nicht gemessen.
+bestätigt die zugrunde liegende Auswahl von Konfiguration und Gerätehinweisen.
+Die neue gerätebezogene Sperre muss auf der T95 noch praktisch abgenommen werden.
 
 <a id="grenzen-nach-dateisystem"></a>
 
@@ -75,7 +76,7 @@ Die tatsächliche Häufigkeit auf der T95 wurde nicht gemessen.
 | ext4 | Kein expliziter Ausschluss im Hook. Gespeicherte UID/GID, Modus und ACLs gelten weiterhin; eine Samba-Freigabe erteilt keine zusätzlichen Unix-Rechte. Der gemeldete sporadische Mountfehler ist ohne zugehörige Logs offen. |
 | exFAT / FAT | Treiber und Dateisystemzustand entscheiden über den Mount. Besitzer-/Maskenoptionen unterscheiden sich von ext4; Dateigrößen- und Namensgrenzen bleiben bestehen. |
 | NTFS | UDisks kann `ntfs3` trotz installiertem `ntfs-3g` auswählen. „dirty“ oder nicht sauber beendeter Zustand darf nicht pauschal durch Force-Mount übergangen werden. |
-| Btrfs mit Subvolume | Mount kann funktionieren; der aktuelle Auswurfpfad verarbeitet die Quellenangabe nicht zuverlässig. |
+| Btrfs mit Subvolume | Blockquelle und anonyme Mount-Gerätenummer werden berücksichtigt. Unterstützt ist ein einzelnes physisches Laufwerk; Hardware-Abnahme offen. |
 | LUKS, LVM, RAID, andere Gerätepfade | `/dev/mapper/*` und `/dev/dm-*` werden vom Hook nicht akzeptiert. Entsperren, Mapper-Auflösung und komplexe Laufwerkstopologien sind kein zugesicherter Funktionsumfang. |
 
 UDisks beschreibt die [dateisystemspezifischen Mountoptionen](https://storaged.org/udisks/docs/mount_options.html).
@@ -102,6 +103,8 @@ der geänderten Rücknahme bleibt offen.
 
 ## 🧪 Prüfverfahren und Aussagegrenzen
 
+**Ausgangsaudit bei `4f97a5d`, vor den Korrekturen:** Die folgenden Nachweise betreffen die ursprüngliche Untersuchung. Die aktuellen Regressionsergebnisse stehen getrennt darunter.
+
 - Drei Samba-Shellskripte bestehen `bash -n`; udiskie-JSON ist syntaktisch gültig.
 - Alle 20 Samba- und 14 Dashboard-Prüfsummen stimmten beim Audit des Ausgangsstands.
 - Die vorhandenen 16 Setup-Tests bestanden; sie testeten Dashboard/Bluetooth,
@@ -118,3 +121,18 @@ der geänderten Rücknahme bleibt offen.
 Für Hardware-Abnahme erforderlich: lesender und schreibender Clientzugriff je
 Dateisystem, mehrere Partitionen, gleichzeitige Geräteereignisse, Auswurf bei
 offenen Dateien, nicht unterstütztes Power-off, Neustart und erneutes Anstecken.
+
+<a id="abnahme-der-neuen-usb-verwaltung"></a>
+
+## ✅ Abnahme der neuen USB-Verwaltung
+
+- **55 neue automatisierte Tests bestanden**: Freigaben/Auswurf, Parser und Update-/Rollback-Fixtures. Zusätzlich bestehen die bisherigen 32 Dashboard-/Bluetooth-Tests.
+- **udev-Regel syntaktisch geprüft**; noch kein Nachweis ihrer Laufzeitwirkung auf der T95.
+- **Keine echten Datenträger oder Dienste verändert.** Simulationen verwenden temporäre Verzeichnisse und System-Doubles.
+- **Hardware offen:** Client lesen/schreiben mit Inhaltsvergleich für ext4, exFAT, FAT32 und NTFS; Btrfs-Subvolumes; 20 ext4-Ansteck-/Auswurfzyklen; Mehrgerätebetrieb an beiden Ports und mit Hub; Power-off und Wiederaufnahme.
+
+Die [Abnahmecheckliste](../server/samba-usb/docs/RESTORE-CHECKLIST.md) hält diese
+Punkte getrennt fest. Erst nach tatsächlicher Durchführung wird ein Hardwarefall
+als bestanden eingetragen. [Update-Anleitung](../server/samba-usb/README.md#vorhandene-einrichtung-aktualisieren).
+
+<a id="-offene-samba-usb-befunde"></a>

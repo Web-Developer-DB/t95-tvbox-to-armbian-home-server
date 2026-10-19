@@ -113,6 +113,22 @@ Preserve the working production SD as recovery for these checks. The feedback
 does not specify a replacement SD or these individual checks, so they are
 tracked separately from the confirmed steps.
 
+## 🔌 New Samba/USB implementation — 2026-10-19
+
+| Check | Status |
+| --- | --- |
+| 55 Samba/USB tests with simulated system effects | Passed |
+| Existing 32 setup tests | Passed |
+| udev rule syntax | Passed |
+| Package manifests: 25 Samba + 14 dashboard entries | Passed |
+| All eight audit findings addressed in code | Covered by automated tests |
+| New per-drive guard and eject on physical T95 | Pending |
+| Filesystem matrix, 20 ext4 cycles and multiple devices | Pending |
+
+Earlier USB reference acceptance applies to the earlier scripts. It does not
+confirm the new implementation. [Audit and limits](SAMBA_USB_AUDIT.en.md) ·
+[Hardware checklist](../server/samba-usb/docs/RESTORE-CHECKLIST.en.md).
+
 <a id="optional-future-work"></a>
 
 ## 🔭 Optional future work

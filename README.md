@@ -107,7 +107,11 @@ individuelle Aufkleber sind abgedeckt.
 Referenz: **Armbian 26.8.4 / Debian 13 / Kernel `6.18.48-current-sunxi64`**.
 Die Dashboard-/Bluetooth-Schritte hat der Projektbetreiber am **17.10.2026**
 als funktionsfähig bestätigt. Weitere Abnahmen und Langzeittests stehen in den
-[Testnachweisen](docs/VALIDATION.md). Ethernet: 100 Mbit/s, gemessen etwa 11–12 MB/s.
+[Testnachweisen](docs/VALIDATION.md).
+
+**Neue USB-Verwaltung:** automatisiert geprüft; Hardware-Abnahme noch offen. [Korrekturstand](docs/SAMBA_USB_AUDIT.md).
+
+Ethernet: 100 Mbit/s, gemessen etwa 11–12 MB/s.
 
 <a id="alltag"></a>
 

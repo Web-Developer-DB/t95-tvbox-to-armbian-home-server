@@ -194,7 +194,7 @@ normal. Für USB-Probleme den nächsten Abschnitt verwenden.
 **Ergebnis:** Eine kleine Testdatei lässt sich vom Client schreiben und lesen.
 Für weitere Prüfungen siehe [Samba-Modul](../server/samba-usb/README.md#nach-der-installation-prüfen).
 Eine Neuinstallation des Moduls ersetzt dessen Samba-Konfiguration und ist
-kein erster Diagnoseschritt.
+kein erster Diagnoseschritt. Der [Update-Modus](../server/samba-usb/README.md#vorhandene-einrichtung-aktualisieren) erhält die vorhandene Samba-Konfiguration.
 
 <a id="usb-laufwerk-fehlt-oder-ist-belegt"></a>
 
@@ -203,6 +203,7 @@ kein erster Diagnoseschritt.
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
 ```bash
+sudo usb-eject --status
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
 sudo -u "$(id -un)" net usershare list
 sudo journalctl -t T95-USB-SHARE --no-pager -n 30
@@ -236,7 +237,7 @@ auch ein Terminal darf nicht im USB-Verzeichnis stehen. Dann den Auswurf
 wiederholen. Kein erzwungenes Aushängen und kein Abziehen während Schreibzugriffen.
 
 **Ergebnis:** Erst nach erfolgreichem Auswurf abziehen. Wiedereinstecken
-erzeugt die Freigabe erneut. Weitere Diagnose:
+erzeugt die Freigabe erneut. Andere Laufwerke werden während des Auswurfs weiter eingebunden; ein fehlgeschlagener Teilvorgang kann erneut aufgerufen werden. Weitere Diagnose:
 [Samba-/USB-Fehlerhilfe](../server/samba-usb/docs/TROUBLESHOOTING.md).
 
 <a id="dashboard-oder-bluetooth-funktioniert-nicht"></a>

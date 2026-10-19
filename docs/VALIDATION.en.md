@@ -91,7 +91,17 @@ reference-installation evidence.
 | --- | --- | --- |
 | Documented dashboard steps | passed | Project maintainer's confirmation on 2026-10-17 |
 | Documented Bluetooth steps | passed | Project maintainer's confirmation on 2026-10-17 |
-| Setup installation, removal, and failures in a test environment | passed | 16 automated tests with simulated APT/systemd/BlueZ |
+| Setup installation, removal, and failures in a test environment | passed | 32 automated tests with simulated APT/systemd/BlueZ; updated 2026-10-19 |
+
+**2026-10-19 — changed audio rollback:** configuration archives are now created
+before APT; existing legacy MPD configuration and recorded service states are
+restored. Automated fixtures cover these changes and failure/retry paths. The
+2026-10-17 hardware confirmation applies to the earlier setup behavior, not this
+new rollback. Its dedicated hardware run remains open.
+
+The [Samba/USB audit](SAMBA_USB_AUDIT.en.md) separately records confirmed error
+paths and filesystem limits; general USB acceptance is not a per-filesystem or
+all-error-cases certification.
 
 The following individual checks have no separate confirmation yet:
 

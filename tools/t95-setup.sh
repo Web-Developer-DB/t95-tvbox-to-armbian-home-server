@@ -9,7 +9,7 @@ ref=${T95_SETUP_REF:-main}
 if (($# == 0)); then
     printf '%s\n' 'T95: 0 Dashboard + Bluetooth/Player gemeinsam installieren' \
         '     1 Dashboard installieren | 2 Dashboard entfernen' \
-        '     3 Bluetooth + Player installieren | 4 Player entfernen / Bluetooth aus' \
+        '     3 Bluetooth + Player installieren | 4 Audio-Setup zurücknehmen' \
         '     5 Bluetooth aus | 6 Bluetooth an | 7 Bluetooth neu starten | 8 Status'
     read -r -p 'Auswahl: ' choice
     case "$choice" in

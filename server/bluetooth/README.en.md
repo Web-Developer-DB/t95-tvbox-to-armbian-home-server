@@ -13,7 +13,7 @@ for showing, connecting, disconnecting, and forgetting devices.
 | 🚀 Set up the player once | [Requirements](#requirements) → [Install](#install) |
 | 🎧 Everyday headphone tasks | [Find, connect, and disconnect devices](../../docs/BLUETOOTH_CHEATSHEET.en.md) |
 | 🎵 Play your first music | [Transfer and play a file](../../docs/MUSIKPLAYER_CHEATSHEET.en.md) |
-| ↩️ Disable the player | [Removal and retained data](#remove-the-player-and-disable-bluetooth) |
+| ↩️ Undo audio setup | [Removal and retained data](#remove-the-player-and-disable-bluetooth) |
 
 <a id="requirements"></a>
 
@@ -33,6 +33,33 @@ For missing tools, see [preparation](../setup/README.en.md#requirements).
 
 The matching T95 uses built-in Bluetooth; this setup does not require an
 additional USB Bluetooth adapter.
+
+> [!NOTE]
+> **Rollback update, 2026-10-19:** the backup and service-baseline restoration
+> described below have automated coverage; a separate T95 hardware run is still
+> [pending](../../docs/VALIDATION.en.md#dashboard-and-bluetooth).
+
+<a id="automatic-configuration-backup"></a>
+
+## 🗂️ Automatic configuration backup
+
+Before APT or audio configuration changes, setup creates a private archive and
+journals the original content, modes, and ownership of the files it manages.
+A failed backup aborts installation before the package operation.
+
+| Saved item | Location or scope |
+| --- | --- |
+| Configuration archive | `/var/lib/t95-setup/bluetooth/audio-before-setup.tar.gz` |
+| Automatic file rollback | File backups and SHA-256 records in the same private directory |
+| Existing audio settings | Available MPD, mpDris2, PipeWire, WirePlumber, PulseAudio, Bluetooth settings and user audio units |
+| Service baseline | Active/autostart state of system and user audio services |
+
+The archive is readable only by root and must stay private. It is a reference
+copy, not a system image or package-version backup. Automatic removal restores
+managed files from the journal; do not blindly extract the complete archive over
+an active system. An existing `~/.mpdconf` is saved, temporarily removed to avoid
+conflicting MPD configuration, and restored on rollback. Repeating `install`
+preserves the first backup; reinstalling after removal archives the old journal.
 
 <a id="install"></a>
 
@@ -126,8 +153,10 @@ remembered; the home server and Samba keep running. The
 walks through switching to a PC/phone and back.
 
 <a id="remove-the-player-and-disable-bluetooth"></a>
+<a id="-remove-the-player-and-disable-bluetooth"></a>
+<a id="restore-the-previous-audio-setup"></a>
 
-## ↩️ Remove the player and disable Bluetooth
+## ↩️ Restore the previous audio setup
 
 This section removes the player setup. To disconnect or forget only one
 headphone device, use [device controls](../../docs/BLUETOOTH_CHEATSHEET.en.md#disconnect-only).
@@ -142,6 +171,17 @@ This command removes the setup and its newly added target packages:
 t95-bluetooth remove --remove-packages
 ```
 
+**Check after successful rollback — on the T95, normal SSH user:**
+
+```bash
+t95-bluetooth status
+```
+
+Expect `Setup: removed`. Read each named service against its saved baseline;
+`active` alone does not indicate a leftover when that service was active before.
+Shared backups and music are intentionally retained. To only pause Bluetooth,
+use `t95-bluetooth off` instead of uninstalling.
+
 Alternatively, use the dedicated download launcher without a menu:
 
 **On the T95, normal SSH user; `sudo` where shown:**
@@ -153,22 +193,35 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-t
 <details>
 <summary>What removal keeps and how conflicts are handled</summary>
 
-Removal stops/disables the user's MPD, mpDris2, and `mpris-proxy`, blocks radio,
-and stops/disables BlueZ. Existing configuration files are restored. A
-firmware alias created by the installer is removed; a preexisting alias remains.
+Removal restores the files and active/autostart states recorded before setup.
+Previously running services are restarted with their restored configuration;
+previously inactive services are stopped. For example, a preexisting and active
+`mpris-proxy` or PipeWire service may be active again after successful removal.
+The installer does not change global service enablement for all users.
+A firmware alias created by setup is removed; a preexisting alias remains.
 
-Only **newly installed, explicitly requested target packages** are proposed
-for removal. If APT would remove other packages, that package step aborts.
-Preexisting packages, shared dependencies, music, playlists, player state,
-pairings, and original firmware remain. No `autoremove` or configuration
-purge runs. Omitting `--remove-packages` also preserves installed target packages.
+Only **newly installed, explicitly requested target packages** are removed with
+`--remove-packages`, after an APT simulation rejects removing additional packages.
+Preinstalled audio packages and shared dependencies remain. Upgraded package
+versions are not downgraded; no `autoremove` or configuration purge runs.
+Without `--remove-packages`, target packages stay installed; an inherited global
+autostart that cannot be returned to its baseline causes an error rather than
+an unconditional success message.
 
-Previously running PipeWire/WirePlumber remain. **Linger remains** because
-Samba/USB may use it. Helpers under `/usr/local/bin`, the cache under
-`/usr/local/lib/t95-setup`, and private backups under
-`/var/lib/t95-setup/bluetooth` remain for diagnosis/reinstallation. Repeated
-removal is permitted. This removal intentionally disables Bluetooth/player
-even if an earlier manual setup existed; it is not a full service-state rewind.
+If an existing Samba/USB user service uses the session bus, `dbus-user-session`
+also remains even if audio originally installed it. This runtime dependency
+is not represented by APT package dependencies.
+
+Music, playlists, pairings, original firmware, shared linger, command helpers,
+source cache, and private recovery backups remain. Linger can also serve Samba/USB.
+The runtime service checks must pass before `Setup: removed` is recorded.
+Failure leaves a retryable state such as `restoring`, with the backup retained.
+
+**Older installations:** the download removal launcher also reconciles journals
+already marked `removed`. It preserves files changed after that earlier removal.
+The old journal cannot reconstruct a radio setting it never recorded; the tool
+states this explicitly. New installations save Bluetooth software blocks and,
+when readable, the controller power state before changing them.
 
 Later edits to managed files block removal. Save/check them before
 deliberately using `t95-bluetooth remove --force --remove-packages`, which
@@ -214,6 +267,10 @@ Separate fresh-SD, removal, and cold-boot checks are tracked in the
 [Bluetooth cheat sheet](../../docs/BLUETOOTH_CHEATSHEET.en.md) ·
 [Music player cheat sheet](../../docs/MUSIKPLAYER_CHEATSHEET.en.md) ·
 [General help](../../docs/TROUBLESHOOTING.en.md)
+
+**2026-10-19 update:** configuration backup and restoration of the previous
+service state are covered by automated fixtures. This changed rollback has
+not yet been confirmed by a full run on a separate T95 SD card.
 
 Official references: [WirePlumber Bluetooth](https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/bluetooth.html),
 [MPD PipeWire output](https://mpd.readthedocs.io/en/stable/plugins.html#pipewire),

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Musikplayer entfernen und Bluetooth deaktivieren. Eigener Schnellstart ohne Aktionsargumente.
+# Audio-Setup zurücknehmen: Konfiguration/Dienste wiederherstellen, neue Zielpakete entfernen.
 set -Eeuo pipefail
 
 script_dir=$(dirname -- "${BASH_SOURCE[0]}")

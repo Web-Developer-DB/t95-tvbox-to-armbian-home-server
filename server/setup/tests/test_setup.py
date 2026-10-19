@@ -1,5 +1,7 @@
 """Filesystem fixtures + fake package/service backend; never changes the host."""
 import hashlib
+import contextlib
+import io
 import importlib.util
 import json
 import os
@@ -8,6 +10,7 @@ import pwd
 import shutil
 import subprocess
 import tempfile
+import tarfile
 import unittest
 from unittest.mock import patch
 
@@ -21,14 +24,18 @@ ACCOUNT = next(p for p in pwd.getpwall() if 1000 <= p.pw_uid < 60000 and p.pw_di
 class Backend:
     def __init__(self):
         self.calls = []
-        self.packages = {"bluez", "curl", "procps", "iproute2", "util-linux"}
+        self.packages = {"bluez", "pipewire", "curl", "procps", "iproute2", "util-linux"}
         self.extra_remove = False
         self.fail_enable = False
         self.fail_apt = False
+        self.units = {}
+        self.fail_stop = None
+        self.ignore_stop = None
 
     def __call__(self, command, check=True, timeout=120):
         self.calls.append(command)
         cmd = command
+        user_scope = cmd[0] == "runuser"
         if cmd[0] == "runuser":
             cmd = cmd[cmd.index(f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{ACCOUNT.pw_uid}/bus") + 1:]
         out, rc = "", 0
@@ -45,13 +52,47 @@ class Backend:
         elif cmd[:2] == ["apt-get", "remove"]:
             self.packages.difference_update(cmd[4:])
         elif cmd[0] == "systemctl":
+            unit_args = [a for a in cmd[1:] if a.endswith((".service", ".socket"))]
+            def unit_state(unit):
+                key = (user_scope, unit)
+                if key not in self.units:
+                    self.units[key] = {
+                        "enabled": "enabled" if unit in ("bluetooth.service", "pipewire.service") else "disabled",
+                        "active": unit in ("bluetooth.service", "pipewire.service"),
+                    }
+                return self.units[key]
+            unit_packages = {"bluetooth.service": "bluez", "mpris-proxy.service": "bluez",
+                             "mpd.service": "mpd", "mpd.socket": "mpd", "mpdris2.service": "mpdris2",
+                             "pipewire.service": "pipewire", "pipewire.socket": "pipewire",
+                             "pipewire-pulse.service": "pipewire-pulse", "pipewire-pulse.socket": "pipewire-pulse",
+                             "wireplumber.service": "wireplumber"}
+            present = not unit_args or unit_packages.get(unit_args[0]) in self.packages
             if "is-enabled" in cmd:
-                out = "enabled" if cmd[-1] in ("bluetooth.service", "pipewire.service") else "disabled"
+                out = unit_state(unit_args[0])["enabled"] if present else "not-found"
             elif "is-active" in cmd:
-                out = "active" if cmd[-1] in ("bluetooth.service", "pipewire.service") else "inactive"
+                out = "active" if present and unit_state(unit_args[0])["active"] else "inactive"
+            elif "show" in cmd:
+                out = "loaded" if present else "not-found"
             elif self.fail_enable and "enable" in cmd and "wireplumber.service" in cmd:
                 self.fail_enable = False
                 out, rc = "simulated service failure", 1
+            elif self.fail_stop and "stop" in cmd and self.fail_stop in cmd:
+                out, rc = "simulated stop failure", 1
+            elif self.ignore_stop and "stop" in cmd and self.ignore_stop in cmd:
+                pass
+            else:
+                for unit in unit_args:
+                    state = unit_state(unit)
+                    if "enable" in cmd:
+                        state["enabled"] = "enabled-runtime" if "--runtime" in cmd else "enabled"
+                    if "disable" in cmd:
+                        state["enabled"] = "disabled"
+                    if "mask" in cmd:
+                        state["enabled"] = "masked"
+                    if "start" in cmd or "restart" in cmd or ("enable" in cmd and "--now" in cmd):
+                        state["active"] = True
+                    if "stop" in cmd or ("disable" in cmd and "--now" in cmd) or "mask" in cmd:
+                        state["active"] = False
         elif cmd[:2] == ["loginctl", "show-user"]:
             out = "yes"
         elif cmd[:2] == ["mpd", "--version"]:
@@ -203,8 +244,9 @@ class SetupTests(unittest.TestCase):
         self.assertFalse(routing.exists())
         self.assertEqual(music_file.read_text(), "personal data")
         self.assertEqual(sentinel.read_text(), "do not touch")
-        self.assertTrue(any(c == ["rfkill", "block", "bluetooth"] for c in self.backend.calls))
-        self.assertFalse(any("stop" in c and c[-1] == "pipewire.service" for c in self.backend.calls))
+        self.assertEqual(manager.state["phase"], "removed")
+        self.assertTrue(self.backend.units[(False, "bluetooth.service")]["active"])
+        self.assertTrue(self.backend.units[(True, "pipewire.service")]["active"])
         self.assertFalse(any(c[0] == "loginctl" for c in self.backend.calls))
         self.assertFalse(any("smbd" in " ".join(c) or "ssh" in " ".join(c) for c in self.backend.calls))
 
@@ -253,7 +295,7 @@ class SetupTests(unittest.TestCase):
         manager = self.manager("bluetooth")
         with self.assertRaisesRegex(RuntimeError, "APT failure"):
             manager.install()
-        self.assertEqual(manager.state["files"], [])
+        self.assertTrue(all("installed" not in r for r in manager.state["files"]))
         self.backend.calls.clear()
         manager.remove()
         self.assertEqual(manager.state["phase"], "removed")
@@ -290,6 +332,234 @@ class SetupTests(unittest.TestCase):
         self.assertIn(["rfkill", "block", "bluetooth"], self.backend.calls)
         self.assertIn(["rfkill", "unblock", "bluetooth"], self.backend.calls)
         self.assertFalse(any("reboot" in c or "shutdown" in c or "apt-get" in c for c in self.backend.calls))
+
+    def test_audio_backup_is_private_and_precedes_package_changes(self):
+        self.board()
+        config = self.home / ".config/mpd/mpd.conf"
+        config.parent.mkdir(parents=True)
+        config.write_text("original audio configuration")
+        config.chmod(0o640)
+        normal = self.backend
+        manager = self.manager("bluetooth")
+        def packages_change_config(command, check=True, timeout=120):
+            if command[:2] == ["apt-get", "install"]:
+                backup = manager.state["audio_backup"]
+                archive = Path(backup["path"])
+                self.assertEqual(archive.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(manager.state_dir.stat().st_mode & 0o777, 0o700)
+                self.assertEqual(hashlib.sha256(archive.read_bytes()).hexdigest(), backup["sha256"])
+                with tarfile.open(archive) as saved:
+                    member = saved.getmember(str(config.relative_to(self.root)))
+                    self.assertEqual(member.mode, 0o640)
+                    self.assertEqual(saved.extractfile(member).read(), b"original audio configuration")
+                config.write_text("package changed this before setup writes")
+            return normal(command, check, timeout)
+        manager.run = packages_change_config
+        manager.install()
+        manager.remove()
+        self.assertEqual(config.read_text(), "original audio configuration")
+        self.assertEqual(config.stat().st_mode & 0o777, 0o640)
+
+    def test_failed_package_install_restores_prepared_config_before_setup_write(self):
+        self.board()
+        config = self.home / ".config/mpd/mpd.conf"
+        config.parent.mkdir(parents=True)
+        config.write_text("before package transaction")
+        manager = self.manager("bluetooth")
+        normal = self.backend
+        def partial_install(command, check=True, timeout=120):
+            if command[:2] == ["apt-get", "install"]:
+                config.write_text("partially changed by packages")
+                raise RuntimeError("simulated partial package failure")
+            return normal(command, check, timeout)
+        manager.run = partial_install
+        with self.assertRaisesRegex(RuntimeError, "partial package failure"):
+            manager.install()
+        self.assertEqual(config.read_text(), "before package transaction")
+        self.assertEqual(manager.state["phase"], "failed")
+
+    def test_failed_audio_backup_prevents_package_installation(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        with patch.object(setup.tarfile, "open", side_effect=OSError("backup failed")):
+            with self.assertRaisesRegex(OSError, "backup failed"):
+                manager.install()
+        self.assertFalse(any(c[0] == "apt-get" for c in self.backend.calls))
+        self.assertEqual(manager.state["phase"], "failed")
+
+    def test_cleanup_after_failed_preflight_does_not_stop_unrecorded_services(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        with self.assertRaisesRegex(ValueError, "Musikpfad"):
+            manager.install(music="relative-music-directory")
+        self.assertEqual(manager.state["services"], [])
+        self.backend.calls.clear()
+        manager.remove()
+        self.assertFalse(any("stop" in c or "restart" in c for c in self.backend.calls))
+        self.assertEqual(manager.state["phase"], "removed")
+
+    def test_repeated_audio_install_preserves_the_first_configuration_archive(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        archive = Path(manager.state["audio_backup"]["path"])
+        before = archive.read_bytes()
+        self.backend.calls.clear()
+        manager.install()
+        self.assertEqual(archive.read_bytes(), before)
+        self.assertFalse(any(c[0] == "apt-get" for c in self.backend.calls))
+
+    def test_legacy_mpd_configuration_is_backed_up_and_restored(self):
+        self.board()
+        legacy = self.home / ".mpdconf"
+        legacy.write_text("the previous manual player configuration")
+        legacy.chmod(0o600)
+        manager = self.manager("bluetooth")
+        manager.install()
+        self.assertFalse(legacy.exists())
+        manager.remove()
+        self.assertEqual(legacy.read_text(), "the previous manual player configuration")
+        self.assertEqual(legacy.stat().st_mode & 0o777, 0o600)
+
+    def test_remove_restores_preexisting_active_player_and_audio_services(self):
+        self.board()
+        self.backend.packages.update(setup.PACKAGES["bluetooth"])
+        # Matches the reported box: all audio daemons existed before setup.
+        for unit in setup.USER_UNITS:
+            self.backend.units[(True, unit)] = {"active": unit != "mpdris2.service", "enabled": "enabled"}
+        manager = self.manager("bluetooth")
+        manager.install()
+        manager.remove(purge=True)
+        for record in manager.state["services"]:
+            observed = self.backend.units[(record["scope"] == "user", record["unit"])]
+            self.assertEqual(observed["active"], record["active"], record["unit"])
+            self.assertEqual(observed["enabled"], record["enabled"], record["unit"])
+        self.assertEqual(manager.state["phase"], "removed")
+        self.assertFalse(any("--global" in c and "disable" in c for c in self.backend.calls))
+
+    def test_failed_player_stop_cannot_report_removed(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        self.backend.fail_stop = "mpd.service"
+        with self.assertRaisesRegex(RuntimeError, "stop failure"):
+            manager.remove()
+        self.assertNotEqual(manager.state["phase"], "removed")
+
+    def test_unrestored_service_state_cannot_report_removed_and_can_retry(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        self.backend.ignore_stop = "wireplumber.service"
+        with self.assertRaisesRegex(RuntimeError, "Dienstzustand"):
+            manager.remove()
+        self.assertEqual(manager.state["phase"], "restoring")
+        self.backend.ignore_stop = None
+        manager.remove()
+        self.assertEqual(manager.state["phase"], "removed")
+
+    def test_failed_bluetooth_package_removal_does_not_report_complete(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        self.backend.extra_remove = True
+        with self.assertRaisesRegex(ValueError, "weitere Pakete"):
+            manager.remove(purge=True)
+        self.assertEqual(manager.state["phase"], "restoring")
+        self.backend.extra_remove = False
+        manager.remove(purge=True)
+        self.assertEqual(manager.state["phase"], "removed")
+
+    def test_shared_session_bus_is_kept_for_samba_automount(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        self.assertIn("dbus-user-session", manager.state["new_packages"])
+        unit = self.home / ".config/systemd/user/udiskie.service"
+        unit.write_text("Samba automount must survive audio rollback")
+        manager.remove(purge=True)
+        self.assertIn("dbus-user-session", self.backend.packages)
+        self.assertEqual(unit.read_text(), "Samba automount must survive audio rollback")
+
+    def test_rfkill_switch_is_restored_after_its_package_was_removed(self):
+        self.board()
+        switch = self.root / "sys/class/rfkill/rfkill4"
+        switch.mkdir(parents=True)
+        (switch / "type").write_text("bluetooth\n")
+        (switch / "name").write_text("hci0\n")
+        (switch / "soft").write_text("1\n")
+        manager = self.manager("bluetooth")
+        manager.install()
+        (switch / "soft").write_text("0\n")
+        self.backend.calls.clear()
+        manager.remove(purge=True)
+        self.assertNotIn("rfkill", self.backend.packages)
+        self.assertEqual((switch / "soft").read_text(), "1\n")
+        self.assertFalse(any(c[0] == "rfkill" for c in self.backend.calls))
+
+    def test_runtime_enable_state_is_restored(self):
+        self.board()
+        self.backend.packages.add("mpdris2")
+        self.backend.units[(True, "mpdris2.service")] = {"enabled": "enabled-runtime", "active": False}
+        manager = self.manager("bluetooth")
+        manager.install()
+        manager.remove()
+        self.assertEqual(self.backend.units[(True, "mpdris2.service")],
+                         {"enabled": "enabled-runtime", "active": False})
+
+    def test_status_does_not_activate_an_inactive_bluetooth_service(self):
+        manager = self.manager("bluetooth")
+        self.backend.units[(False, "bluetooth.service")] = {"enabled": "disabled", "active": False}
+        normal = self.backend
+        def missing_rfkill(command, check=True, timeout=120):
+            if command[0] == "rfkill":
+                return subprocess.CompletedProcess(command, 127, "missing")
+            return normal(command, check, timeout)
+        manager.run = missing_rfkill
+        with contextlib.redirect_stdout(io.StringIO()) as printed:
+            manager.status()
+        self.assertIn("rfkill nicht installiert", printed.getvalue())
+        self.assertFalse(any(c[0] == "bluetoothctl" for c in self.backend.calls))
+        self.assertFalse(any("start" in c or "restart" in c for c in self.backend.calls))
+
+    def test_old_removed_journal_restores_services_without_overwriting_later_files(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        manager.restore_files()
+        manager.state["phase"] = "removed"
+        del manager.state["radio_before"]
+        manager.save()
+        self.backend.units[(True, "pipewire.service")]["active"] = False
+        user_file = self.home / ".config/mpd/mpd.conf"
+        user_file.write_text("configuration changed after old removal")
+        cached = self.root / "usr/local/lib/t95-setup/server/setup/t95_setup.py"
+        cached.write_text("old cached setup version")
+        manager.remove()
+        self.assertTrue(self.backend.units[(True, "pipewire.service")]["active"])
+        self.assertEqual(user_file.read_text(), "configuration changed after old removal")
+        self.assertEqual(manager.state["phase"], "removed")
+        self.assertEqual(cached.read_bytes(), MODULE.read_bytes())
+
+    def test_old_removed_journal_retry_keeps_files_changed_after_original_removal(self):
+        self.board()
+        manager = self.manager("bluetooth")
+        manager.install()
+        manager.restore_files()
+        manager.state["phase"] = "removed"
+        manager.save()
+        user_file = self.home / ".config/mpd/mpd.conf"
+        user_file.write_text("keep later manual audio configuration")
+        self.backend.fail_stop = "mpd.service"
+        with self.assertRaisesRegex(RuntimeError, "stop failure"):
+            manager.remove()
+        self.assertEqual(manager.state["phase"], "restoring")
+        self.backend.fail_stop = None
+        # A fresh invocation must remember that files were already removed.
+        manager = self.manager("bluetooth")
+        manager.remove()
+        self.assertEqual(manager.state["phase"], "removed")
+        self.assertEqual(user_file.read_text(), "keep later manual audio configuration")
 
 
 if __name__ == "__main__":

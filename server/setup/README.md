@@ -99,7 +99,7 @@ Nur die benötigte Aktion wählen. Um den vorherigen Dashboard-Stand wiederherzu
 t95-dashboard remove
 ```
 
-Um den Musikplayer zu entfernen und Bluetooth zu deaktivieren:
+Um das Audio-Setup zurückzunehmen und den vorherigen Zustand wiederherzustellen:
 
 **Auf der T95, normaler SSH-Benutzer; `sudo` wo angegeben:**
 
@@ -134,7 +134,7 @@ und der [Bluetooth-Anleitung](../bluetooth/README.md):
 | `tools/install-t95-dashboard.sh` | Dashboard installieren |
 | `tools/uninstall-t95-dashboard.sh` | Vorherigen Dashboard-Stand wiederherstellen |
 | `tools/install-t95-bluetooth.sh` | Bluetooth und Musikplayer installieren |
-| `tools/uninstall-t95-bluetooth.sh` | Player entfernen, Bluetooth deaktivieren, neu hinzugefügte Zielpakete geprüft entfernen |
+| `tools/uninstall-t95-bluetooth.sh` | Vorherige Audio-Konfiguration/Dienste wiederherstellen und neue Zielpakete geprüft entfernen |
 
 Die Einzelstarter benötigen keine Aktionsargumente und öffnen kein Menü. Aus
 einem lokalen Checkout verwenden sie den benachbarten gemeinsamen Starter;
@@ -215,11 +215,14 @@ APT-Simulation bestätigt, dass keine weiteren Pakete entfernt würden. Neue
 transitive Abhängigkeiten bleiben erhalten. APT-Upgrades bestehender Pakete
 werden nicht zurückgedreht. Es gibt kein automatisches `autoremove`.
 
-Bei Bluetooth ist `remove` absichtlich eine Stilllegung: Playerdienste und
-Bluetooth werden deaktiviert, auch wenn eine vorherige manuelle Einrichtung
-existierte; alte Dateien werden trotzdem gesichert/wiederhergestellt.
-Gemeinsam genutztes Linger und zuvor laufende PipeWire-/WirePlumber-Dienste
-bleiben erhalten. Musik und Bluetooth-Kopplungen werden nicht gelöscht.
+Bei Bluetooth stellt `remove` die gesicherte Konfiguration und die vorherigen
+Dienstzustände wieder her, auch zuvor laufende Player-, PipeWire- und
+Bluetooth-Dienste. Das private Referenzarchiv `audio-before-setup.tar.gz` und die
+Einzelkopien entstehen vor der Paketinstallation. Dienstfehler verhindern einen
+falschen Status `removed`. Alte Rücknahmeprotokolle können ebenfalls abgeglichen
+werden; ein damals nicht gespeicherter Funkzustand lässt sich nicht rekonstruieren.
+Ein vom vorhandenen Samba-Automounter benötigtes Sitzungsbus-Paket bleibt erhalten. Gemeinsames Linger, Musik, Kopplungen und Wiederherstellungswerkzeuge bleiben.
+[Details zu Sicherung und Rücknahme](../bluetooth/README.md#automatische-konfigurationssicherung).
 
 <a id="prüfen-vor-veröffentlichung"></a>
 
@@ -247,8 +250,13 @@ Konfiguration/Audio-Auswahl, Erhalt von Daten und schon vorhandenem Firmware-
 Alias, Rücknahme bei Dienstfehlern, begrenzte Paketentfernung, falsche Hardware
 sowie aus/an ohne Neustart und ohne Löschen der Kopplungen.
 
-Die sechzehn automatisierten Tests bestehen, einschließlich lokaler und
+Die 32 automatisierten Tests bestehen, einschließlich lokaler und
 heruntergeladener Einzelstarter, gemeinsamem Menü und Abbruch bei Fehlern.
+Neue Rücknahmefälle prüfen Sicherung vor Paketänderungen, private Archivrechte,
+alte MPD-Konfiguration, vorher aktive Dienste, fehlgeschlagene Stopps, falsche
+Dienst-Erfolgsmeldungen, Paketfehler, Runtime-Autostart, alte Rücknahmejournale,
+fehlendes rfkill-Paket und eine Statusabfrage ohne Dienstaktivierung.
+
 Zusätzlich wurde die neue MPD-
 Streamregel mit dem auf der Ausgangsbox installierten `pw-config` eingelesen:
 Die Syntax und beide Routing-Eigenschaften wurden korrekt erkannt. Dafür

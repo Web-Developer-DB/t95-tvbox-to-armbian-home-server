@@ -98,7 +98,7 @@ Choose only the action you need. To restore the previous dashboard:
 t95-dashboard remove
 ```
 
-To remove the music player and disable Bluetooth:
+To undo the audio setup and restore its previous state:
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
@@ -126,7 +126,7 @@ Git is unnecessary for the download method.
 | `install-t95-dashboard.sh` | Install dashboard |
 | `uninstall-t95-dashboard.sh` | Restore the previous dashboard state |
 | `install-t95-bluetooth.sh` | Install Bluetooth and music player |
-| `uninstall-t95-bluetooth.sh` | Remove player, disable Bluetooth, request checked removal of newly added target packages |
+| `uninstall-t95-bluetooth.sh` | Restore previous audio configuration/services and remove newly added target packages |
 
 These launchers skip the menu. See the authoritative
 [dashboard](../../docs/SSH_DASHBOARD.en.md) and
@@ -190,10 +190,13 @@ that were absent before setup and explicitly requested by it. An APT
 simulation rejects removing additional packages; new transitive dependencies
 remain. Existing-package upgrades are not reverted and no `autoremove` runs.
 
-Bluetooth removal intentionally disables player and Bluetooth even when an
-older manual setup existed; old files are restored. Shared linger and
-previously running PipeWire/WirePlumber services remain. Music and pairings
-are retained.
+Bluetooth removal restores the saved configuration and service baseline,
+including previously running player, PipeWire, and Bluetooth services. The
+private `audio-before-setup.tar.gz` reference archive and per-file backups are
+created before package changes. Service failures prevent a false `removed`
+status. Old removed journals can also be reconciled; a radio state missing
+from an older journal cannot be reconstructed. A session-bus package needed by the existing Samba automounter is retained. Shared linger, music, pairings,
+and recovery tools remain. [Backup and rollback details](../bluetooth/README.en.md#automatic-configuration-backup).
 
 <a id="verify-before-publishing"></a>
 
@@ -210,13 +213,18 @@ python3 tools/restore-ssh-dashboard.py
 git diff --check
 ```
 
-The sixteen tests use temporary filesystems and simulated APT/systemd/BlueZ;
+The 32 automated tests use temporary filesystems and simulated APT/systemd/BlueZ;
 they do not change PC packages or services. They cover dashboard install,
 idempotence, rollback, hashes, redirected targets, later edits, Bluetooth
 configuration/output choice, data and firmware-alias preservation, service
 failure rollback, bounded package removal, wrong hardware, offline on/off,
 individual starters, and the combined menu. Ownership changes are simulated;
 the original firmware payload is not copied into tests.
+
+New rollback fixtures cover backup before package mutation, private archive
+permissions, legacy MPD configuration, restoration of previously active services,
+failed stops, false service success, failed package removal, runtime enablement,
+old removed journals, rfkill-package absence, and a non-activating status query.
 
 The MPD routing rule was additionally parsed with the reference box's
 `pw-config` from a temporary file. Its syntax and properties were recognized;

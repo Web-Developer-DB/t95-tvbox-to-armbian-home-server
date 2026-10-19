@@ -13,7 +13,7 @@ dort stehen Geräte anzeigen, verbinden, trennen und vergessen im Vordergrund.
 | 🚀 Player einmalig einrichten | [Voraussetzungen](#voraussetzungen) → [Installieren](#schnell-installieren) |
 | 🎧 Kopfhörer im Alltag benutzen | [Geräte finden, verbinden und trennen](../../docs/BLUETOOTH_CHEATSHEET.md) |
 | 🎵 Erste eigene Musik hören | [Datei übertragen und abspielen](../../docs/MUSIKPLAYER_CHEATSHEET.md) |
-| ↩️ Player stilllegen | [Entfernung und erhaltene Daten](#player-entfernen-und-bluetooth-deaktivieren) |
+| ↩️ Audio-Setup zurücknehmen | [Entfernung und erhaltene Daten](#player-entfernen-und-bluetooth-deaktivieren) |
 
 <a id="voraussetzungen"></a>
 
@@ -33,6 +33,34 @@ Bei fehlenden Werkzeugen hilft die [Vorbereitung](../setup/README.md#voraussetzu
 
 Die passende T95 verwendet ihr eingebautes Bluetooth. Ein zusätzlicher
 USB-Bluetooth-Adapter ist für diesen Aufbau nicht erforderlich.
+
+> [!NOTE]
+> **Geänderte Rücknahme vom 19.10.2026:** Die folgende Sicherung und Wiederherstellung
+> der Dienstzustände ist automatisiert geprüft. Ein eigener T95-Hardwaredurchlauf
+> steht [noch aus](../../docs/VALIDATION.md#dashboard-und-bluetooth).
+
+<a id="automatische-konfigurationssicherung"></a>
+
+## 🗂️ Automatische Konfigurationssicherung
+
+Noch vor APT und Änderungen an der Audio-Konfiguration erzeugt das Setup ein
+privates Archiv und sichert Inhalt, Modus und Eigentümer seiner verwalteten
+Dateien im Journal. Schlägt die Sicherung fehl, startet die Paketinstallation nicht.
+
+| Sicherung | Ort oder Umfang |
+| --- | --- |
+| Konfigurationsarchiv | `/var/lib/t95-setup/bluetooth/audio-before-setup.tar.gz` |
+| Automatische Dateirücknahme | Einzelkopien und SHA-256-Nachweise im selben privaten Verzeichnis |
+| Vorhandene Audio-Einstellungen | Vorhandene MPD-, mpDris2-, PipeWire-, WirePlumber-, PulseAudio- und Bluetooth-Konfiguration sowie Audio-Benutzerdienste |
+| Dienstzustände | Lauf- und Autostartzustände der System- und Audio-Benutzerdienste |
+
+Das Archiv ist nur für root lesbar und bleibt privat. Es ist eine Referenzkopie,
+kein Systemimage und keine Sicherung alter Paketversionen. Die automatische
+Rücknahme stellt verwaltete Dateien aus dem Journal wieder her; das Gesamtarchiv
+nicht ungeprüft über ein laufendes System entpacken. Eine vorhandene `~/.mpdconf`
+wird gesichert, zur Vermeidung konkurrierender MPD-Konfiguration vorübergehend
+entfernt und bei Rücknahme wiederhergestellt. Ein erneutes `install` bewahrt die
+erste Sicherung; nach einer Rücknahme archiviert eine Neuinstallation das alte Journal.
 
 <a id="schnell-installieren"></a>
 
@@ -128,8 +156,10 @@ Die [Alltagsanleitung](../../docs/BLUETOOTH_CHEATSHEET.md#kopfhörer-am-pc-oder-
 zeigt den Wechsel zum PC oder Handy und zurück Schritt für Schritt.
 
 <a id="player-entfernen-und-bluetooth-deaktivieren"></a>
+<a id="-player-entfernen-und-bluetooth-deaktivieren"></a>
+<a id="vorherige-audio-einrichtung-wiederherstellen"></a>
 
-## ↩️ Player entfernen und Bluetooth deaktivieren
+## ↩️ Vorherige Audio-Einrichtung wiederherstellen
 
 Dieser Abschnitt entfernt die Player-Einrichtung. Wenn du nur einen
 Kopfhörer trennen oder vergessen möchtest, verwende die
@@ -145,6 +175,17 @@ Ein Befehl für Rücknahme und Entfernung der neu hinzugefügten Zielpakete:
 t95-bluetooth remove --remove-packages
 ```
 
+**Nach erfolgreicher Rücknahme prüfen — auf der T95, normaler SSH-Benutzer:**
+
+```bash
+t95-bluetooth status
+```
+
+Erwartet wird `Setup: removed`. Vergleiche jeden benannten Dienst mit seinem
+gespeicherten Ausgangszustand: `active` allein ist kein Installationsrest, wenn
+der Dienst vorher schon aktiv war. Sicherungen und Musik bleiben bewusst erhalten.
+Wenn du Bluetooth nur pausieren möchtest, verwende `t95-bluetooth off`.
+
 Als Alternative zu `remove`, wenn der lokale Helfer fehlt: eigener Downloadstarter ohne Menüauswahl.
 Nur einen der beiden Wege verwenden:
 
@@ -157,26 +198,38 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-t
 <details>
 <summary>Was bei der Entfernung erhalten bleibt und wie Konflikte behandelt werden</summary>
 
-Dabei werden MPD, mpDris2 und `mpris-proxy` für den gewählten Benutzer gestoppt
-und deaktiviert; Bluetooth-Funk und BlueZ werden abgeschaltet, BlueZ wird
-deaktiviert. Vorhandene Konfigurationsdateien werden aus der Sicherung
-wiederhergestellt. Ein vom Installer neu angelegter Firmware-Alias wird
-entfernt, ein schon vorher vorhandener Alias bleibt bestehen.
+Die Rücknahme stellt die gesicherten Dateien sowie die protokollierten
+Lauf- und Autostartzustände vor der Installation wieder her. Zuvor aktive
+Dienste werden mit ihrer ursprünglichen Konfiguration neu gestartet; zuvor
+inaktive Dienste werden beendet. Ein vorher bereits aktiver `mpris-proxy`
+oder PipeWire-Dienst darf nach erfolgreicher Rücknahme deshalb wieder laufen.
+Die systemweite Aktivierung für alle Benutzer wird nicht verändert.
+Ein neu angelegter Firmware-Alias wird entfernt; ein vorher vorhandener bleibt.
 
-Nur die beim Installieren **neu hinzugefügten, ausdrücklich angeforderten**
-Pakete werden für APT-Entfernung vorgeschlagen. Würde APT dafür weitere Pakete
-entfernen, bricht dieser Paketschritt ab. Vorher installierte Pakete, gemeinsame
-Abhängigkeiten, Musikdateien, Playlists, Playerzustände, Kopplungen und die
-unveränderte Originalfirmware bleiben erhalten. Es gibt kein `autoremove` und
-kein APT-Purge vorhandener Konfigurationsdateien. Ohne `--remove-packages` bleibt
-auch die Paketinstallation erhalten.
+Mit `--remove-packages` werden nur **neu hinzugefügte, ausdrücklich angeforderte
+Zielpakete** entfernt. Eine APT-Simulation verhindert, dass dabei weitere Pakete
+entfernt werden. Vorher installierte Audiopakete und gemeinsame Abhängigkeiten
+bleiben erhalten. Paket-Upgrades werden nicht auf ältere Versionen zurückgesetzt;
+es gibt kein `autoremove` und kein pauschales Löschen von Paketkonfigurationen.
+Ohne `--remove-packages` bleiben Zielpakete installiert. Lässt sich ein geerbter
+systemweiter Autostart dadurch nicht zurücknehmen, meldet das Werkzeug einen
+Fehler statt einen uneingeschränkten Erfolg.
 
-PipeWire/WirePlumber, die schon vor dem Setup liefen, werden bei der Rücknahme
-nicht abgeschaltet. **Linger bleibt erhalten**, weil es auch die Samba-
-USB-Einrichtung verwenden kann. Die Hilfsbefehle unter `/usr/local/bin`, der
-Quellcache unter `/usr/local/lib/t95-setup` und die privaten Sicherungen unter
-`/var/lib/t95-setup/bluetooth` bleiben für Diagnose und erneute Installation
-vorhanden. Ein weiterer `remove`-Aufruf ist erlaubt.
+Verwendet eine vorhandene Samba-/USB-Einrichtung den Sitzungsbus, bleibt außerdem
+`dbus-user-session` erhalten, auch wenn das Audio-Setup es ursprünglich installiert
+hat. Diese Laufzeitabhängigkeit ist für die APT-Paketprüfung nicht erkennbar.
+
+Musik, Playlists, Kopplungen, Originalfirmware, gemeinsames Linger, Hilfsbefehle,
+Quellcache und private Sicherungen bleiben erhalten. Linger kann auch Samba/USB
+benötigen. Erst nach bestandener Dienstprüfung wird `Setup: removed` eingetragen.
+Bei Fehlern bleibt ein wiederaufnehmbarer Zustand wie `restoring`; die Sicherung
+bleibt verfügbar.
+
+**Ältere Installationen:** Der Downloadstarter gleicht auch bereits als `removed`
+markierte Protokolle ab. Nach der damaligen Entfernung geänderte Dateien bleiben
+dabei erhalten. Einen früher nicht protokollierten Funkzustand kann das alte
+Journal nicht rekonstruieren; das Werkzeug weist darauf hin. Neue Installationen
+sichern Bluetooth-Softblocks und, soweit abfragbar, den Einschaltzustand des Controllers.
 
 Nachträglich geänderte verwaltete Dateien blockieren die Rücknahme. Diese
 Dateien zuerst separat sichern und prüfen. Erst danach kann
@@ -237,5 +290,10 @@ Offizielle Grundlagen:
 [PipeWire: Clientregeln](https://docs.pipewire.org/page_man_pipewire-client_conf_5.html),
 [WirePlumber: Zielbindung und Fallback](https://pipewire.pages.freedesktop.org/wireplumber/policies/linking.html),
 [BlueZ: bluetoothctl](https://manpages.debian.org/trixie/bluez/bluetoothctl.1.en.html).
+
+**Erweiterung vom 19.10.2026:** Konfigurationssicherung und Wiederherstellung
+der vorherigen Dienstzustände sind automatisiert geprüft. Ein vollständiger
+Hardwaredurchlauf dieser geänderten Rücknahme auf einer separaten T95-SD
+ist noch offen.
 
 </details>

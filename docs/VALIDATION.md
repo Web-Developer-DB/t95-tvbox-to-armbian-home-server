@@ -92,7 +92,17 @@ Setup-Tests und die bisherigen Funktionsnachweise der Referenzinstallation.
 | --- | --- | --- |
 | Dokumentierte Dashboard-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
 | Dokumentierte Bluetooth-Schritte | bestanden | Funktionsbestätigung des Projektbetreibers am 17.10.2026 |
-| Setup-Installation, Rücknahme und Fehlerfälle in Testumgebung | bestanden | 16 automatisierte Tests mit simuliertem APT/systemd/BlueZ |
+| Setup-Installation, Rücknahme und Fehlerfälle in Testumgebung | bestanden | 32 automatisierte Tests mit simuliertem APT/systemd/BlueZ; Stand 19.10.2026 |
+
+**19.10.2026 — geänderte Audio-Rücknahme:** Konfigurationsarchive entstehen jetzt
+vor APT; alte MPD-Konfiguration und gespeicherte Dienstzustände werden wiederhergestellt.
+Automatisierte Fixtures prüfen dies einschließlich Fehlern und Wiederaufnahme.
+Die Hardwarebestätigung vom 17.10.2026 gilt für das frühere Setup-Verhalten,
+nicht für diese neue Rücknahme. Ihr eigener Hardwaredurchlauf ist noch offen.
+
+Der [Samba-/USB-Audit](SAMBA_USB_AUDIT.md) hält separat bestätigte Fehlerpfade und
+Dateisystemgrenzen fest. Die allgemeine USB-Abnahme ist keine Zertifizierung
+jedes Dateisystems und sämtlicher Fehlerfälle.
 
 Für folgende Einzelprüfungen liegt noch keine gesonderte Bestätigung vor:
 

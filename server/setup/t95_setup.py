@@ -15,6 +15,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 import time
 
@@ -30,6 +31,13 @@ USER_UNITS = ["pipewire.socket", "pipewire-pulse.socket", "pipewire.service",
               "pipewire-pulse.service", "wireplumber.service", "mpd.service",
               "mpdris2.service", "mpris-proxy.service"]
 PLAYER_UNITS = ["mpdris2.service", "mpd.service", "mpris-proxy.service"]
+USER_AUDIO_CONFIGS = [
+    ".mpdconf", ".config/mpd/mpd.conf", ".config/mpDris2/mpDris2.conf",
+    ".config/pipewire/client.conf.d/51-t95-mpd-target.conf",
+    ".config/systemd/user/mpdris2.service",
+    ".config/systemd/user/wireplumber.service.d/51-t95-state.conf",
+    ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf",
+]
 
 
 def run(command, check=True, timeout=120):
@@ -122,6 +130,13 @@ class Setup:
             return self.user_run(["systemctl", "--user", *args], check)
         return self.run(["systemctl", *args], check=check)
 
+    def unit_load_state(self, scope, unit):
+        result = self.service(scope, ["show", unit, "--property=LoadState", "--value"], False)
+        value = result.stdout.strip()
+        if result.returncode and value != "not-found":
+            raise RuntimeError(f"Dienst nicht prüfbar: {unit}: {value}")
+        return value
+
     def save(self):
         self.state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.state_dir.chmod(0o700)
@@ -159,9 +174,9 @@ class Setup:
             self.state["directories"].append(str(p))
             self.save()
 
-    def write(self, path, data=None, mode=0o644, user=False, link=None):
-        check_destination(path, allow_link=link is not None)
-        self.directory(path.parent, user)
+    def remember(self, path, allow_link=False):
+        """Save the original before package installation or file mutation."""
+        check_destination(path, allow_link=allow_link)
         record = next((r for r in self.state["files"] if r["path"] == str(path)), None)
         if record is None:
             record = {"path": str(path), "before": fingerprint(path)}
@@ -171,6 +186,11 @@ class Setup:
                 record["backup"] = str(backup)
             self.state["files"].append(record)
             self.save()  # Journal before mutation, including power-loss recovery.
+        return record
+
+    def write(self, path, data=None, mode=0o644, user=False, link=None):
+        record = self.remember(path, allow_link=link is not None)
+        self.directory(path.parent, user)
         if path.is_symlink() and link is None:
             raise ValueError(f"Umgeleitete Zieldatei: {path}")
         if link is not None:
@@ -196,6 +216,11 @@ class Setup:
                 if fingerprint(Path(record["backup"]))["sha256"] != record["before"]["sha256"]:
                     raise ValueError("Sicherungsdatei beschädigt; Abbruch")
         for record in reversed(self.state["files"]):
+            if "installed" not in record and fingerprint(Path(record["path"])) == record["before"]:
+                # Do not create directories for an untouched preflight backup.
+                # APT can nevertheless have changed a prepared target before
+                # failing; in that case its original still must be restored.
+                continue
             path, old = Path(record["path"]), record["before"]
             self.directory(path.parent, user=self.user and path.is_relative_to(self.home))
             if old["kind"] == "file":
@@ -214,8 +239,11 @@ class Setup:
         for scope, units in [("system", ["bluetooth.service", "mpd.socket", "mpd.service"]),
                              ("user", USER_UNITS)]:
             for unit in units:
-                enabled = self.service(scope, ["is-enabled", unit], False).stdout.strip()
-                active = self.service(scope, ["is-active", unit], False).stdout.strip() == "active"
+                if self.unit_load_state(scope, unit) == "not-found":
+                    enabled, active = "not-found", False
+                else:
+                    enabled = self.service(scope, ["is-enabled", unit], False).stdout.strip()
+                    active = self.service(scope, ["is-active", unit], False).stdout.strip() == "active"
                 self.state["services"].append(dict(scope=scope, unit=unit, enabled=enabled, active=active))
         self.state["linger_before"] = self.run(
             ["loginctl", "show-user", self.user, "-p", "Linger", "--value"], check=False).stdout.strip()
@@ -225,14 +253,104 @@ class Setup:
         if not self.state["services"]:
             return
         for scope in ("system", "user"):
-            self.service(scope, ["daemon-reload"], False)
+            self.service(scope, ["daemon-reload"])
         for record in self.state["services"]:
             scope, unit = record["scope"], record["unit"]
+            if self.unit_load_state(scope, unit) == "not-found":
+                if record["active"] or record["enabled"] in ("enabled", "enabled-runtime"):
+                    raise RuntimeError(f"Früher vorhandener Dienst fehlt: {unit}; Rücknahme unvollständig")
+                continue
+            self.service(scope, ["disable", unit])
             if record["enabled"] in ("enabled", "enabled-runtime"):
-                self.service(scope, ["enable", unit], False)
-            else:
-                self.service(scope, ["disable", unit], False)
-            self.service(scope, ["start" if record["active"] else "stop", unit], False)
+                args = ["enable", unit]
+                if record["enabled"] == "enabled-runtime":
+                    args.insert(1, "--runtime")
+                self.service(scope, args)
+            elif record["enabled"] in ("masked", "masked-runtime"):
+                args = ["mask", "--now", unit]
+                if record["enabled"] == "masked-runtime":
+                    args.insert(1, "--runtime")
+                self.service(scope, args)
+            # Reload restored PipeWire/WirePlumber/MPD configuration into memory.
+            # A plain start leaves an already running service on setup settings.
+            self.service(scope, ["restart" if record["active"] else "stop", unit])
+        # Check the final graph: starting a later unit may activate an earlier
+        # socket or dependency, so per-command success alone is insufficient.
+        for record in self.state["services"]:
+            scope, unit = record["scope"], record["unit"]
+            if self.unit_load_state(scope, unit) == "not-found":
+                continue
+            actual = self.service(scope, ["is-active", unit], False).stdout.strip()
+            if (actual == "active") != record["active"]:
+                raise RuntimeError(f"Dienstzustand nicht wiederhergestellt: {unit}: {actual}")
+            enabled = self.service(scope, ["is-enabled", unit], False).stdout.strip()
+            expected = record["enabled"]
+            allowed = {"disabled", "static", "not-found"} if expected == "not-found" else {expected}
+            if enabled not in allowed:
+                raise RuntimeError(f"Autostart nicht wiederhergestellt: {unit}: {enabled} statt {expected}. "
+                                   "Bei neu hinzugefügten Paketen remove --remove-packages verwenden.")
+
+    def backup_audio_configuration(self):
+        """Private reference snapshot plus per-file automatic rollback journal."""
+        for relative in USER_AUDIO_CONFIGS:
+            self.remember(self.home / relative)
+        paths = [self.path(p) for p in (
+            "/etc/mpd.conf", "/etc/default/mpd", "/etc/bluetooth",
+            "/etc/pipewire", "/etc/wireplumber", "/etc/pulse")]
+        paths += [self.home / p for p in (
+            ".mpdconf", ".config/mpd", ".config/mpDris2", ".config/pipewire",
+            ".config/wireplumber", ".config/pulse")]
+        for unit in USER_UNITS:
+            paths += [self.home / ".config/systemd/user" / unit,
+                      self.home / ".config/systemd/user" / (unit + ".d")]
+        archive = self.state_dir / "audio-before-setup.tar.gz"
+        def regular_configs(member):
+            if not (member.isfile() or member.isdir() or member.issym() or member.islnk()):
+                raise ValueError(f"Keine Konfigurationsdatei: {member.name}")
+            return member
+        # Opening with xb avoids overwriting the first snapshot on retries.
+        with archive.open("xb") as output:
+            os.fchmod(output.fileno(), 0o600)
+            with tarfile.open(fileobj=output, mode="w:gz", dereference=False) as backup:
+                for path in paths:
+                    if path.exists() or path.is_symlink():
+                        backup.add(path, arcname=str(path.relative_to(self.root)), filter=regular_configs)
+        self.state["audio_backup"] = {"path": str(archive),
+                                     "sha256": fingerprint(archive)["sha256"]}
+        self.state["radio_before"] = []
+        rfkill = self.path("/sys/class/rfkill")
+        for entry in sorted(rfkill.glob("rfkill*")):
+            if (entry / "type").read_text().strip() == "bluetooth":
+                self.state["radio_before"].append({"name": (entry / "name").read_text().strip(),
+                                                   "soft": (entry / "soft").read_text().strip()})
+        if any(r["unit"] == "bluetooth.service" and r["active"] for r in self.state["services"]):
+            shown = self.run(["bluetoothctl", "--timeout", "3", "show"], check=False)
+            powered = re.search(r"^\s*Powered: (yes|no)\s*$", shown.stdout, re.M)
+            if powered:
+                self.state["controller_powered_before"] = powered[1] == "yes"
+        self.save()
+        print("Audio-Konfiguration vor Installation gesichert:", archive, flush=True)
+
+    def restore_radio(self):
+        if "radio_before" not in self.state:
+            print("Hinweis: Protokoll ohne vorherigen Funkzustand; Funk unverändert.")
+            return
+        for previous in self.state["radio_before"]:
+            matches = [p for p in self.path("/sys/class/rfkill").glob("rfkill*")
+                       if (p / "type").read_text().strip() == "bluetooth"
+                       and (p / "name").read_text().strip() == previous["name"]]
+            if len(matches) != 1:
+                raise RuntimeError("Vorheriges Bluetooth-Funkgerät nicht eindeutig gefunden")
+            entry = matches[0]
+            if (entry / "soft").read_text().strip() != previous["soft"]:
+                # rfkill may itself have been a newly added package and is no
+                # longer available after package rollback. Restore just this
+                # captured kernel switch, never all radios indiscriminately.
+                (entry / "soft").write_text(previous["soft"] + "\n")
+                if (entry / "soft").read_text().strip() != previous["soft"]:
+                    raise RuntimeError("Vorheriger Bluetooth-Funkzustand nicht wiederhergestellt")
+        if "controller_powered_before" in self.state:
+            self.bt("power", "on" if self.state["controller_powered_before"] else "off")
 
     def install_packages(self):
         owned = []
@@ -340,13 +458,7 @@ class Setup:
         if not self.user:
             raise ValueError("Für den Player --user NAME angeben")
         driver, alias = self.check_board()
-        if (self.home / ".mpdconf").exists():
-            raise ValueError("Zusätzliche ~/.mpdconf vorhanden; vorher separat sichern/auflösen")
-        for relative in (".config/mpd/mpd.conf", ".config/mpDris2/mpDris2.conf",
-                         ".config/pipewire/client.conf.d/51-t95-mpd-target.conf",
-                         ".config/systemd/user/mpdris2.service",
-                         ".config/systemd/user/wireplumber.service.d/51-t95-state.conf",
-                         ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf"):
+        for relative in USER_AUDIO_CONFIGS:
             check_destination(self.home / relative)
         # Paths are quoted for MPD and written into an INI file. Reject control
         # characters and INI interpolation markers instead of accepting injection.
@@ -354,9 +466,17 @@ class Setup:
         if not music.is_absolute() or any(c in str(music) + str(self.home) for c in '\n\r"\\%'):
             raise ValueError("Musikpfad muss absolut sein und darf keine Steuer-/Konfigurationszeichen enthalten")
         self.snapshot_services()
+        self.backup_audio_configuration()
         self.install_packages()
         if "pipewire" not in self.run(["mpd", "--version"]).stdout.lower():
             raise ValueError("Installiertes MPD unterstützt keine PipeWire-Ausgabe")
+        legacy = self.home / ".mpdconf"
+        if legacy.exists():
+            # MPD gives this legacy file precedence over ~/.config/mpd/mpd.conf.
+            # Its original was already journaled before the package operation.
+            legacy.unlink()
+            next(r for r in self.state["files"] if r["path"] == str(legacy))["installed"] = fingerprint(legacy)
+            self.save()
         self.run(["loginctl", "enable-linger", self.user])
         self.run(["systemctl", "start", f"user@{self.uid}.service"])
         for _ in range(15):
@@ -503,7 +623,16 @@ audio_output {{
             self.bt("power", "on")
 
     def remove_packages(self):
-        packages = [p for p in self.state["new_packages"] if p in PACKAGES[self.component]]
+        packages = [p for p in self.state["new_packages"] if p in PACKAGES[self.component]
+                    and self.run(["dpkg-query", "-W", "-f=${Status}", p], check=False).stdout.strip()
+                    == "install ok installed"]
+        if (self.component == "bluetooth" and "dbus-user-session" in packages
+                and (self.home / ".config/systemd/user/udiskie.service").exists()):
+            # Samba's user automounter needs the same session bus even when
+            # audio originally installed it. APT cannot see this script-level
+            # dependency. Do not break the file server on the next login.
+            packages.remove("dbus-user-session")
+            print("dbus-user-session bleibt für die vorhandene Samba-/USB-Einrichtung erhalten.")
         if not packages:
             return
         simulation = self.run(["apt-get", "-s", "remove", "--no-auto-remove", *packages]).stdout
@@ -511,41 +640,71 @@ audio_output {{
         if not removed.issubset(set(packages)):
             raise ValueError("APT würde weitere Pakete entfernen. Pakete bleiben erhalten; keine automatische Rücknahme.")
         self.run(["apt-get", "remove", "-y", "--no-auto-remove", *packages], timeout=1800)
+        for package in packages:
+            if self.run(["dpkg-query", "-W", "-f=${Status}", package], check=False).stdout.strip() == "install ok installed":
+                raise RuntimeError(f"Paket wurde nicht entfernt: {package}; Rücknahme unvollständig")
+
+    def stop_audio_for_rollback(self):
+        if not self.state["services"]:
+            # Preflight may have failed before capturing/changing any service.
+            return
+        units = [unit for unit in USER_UNITS if self.unit_load_state("user", unit) != "not-found"]
+        if units:
+            # One systemd transaction stops sockets together with the daemons.
+            self.service("user", ["stop", *units])
 
     def remove(self, force=False, purge=False):
         if not self.state:
             raise ValueError("Kein Installationsprotokoll vorhanden; bestehende Einrichtung wird nicht blind gelöscht")
-        if self.state["phase"] != "removed":
-            conflicts = self.conflicts()
+        was_removed = self.state["phase"] == "removed"
+        if not was_removed:
+            # A retry of the old-journal service migration must not overwrite
+            # configuration changed after its original removal.
+            services_only = self.component == "bluetooth" and self.state.get("rollback_services_only", False)
+            conflicts = [] if services_only else self.conflicts()
             if conflicts and not force:
                 raise ValueError("Seit Installation geänderte Dateien; separat sichern, dann --force verwenden:\n" + "\n".join(conflicts))
-            complete = self.state["phase"] == "installed"
-            if self.component == "bluetooth" and complete:
-                self.radio("off")
-                self.service("system", ["disable", "bluetooth.service"])
-                self.service("user", ["disable", "--now", *PLAYER_UNITS], False)
-                # Stop only audio services that were not running before setup.
-                for r in reversed(self.state["services"]):
-                    if r["scope"] == "user" and r["unit"] not in PLAYER_UNITS and not r["active"]:
-                        self.service("user", ["stop", r["unit"]], False)
-                        if r["enabled"] not in ("enabled", "enabled-runtime"):
-                            self.service("user", ["disable", r["unit"]], False)
-            self.restore_files()
             if self.component == "bluetooth":
-                if complete:
-                    self.service("user", ["daemon-reload"])
-                else:
-                    # A failed/interrupted install may not have installed BlueZ
-                    # or rfkill. Restore its baseline instead of requiring them.
-                    self.restore_services()
+                # Stop sockets too, so package removal cannot leave running
+                # audio processes or immediately reactivate them.
+                self.stop_audio_for_rollback()
+                self.state["phase"] = "restoring"
+                self.save()
+            if not services_only:
+                self.restore_files()
+            if self.component == "bluetooth":
+                if purge:
+                    self.remove_packages()
+                self.restore_services()
+                self.restore_radio()
+                self.cache_tools()
             self.state["phase"] = "removed"
+            if self.component == "bluetooth":
+                self.state["rollback_mode"] = "restore-previous"
             self.save()
             print("Entfernt: vorherige Dateien wiederhergestellt. Sicherung bleibt:", self.state_dir)
         else:
-            print("Bereits entfernt.")
-        if purge:
+            if self.component == "bluetooth":
+                # Upgrade old removal journals too: their previous behavior
+                # disabled the player rather than restoring its baseline.
+                self.state["rollback_services_only"] = True
+                self.state["phase"] = "restoring"
+                self.save()
+                self.stop_audio_for_rollback()
+                if purge:
+                    self.remove_packages()
+                self.restore_services()
+                self.restore_radio()
+                self.cache_tools()
+                self.state["phase"] = "removed"
+                self.state["rollback_mode"] = "restore-previous"
+                self.save()
+                print("Bereits entfernte Einrichtung: vorherige Dienste erneut abgeglichen.")
+            else:
+                print("Bereits entfernt.")
+        if purge and self.component != "bluetooth":
             self.remove_packages()
-        else:
+        elif not purge:
             print("Pakete bleiben installiert. Optional --remove-packages: nur durch dieses Setup hinzugefügte Zielpakete.")
 
     def install(self, music=None):
@@ -565,13 +724,21 @@ audio_output {{
             self.cache_tools()
             self.state["phase"] = "installed"
             self.save()
-        except (Exception, KeyboardInterrupt):
+        except (Exception, KeyboardInterrupt) as original:
             print("Installation fehlgeschlagen; Konfigurationsdateien werden zurückgenommen.", file=sys.stderr)
-            self.restore_files()
-            if self.component == "bluetooth":
-                self.restore_services()
-            self.state["phase"] = "failed"
-            self.save()
+            try:
+                self.restore_files()
+                if self.component == "bluetooth":
+                    self.restore_services()
+                    self.restore_radio()
+            except Exception as rollback_error:
+                self.state["phase"] = "rollback-failed"
+                self.save()
+                raise RuntimeError(f"Installation fehlgeschlagen: {original}. "
+                                   f"Auch die Rücknahme benötigt Prüfung: {rollback_error}") from rollback_error
+            else:
+                self.state["phase"] = "failed"
+                self.save()
             print("APT-Pakete/Linger können verbleiben; Protokoll:", self.state_dir, file=sys.stderr)
             raise
         print(f"Fertig. Lokaler Einstieg: t95-{self.component} status / remove")
@@ -581,12 +748,32 @@ audio_output {{
         if self.state:
             print("Protokoll:", self.state_dir)
             print("Abweichende Dateien:", len(self.conflicts()) if self.state["phase"] != "removed" else "–")
+            if self.state.get("audio_backup"):
+                print("Konfigurationssicherung:", self.state["audio_backup"]["path"])
         if self.component == "bluetooth":
-            for command in (["systemctl", "is-active", "bluetooth.service"], ["rfkill", "list", "bluetooth"],
-                            ["bluetoothctl", "--timeout", "5", "show"]):
-                print(self.run(command, check=False).stdout.strip())
+            if self.state and self.state["phase"] == "removed":
+                if self.state.get("rollback_mode") == "restore-previous":
+                    print("Rücknahme = vorheriger Zustand; zuvor aktive Audiodienste dürfen laufen.")
+                else:
+                    print("Älteres Rücknahmeprotokoll: remove gleicht die vorherigen Dienste erneut ab.")
+            bluetooth = self.service("system", ["is-active", "bluetooth.service"], False).stdout.strip()
+            print("Bluetooth-Dienst:", bluetooth)
+            # A diagnostic call must not activate BlueZ via D-Bus after removal.
+            if bluetooth == "active":
+                controller = self.run(["bluetoothctl", "--timeout", "5", "show"], check=False)
+                print(controller.stdout.strip())
+            else:
+                print("Controllerabfrage übersprungen: Bluetooth-Dienst ist nicht aktiv.")
+            radio = self.run(["rfkill", "list", "bluetooth"], check=False)
+            print("rfkill nicht installiert (Paket kann nach Rücknahme fehlen)." if radio.returncode == 127
+                  else radio.stdout.strip())
             if self.user:
-                print(self.user_run(["systemctl", "--user", "is-active", *PLAYER_UNITS], False).stdout.strip())
+                before = {r["unit"]: r["active"] for r in (self.state or {}).get("services", [])
+                          if r["scope"] == "user"}
+                for unit in USER_UNITS:
+                    actual = self.service("user", ["is-active", unit], False).stdout.strip()
+                    expected = "aktiv" if before.get(unit) else "inaktiv" if unit in before else "unbekannt"
+                    print(f"{unit}: {actual}; vor Installation: {expected}")
 
 
 @contextmanager

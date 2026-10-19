@@ -2,9 +2,15 @@
 
 [Deutsch](RESTORE-CHECKLIST.md) | **English**
 
-**Pending:** this checklist is for the implementation updated 2026-10-19.
+**Partial acceptance started:** this checklist is for the implementation updated 2026-10-19.
 Earlier hardware acceptance does not complete these checks. Use spare media
 with backed-up data. No formatting or repair is part of the acceptance run.
+
+**Confirmed at `aef4e9f` on 2026-10-19:** update of the existing T95 setup,
+unchanged Samba configuration including custom fixed shares, active
+automounter and detection of an already mounted exFAT share with positive
+read/write permission checks. The feedback does not yet confirm actual file/SMB
+access or eject. [Evidence and limits](../../../docs/VALIDATION.en.md#-new-sambausb-implementation--2026-10-19).
 
 | Filesystem | Client read/write with content verification | Eject and reconnect | Result |
 | --- | --- | --- | --- |
@@ -17,7 +23,9 @@ with backed-up data. No formatting or repair is part of the acceptance run.
 ## 🧪 Required scenarios
 
 - [ ] Fresh setup; password prompt and `T95-DATA` read/write without USB.
-- [ ] Update an existing setup; compare Samba configuration and passwords before/after.
+- [x] Update an existing setup; backup created and Samba configuration including custom fixed shares unchanged.
+- [x] Already mounted exFAT share detected after update; automounter active and user permission checks passed.
+- [ ] Authenticate from a client with the existing Samba password; verify actual read/write access and file contents.
 - [ ] Existing YAML configuration; confirm the explicit project JSON is selected.
 - [ ] Drive A ejects while B stays readable/writable and newly attached C is mounted/shared.
 - [ ] Repeat on both built-in ports and with a powered USB hub.

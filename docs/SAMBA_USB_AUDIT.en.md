@@ -11,7 +11,8 @@ simulations do not replace tests with physical storage.
 > [!IMPORTANT]
 > **Fix status, 2026-10-19:** all eight findings are addressed in code and covered
 > by automated tests. Eject is now per-drive; udiskie keeps running.
-> **Hardware acceptance of this version is pending.** The originally reported
+> **Hardware acceptance has started; the full run remains pending.** An existing
+> setup update and exFAT status are partially confirmed. The originally reported
 > intermittent ext4 issue is not yet proven fixed on physical hardware.
 
 [Set up Samba](../server/samba-usb/README.en.md) · [Troubleshooting](TROUBLESHOOTING.en.md#usb-drive-missing-or-busy)
@@ -45,7 +46,7 @@ and an unambiguously identified volume.
 | Automounter restart error hidden | No automounter stop/start during eject; other drives keep working | Passed | Pending |
 | Concurrent share names collide | Short common lock, reserved names and atomic JSON state | Passed | Pending |
 | YAML overrides project JSON | Explicit service config path; existing files backed up | Passed | Pending |
-| Repeated setup retains old running config | Deliberate restart and reconciliation of existing mounts | Passed | Pending |
+| Repeated setup retains old running config | Deliberate restart and reconciliation of existing mounts | Passed | Partial: update, active service and exFAT share confirmed |
 | Samba error prevents state fallback | Explicit error handling; only validated current mappings accepted | Passed | Pending |
 | Btrfs source suffix is unsuitable as a device | Resolve block source without FSROOT suffix; handle anonymous Btrfs/FUSE mount numbers | Passed | Pending |
 
@@ -123,7 +124,8 @@ power-off, reboot, and reinsertion.
 
 - **55 new automated tests pass:** shares/eject, parsers and update/rollback fixtures. The existing 32 dashboard/Bluetooth tests also pass.
 - **udev rule syntax verified**; runtime effect on the T95 is not yet demonstrated.
-- **No physical storage or services modified.** Simulations use temporary directories and system doubles.
+- **Simulations modify no physical storage or services.** They use temporary directories and system doubles.
+- **Partial T95 acceptance at `aef4e9f`:** an existing setup was updated successfully; a private backup was created, Samba configuration including custom fixed shares remained unchanged, the automounter was active and an existing exFAT share was detected with positive user permission checks. Evidence: maintainer-provided terminal output dated 2026-10-19; no file/SMB access or eject confirmed yet. [Details and limits](VALIDATION.en.md#-new-sambausb-implementation--2026-10-19).
 - **Hardware pending:** client write/read with content verification for ext4, exFAT, FAT32 and NTFS; Btrfs subvolumes; 20 ext4 reconnect/eject cycles; multiple devices on both ports and with a hub; power-off and resumption.
 
 The [acceptance checklist](../server/samba-usb/docs/RESTORE-CHECKLIST.en.md)

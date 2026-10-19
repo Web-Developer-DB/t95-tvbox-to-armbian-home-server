@@ -2,9 +2,15 @@
 
 **Deutsch** | [English](RESTORE-CHECKLIST.en.md)
 
-**Noch offen:** Diese Liste gilt für die Implementierung vom 19.10.2026.
+**Teilabnahme begonnen:** Diese Liste gilt für die Implementierung vom 19.10.2026.
 Frühere Hardwarebestätigungen erfüllen sie nicht. Separate Datenträger mit
 gesicherten Daten verwenden. Formatieren oder Reparieren gehört nicht zur Abnahme.
+
+**Bestätigt bei `aef4e9f` am 19.10.2026:** Update der vorhandenen T95-Einrichtung,
+unveränderte Samba-Konfiguration einschließlich eigener fester Freigaben,
+aktiver Automounter und Erkennung einer bereits gemounteten exFAT-Freigabe mit
+positiver Lese-/Schreibrechte-Prüfung. Die Rückmeldung enthält noch keinen
+tatsächlichen Datei-/SMB-Zugriff und keinen Auswurf. [Nachweis und Grenzen](../../../docs/VALIDATION.md#-neue-samba-usb-verwaltung--19102026).
 
 | Dateisystem | Client lesen/schreiben mit Inhaltsprüfung | Auswurf und Wiedereinstecken | Ergebnis |
 | --- | --- | --- | --- |
@@ -17,7 +23,9 @@ gesicherten Daten verwenden. Formatieren oder Reparieren gehört nicht zur Abnah
 ## 🧪 Verbindliche Szenarien
 
 - [ ] Neueinrichtung; Passwortabfrage und `T95-DATA` lesen/schreiben ohne USB.
-- [ ] Update einer vorhandenen Einrichtung; Samba-Konfiguration und Passwörter vorher/nachher vergleichen.
+- [x] Update einer vorhandenen Einrichtung; Sicherung angelegt und Samba-Konfiguration einschließlich eigener fester Freigaben unverändert.
+- [x] Bereits gemountete exFAT-Freigabe nach Update erkannt; Automounter aktiv und Benutzerrechte-Prüfung positiv.
+- [ ] Mit bisherigem Samba-Passwort vom Client anmelden; tatsächliches Lesen/Schreiben und Inhalt prüfen.
 - [ ] Vorhandene YAML-Konfiguration; ausdrücklich gewählte Projekt-JSON bestätigen.
 - [ ] A auswerfen, während B les-/schreibbar bleibt und neu angeschlossenes C eingebunden/freigegeben wird.
 - [ ] An beiden eingebauten Anschlüssen und mit versorgtem USB-Hub wiederholen.

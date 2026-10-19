@@ -123,8 +123,28 @@ Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten gefü
 | udev-Regel: Syntax | Bestanden |
 | Paketmanifeste: 25 Samba- und 14 Dashboard-Einträge | Bestanden |
 | Alle acht Auditbefunde im Code bearbeitet | Automatisiert abgesichert |
+| Update einer vorhandenen T95-Einrichtung bei `aef4e9f` | Auf Hardware bestätigt; siehe Teilabnahme unten |
+| Bestehende feste Freigaben und Samba-Konfiguration nach Update | Unverändert; Dateivergleich ohne Unterschiede |
+| Bereits gemountetes exFAT-Laufwerk nach Update | Freigabe erkannt; Rechteprüfung für Lesen/Schreiben positiv |
 | Neue Geräte-Sperre und Auswurf auf echter T95 | Offen |
 | Dateisystemmatrix, 20 ext4-Zyklen und Mehrgerätebetrieb | Offen |
+
+**Teilabnahme am 19.10.2026, Revision `aef4e9f`:** Der Projektbetreiber hat
+das Update auf der bereits eingerichteten T95 ausgeführt und die
+Terminalausgaben zurückgemeldet. Alle 25 Modulprüfsummen waren korrekt; die
+private Konfigurationssicherung wurde angelegt und `--update` endete mit
+`Fertig. Bestehende Samba-Konfiguration erhalten.` Der anschließende Vergleich
+mit der wiederhergestellten bisherigen Konfiguration zeigte keine Unterschiede.
+Die beiden vorhandenen festen Freigaben (SD/Home-Verzeichnis und eMMC) blieben
+damit erhalten. Automounter und Benutzerdienst meldeten `active`. Ein bereits
+eingehängtes exFAT-Laufwerk erschien als Usershare; die Statusprüfung bestätigte
+Lese-/Schreibrechte des eingerichteten Benutzers.
+
+Diese Rückmeldung bestätigt weder eine neue USB-Ansteckfolge noch einen
+tatsächlichen Datei- oder SMB-Clientzugriff. Samba-Anmeldung mit dem bisherigen
+Passwort, Inhaltsvergleich, Auswurf, Wiederanstecken und Mehrgerätebetrieb
+bleiben separat zu prüfen. Interne SD/eMMC- und ZRAM-Geräte wurden im Status
+erwartungsgemäß als nicht von der USB-Verwaltung verwaltet eingeordnet.
 
 Die frühere USB-Referenzabnahme bestätigt die damaligen Skripte. Die neue
 Implementierung übernimmt diese Bestätigung nicht. [Audit und Testgrenzen](SAMBA_USB_AUDIT.md) ·

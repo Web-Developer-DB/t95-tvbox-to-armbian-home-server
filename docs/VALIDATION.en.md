@@ -122,8 +122,27 @@ tracked separately from the confirmed steps.
 | udev rule syntax | Passed |
 | Package manifests: 25 Samba + 14 dashboard entries | Passed |
 | All eight audit findings addressed in code | Covered by automated tests |
+| Update of an existing T95 setup at `aef4e9f` | Confirmed on hardware; see partial acceptance below |
+| Existing fixed shares and Samba configuration after update | Unchanged; file comparison reported no differences |
+| Already mounted exFAT drive after update | Share detected; read/write permission checks passed |
 | New per-drive guard and eject on physical T95 | Pending |
 | Filesystem matrix, 20 ext4 cycles and multiple devices | Pending |
+
+**Partial acceptance on 2026-10-19, revision `aef4e9f`:** The maintainer ran
+the update on the existing T95 installation and provided terminal output.
+All 25 module checksums matched; a private configuration backup was created
+and `--update` completed with `Fertig. Bestehende Samba-Konfiguration erhalten.`
+The subsequent comparison with the restored previous configuration reported
+no differences, preserving both existing fixed shares (SD/home directory and
+eMMC). The automounter and user service reported `active`. An already mounted
+exFAT drive appeared as a usershare; status checks confirmed read/write
+permissions for the configured user.
+
+This feedback does not confirm a new USB attachment sequence or actual file
+or SMB client access. Authentication with the existing Samba password,
+content verification, eject, reconnection and multiple-device operation still
+require separate checks. Internal SD/eMMC and ZRAM devices were correctly
+reported as outside the USB manager's scope.
 
 Earlier USB reference acceptance applies to the earlier scripts. It does not
 confirm the new implementation. [Audit and limits](SAMBA_USB_AUDIT.en.md) ·

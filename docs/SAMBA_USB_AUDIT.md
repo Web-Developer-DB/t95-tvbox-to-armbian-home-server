@@ -11,7 +11,8 @@ Quellprüfung und isolierte Simulationen ersetzen keinen Datenträgertest.
 > [!IMPORTANT]
 > **Korrekturstand 19.10.2026:** Alle acht Befunde sind im Code bearbeitet und
 > durch automatisierte Tests abgesichert. Der Auswurf arbeitet jetzt je Laufwerk;
-> udiskie bleibt aktiv. **Die Hardware-Abnahme dieser Version steht noch aus.**
+> udiskie bleibt aktiv. **Die Hardware-Abnahme hat begonnen; der vollständige
+> Durchlauf steht noch aus.** Update und exFAT-Status sind als Teilabnahme bestätigt.
 > Der ursprüngliche sporadische ext4-Fehler ist damit noch nicht auf echter
 > Hardware als behoben nachgewiesen.
 
@@ -47,7 +48,7 @@ Schritt mit Datensicherung und eindeutig identifiziertem Medium.
 | Automounter-Neustartfehler wird unterdrückt | Stoppen/Starten aus dem Auswurf entfernt; andere Geräte laufen weiter | Bestanden | Offen |
 | Gleichzeitige Freigabenamen kollidieren | Gemeinsame kurze Sperre, Namensreservierung und atomare JSON-Zuordnungen | Bestanden | Offen |
 | YAML übersteuert Projekt-JSON | Dienst wählt die Konfigurationsdatei ausdrücklich; vorhandene Dateien werden gesichert | Bestanden | Offen |
-| Erneutes Setup lädt laufenden Dienst nicht neu | Kontrollierter Neustart und Abgleich bereits gemounteter Geräte | Bestanden | Offen |
+| Erneutes Setup lädt laufenden Dienst nicht neu | Kontrollierter Neustart und Abgleich bereits gemounteter Geräte | Bestanden | Teilweise: Update, aktiver Dienst und exFAT-Freigabe bestätigt |
 | Samba-Abfrage verhindert State-Fallback | Fehler ausdrücklich melden; nur validierte aktuelle Zuordnungen verwenden | Bestanden | Offen |
 | Btrfs-Subvolume-Quelle ist kein Blockgerätename | Blockquelle ohne FSROOT-Suffix auswerten; auch anonyme Btrfs-/FUSE-Mount-Gerätenummern berücksichtigen | Bestanden | Offen |
 
@@ -128,7 +129,8 @@ offenen Dateien, nicht unterstütztes Power-off, Neustart und erneutes Anstecken
 
 - **55 neue automatisierte Tests bestanden**: Freigaben/Auswurf, Parser und Update-/Rollback-Fixtures. Zusätzlich bestehen die bisherigen 32 Dashboard-/Bluetooth-Tests.
 - **udev-Regel syntaktisch geprüft**; noch kein Nachweis ihrer Laufzeitwirkung auf der T95.
-- **Keine echten Datenträger oder Dienste verändert.** Simulationen verwenden temporäre Verzeichnisse und System-Doubles.
+- **Simulationen verändern keine echten Datenträger oder Dienste.** Sie verwenden temporäre Verzeichnisse und System-Doubles.
+- **Teilabnahme auf T95 bei `aef4e9f`:** Update einer vorhandenen Einrichtung erfolgreich; private Sicherung angelegt, Samba-Konfiguration einschließlich eigener fester Freigaben unverändert, Automounter aktiv und vorhandene exFAT-Freigabe mit positiven Benutzerrechte-Prüfungen erkannt. Nachweis: vom Projektbetreiber übermittelte Terminalausgabe vom 19.10.2026; noch kein Datei-/SMB-Zugriff oder Auswurf. [Details und Grenzen](VALIDATION.md#-neue-samba-usb-verwaltung--19102026).
 - **Hardware offen:** Client lesen/schreiben mit Inhaltsvergleich für ext4, exFAT, FAT32 und NTFS; Btrfs-Subvolumes; 20 ext4-Ansteck-/Auswurfzyklen; Mehrgerätebetrieb an beiden Ports und mit Hub; Power-off und Wiederaufnahme.
 
 Die [Abnahmecheckliste](../server/samba-usb/docs/RESTORE-CHECKLIST.md) hält diese

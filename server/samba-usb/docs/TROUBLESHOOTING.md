@@ -1,105 +1,97 @@
-<a id="troubleshooting"></a>
-
-# 🛟 Troubleshooting
+# 🔎 Samba-/USB-Fehlerhilfe
 
 **Deutsch** | [English](TROUBLESHOOTING.en.md)
 
-> [!NOTE]
-> **Technische Diagnose auf der T95.** Beginne als Einsteiger mit der [einfachen USB-Fehlerhilfe](../../../docs/TROUBLESHOOTING.md#usb-laufwerk-fehlt-oder-ist-belegt). Die Beispiele hier erfordern den tatsächlichen Benutzer sowie passende Geräte-, Mount- und Freigabenamen; Hook-Tests verändern Usershares.
+Zuerst prüfen, auf welcher Ebene der Fehler liegt. Diese Anleitung setzt die
+[aktuelle Projektinstallation](../README.md) voraus.
 
-| Dein Symptom | Hier beginnen |
+| Beobachtung | Nächster Schritt |
 | --- | --- |
-| 📂 USB gemountet, Freigabe fehlt | [Event und Dienst prüfen](#usb-wird-gemountet-aber-keine-samba-freigabe-erscheint) |
-| 🔁 Doppelte Freigabe | [Mountpunkte vergleichen](#doppelte-extern-usb-n-freigabe) |
-| 🛠️ Befehle im Skript fehlen | [PATH prüfen](#command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts) |
-| 🔒 Laufwerk belegt | [DeviceBusy untersuchen](#devicebusy-beim-auswerfen) |
-| 🔌 Laufwerk kommt sofort zurück | [udiskie beim Auswurf prüfen](#gerät-wird-direkt-nach-unmount-wieder-gemountet) |
-| ✅ Auswurf kontrollieren | [Mount, Freigabe und Gerät prüfen](#auswurf-erfolgreich-prüfen) |
+| Laufwerk fehlt bereits in `lsblk` | Kabel, USB-Port, Versorgung und Kernelmeldungen prüfen. |
+| Gerät sichtbar, aber nicht eingehängt | udiskie-/Kernelprotokoll, Dateisystemzustand und Auswurfsperre prüfen. |
+| Eingehängt, aber Freigabe fehlt | Freigabe-Hook und Samba-Einstellungen prüfen. |
+| Freigabe lesbar, Schreiben scheitert | Samba-Konto und tatsächliche Dateirechte prüfen; bei ext4 gelten vorhandene UID/GID/ACLs. |
+| Auswurf fehlgeschlagen | Nicht abziehen; Status und betroffene Mounts prüfen, dann erneut auswerfen. |
 
-Die Befehle verwenden die anonymisierten Shell-Variablen `$T95_USER` und
-`$T95_UID`. Vor dem Test setzen:
+## 📋 Status sammeln
 
-```bash
-export T95_USER=serveruser
-export T95_UID="$(id -u "$T95_USER")"
-```
-
-<a id="usb-wird-gemountet-aber-keine-samba-freigabe-erscheint"></a>
-
-## 📂 USB wird gemountet, aber keine Samba-Freigabe erscheint
+**Auf der T95, normaler SSH-Benutzer; die Befehle ändern keine Einstellungen:**
 
 ```bash
-sudo -u $T95_USER net usershare list
-journalctl -t T95-USB-SHARE --no-pager -n 50
-sudo -u $T95_USER XDG_RUNTIME_DIR=/run/user/$T95_UID \
-  journalctl --user -u udiskie.service --no-pager -n 100
+sudo usb-eject --status
+lsblk -o NAME,TYPE,SIZE,FSTYPE,TRAN,MOUNTPOINTS
+net usershare list
+systemctl --user status udiskie.service --no-pager -l
+sudo journalctl -t T95-USB-SHARE -b --no-pager -n 60
+sudo journalctl -b -u udisks2.service --no-pager -n 60
+sudo journalctl -k -b --no-pager -n 80
 ```
 
-Manueller Hook-Test:
+Fehlt das Benutzerjournal, systemweit nach der tatsächlichen UID suchen:
+
+**Auf der T95, normaler SSH-Benutzer:**
 
 ```bash
-sudo -u $T95_USER /usr/local/bin/t95-usb-share \
-  device_mounted /dev/sda1 /media/$T95_USER/NAME LABEL UUID
+sudo journalctl -b "_UID=$(id -u)" --no-pager -n 80
 ```
 
-<a id="doppelte-extern-usb-n-freigabe"></a>
+Protokolle können Seriennummern, UUIDs und Benutzernamen enthalten. Vor dem
+öffentlichen Teilen prüfen. Eine leere Usershare-Liste ist ohne eingebundenen
+USB-Datenträger korrekt; die feste `T95-DATA`-Freigabe wird dort nicht gelistet.
 
-## 🔁 Doppelte `Extern-USB-N`-Freigabe
+## 💾 Dateisystem und Zugriffsrechte
 
-Prüfen, ob mehrere Shares auf denselben Pfad zeigen:
+- ext4: Mounten und Schreibberechtigung sind getrennte Fragen. Rechte am Datenträger gezielt prüfen; keine pauschalen rekursiven Eigentümerwechsel.
+- NTFS: `volume is dirty`, Hibernation oder Fast-Startup können das Einbinden verhindern. Daten sichern und separat eine passende Reparatur planen; das Skript erzwingt keinen Mount.
+- Schreibgeschützte Datenträger bleiben schreibgeschützt. Die Statusanzeige prüft Zugriffsrechte als tatsächlicher Samba-Benutzer.
+- Fehlt das Gerät in `lsblk`, kann der Freigabe-Hook es noch nicht verarbeiten. Das ist von einer fehlenden SMB-Freigabe zu unterscheiden.
+
+## ⏏️ Auswurf bleibt unvollständig
+
+Offene Dateien, VLC und Terminalfenster im USB-Ordner schließen. Den tatsächlichen
+Freigabenamen wählen:
+
+**Auf der T95, normaler SSH-Benutzer:**
 
 ```bash
-for s in $(sudo -u $T95_USER net usershare list); do
-  sudo -u $T95_USER net usershare info "$s"
-done
+read -r -p 'Freigabename des betroffenen USB-Laufwerks: ' T95_SHARE
 ```
 
-Die Referenzversion von `t95-usb-share` ist idempotent und darf denselben Mountpunkt nicht doppelt veröffentlichen.
-
-<a id="command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts"></a>
-
-## 🛠️ `command not found` für rm/logger/head/sync innerhalb eines Skripts
-
-Prüfen, ob die Shell-Systemvariable `PATH` überschrieben wurde:
+Den Namen eingeben, Enter drücken. Dann im selben T95-Fenster:
 
 ```bash
-grep -n '\bPATH\b' /usr/local/bin/t95-usb-share
-grep -n '\bPATH\b' /usr/local/bin/usb-eject
+sudo usb-eject "$T95_SHARE"
 ```
 
-`PATH` darf nur der Kommando-Suchpfad sein. Für Dateipfade Namen wie `SAVED_PATH` verwenden.
+`failed` kann einen teilweise ausgeführten Vorgang bedeuten. Die Sperre bleibt
+auf das betroffene Laufwerk begrenzt; andere Geräte werden weiter eingebunden.
+Nicht manuell den gesamten Automounter stoppen oder die Sperrdatei löschen.
+Nach erfolgreichem Auswurf abziehen und neu verbinden, wenn das Laufwerk wieder
+benutzt werden soll. Auch ein Rechnerneustart hebt Laufzeitsperren auf.
 
-<a id="devicebusy-beim-auswerfen"></a>
+## 🔄 Installation oder Update scheitert
 
-## 🔒 `DeviceBusy` beim Auswerfen
+`--update` erhält die Samba-Konfiguration. Meldet es fehlende Einstellungen,
+die genannten Werte prüfen; keine komplette Neueinrichtung als ersten
+Fehlerbehebungsversuch ausführen. Bei noch unbekannter Gruppe `sambashare` die
+Box kontrolliert neu starten und den Aufruf wiederholen.
 
-```bash
-fuser -vm /media/$T95_USER/MOUNTNAME
-smbstatus --shares
-```
+Private Sicherung und `state.json` liegen unter `/var/lib/t95-samba/installation-…/`.
+`rolled-back` bestätigt die geprüfte Rücknahme; `rollback-failed` erfordert die
+Prüfung der angegebenen Sicherung und Fehlermeldung. Sicherungen bleiben privat.
 
-Wenn `smbd` den Mount hält:
-
-```bash
-sudo smbcontrol smbd close-share SHARENAME
-```
-
-Die Referenzversion von `usb-eject` führt diesen Schritt automatisch aus.
-
-<a id="gerät-wird-direkt-nach-unmount-wieder-gemountet"></a>
-
-## 🔌 Gerät wird direkt nach Unmount wieder gemountet
-
-`udiskie` darf während der Unmount/Power-Off-Sequenz nicht weiterlaufen. Die Referenzversion von `usb-eject` stoppt den User-Service temporär und startet ihn anschließend wieder.
-
+<!-- Compatibility anchors for older documentation links. -->
+<a id="-auswurf-erfolgreich-prüfen"></a>
+<a id="-command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts"></a>
+<a id="-devicebusy-beim-auswerfen"></a>
+<a id="-doppelte-extern-usb-n-freigabe"></a>
+<a id="-gerät-wird-direkt-nach-unmount-wieder-gemountet"></a>
+<a id="-troubleshooting"></a>
+<a id="-usb-wird-gemountet-aber-keine-samba-freigabe-erscheint"></a>
 <a id="auswurf-erfolgreich-prüfen"></a>
-
-## ✅ Auswurf erfolgreich prüfen
-
-```bash
-findmnt /media/$T95_USER/MOUNTNAME
-sudo -u $T95_USER net usershare list
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-```
-
-Nach erfolgreichem `udisksctl power-off` sollte das physische `/dev/sdX` aus `lsblk` verschwinden.
+<a id="command-not-found-für-rmloggerheadsync-innerhalb-eines-skripts"></a>
+<a id="devicebusy-beim-auswerfen"></a>
+<a id="doppelte-extern-usb-n-freigabe"></a>
+<a id="gerät-wird-direkt-nach-unmount-wieder-gemountet"></a>
+<a id="troubleshooting"></a>
+<a id="usb-wird-gemountet-aber-keine-samba-freigabe-erscheint"></a>

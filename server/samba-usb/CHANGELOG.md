@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-19
+
+- Gemeinsamer Python-Kern für Geräteidentität, atomare Zuordnungen und gesperrte Namensvergabe.
+- Gerätebezogene udev-Sperre ersetzt das Stoppen des Automounters beim Auswurf.
+- Auswurf aller Partitionen mit Btrfs-/FUSE-Zuordnung, Nachbarschutz und Wiederaufnahme nach Fehlern.
+- Private Konfigurationssicherung und geprüfte Rücknahme; `--update` erhält Samba-Einstellungen/Passwörter.
+- Lesendes `usb-eject --status`; automatisierte Regressionstests und getrennte offene Hardwarecheckliste.
+
 ## 2026-09-16
 
 - README für den integrierten Home-Server-Pfad mit Installations-, Prüf-,

@@ -1,60 +1,42 @@
-<a id="restore-checklist"></a>
-
-# ↩️ Restore checklist
+# ✅ Hardware acceptance: new Samba/USB implementation
 
 [Deutsch](RESTORE-CHECKLIST.md) | **English**
 
-Technical checklist for the already prepared eMMC reference installation.
-For a new SD installation, use the [Samba quick start](../README.en.md); do not
-repeat these manual steps after its script finishes.
+**Pending:** this checklist is for the implementation updated 2026-10-19.
+Earlier hardware acceptance does not complete these checks. Use spare media
+with backed-up data. No formatting or repair is part of the acceptance run.
 
-Replace `__T95_USER__` and `__T95_MOUNT_BASE__` in templates with the actual
-username and `/media/<username>` before applying them. Copying unchanged
-Polkit/Samba templates does not expand shell variables. For this eMMC path,
-`/srv/T95-DATA` must already be mounted persistently and verified.
+| Filesystem | Client read/write with content verification | Eject and reconnect | Result |
+| --- | --- | --- | --- |
+| ext4 | ☐ | ☐ 20 cycles | Not tested |
+| exFAT | ☐ | ☐ | Not tested |
+| FAT32 | ☐ | ☐ | Not tested |
+| NTFS | ☐ | ☐ | Not tested |
+| Single-drive Btrfs with subvolumes | ☐ | ☐ | Not tested |
 
-| Part | Check |
-| --- | --- |
-| 🔎 Before starting | Existing user, verified eMMC mount, replaced template placeholders |
-| 📦 Steps 1–5 | Packages, Samba account, group, data path, and share configuration |
-| ⚙️ Steps 6–11 | Helpers, Polkit, udiskie, and persistent user service |
-| ✅ Step 12 | Configuration, client access, USB automount, and safe eject |
+## 🧪 Required scenarios
 
-<a id="prepare"></a>
+- [ ] Fresh setup; password prompt and `T95-DATA` read/write without USB.
+- [ ] Update an existing setup; compare Samba configuration and passwords before/after.
+- [ ] Existing YAML configuration; confirm the explicit project JSON is selected.
+- [ ] Drive A ejects while B stays readable/writable and newly attached C is mounted/shared.
+- [ ] Repeat on both built-in ports and with a powered USB hub.
+- [ ] Multiple partitions: all shares closed and mounts removed on the selected drive.
+- [ ] Unsupported power-off: guarded unmount permits unplugging; other drives keep working.
+- [ ] Busy/open file: failure reported without an unsafe-unplug message; retry works.
+- [ ] Interrupted eject and udiskie restart: target remains guarded; other devices still mount.
+- [ ] Replug and reboot: no obsolete guard or conflicting usershare names.
+- [ ] Permission-limited ext4 and read-only media: clear diagnosis, unchanged ownership/data.
+- [ ] Check kernel/UDisks logs for I/O, disconnect and filesystem errors.
 
-## 📋 Prepare
+Record date, revision, hardware, filesystem/driver, outcome and error details in
+[validation](../../../docs/VALIDATION.en.md). Keep personal logs private.
+[User guide](../README.en.md) · [Technical reference](SAMBA-USB-SETUP.en.md)
 
-**On the T95 as administrator; adapt technical examples before running them.**
-
-These examples assume an existing Linux user;
-replace `serveruser` with the desired name:
-
-```bash
-export T95_USER=serveruser
-export T95_UID="$(id -u "$T95_USER")"
-```
-
+<!-- Compatibility anchors for older documentation links. -->
+<a id="-check-manual-restoration"></a>
+<a id="-prepare"></a>
+<a id="-restore-checklist"></a>
 <a id="check-manual-restoration"></a>
-
-## ✅ Check manual restoration
-
-1. Install `samba`, `samba-common-bin`, `udisks2`, `udiskie`,
-   `dbus-user-session`, `polkitd`, `exfatprogs`, and `ntfs-3g`.
-2. Ensure `$T95_USER` exists; set its Samba password with
-   `smbpasswd -a $T95_USER`.
-3. Add `$T95_USER` to `sambashare`; set `/var/lib/samba/usershares` to
-   `root:sambashare`, mode `1770`.
-4. Create `/srv/T95-DATA/Share`, owned by `$T95_USER:$T95_USER`, mode `2770`.
-5. Apply global usershare options and `[T95-DATA]` from
-   `config/samba/smb.conf.fragment`; do not create a static `[USB]` share.
-6. Install `t95-usb-share` and `usb-eject` from `scripts/` into
-   `/usr/local/bin/`, mode `0755`.
-7. Replace the user placeholder in the Polkit rule and copy it to `/etc/polkit-1/rules.d/50-t95-udisks.rules`.
-8. Copy `config.json` to `/home/$T95_USER/.config/udiskie/config.json`.
-9. Copy `udiskie.service` to
-   `/home/$T95_USER/.config/systemd/user/udiskie.service`.
-10. Set user-file ownership to `$T95_USER:$T95_USER` and run
-    `loginctl enable-linger $T95_USER`.
-11. Start with `systemctl --user enable --now udiskie.service`.
-12. Test `testparm`, automount, `net usershare list`, client access to
-    `smb://SERVER-IP/`, and `usb-eject`.
+<a id="prepare"></a>
+<a id="restore-checklist"></a>

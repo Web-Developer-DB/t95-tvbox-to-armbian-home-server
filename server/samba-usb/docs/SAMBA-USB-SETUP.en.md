@@ -1,185 +1,131 @@
-<a id="complete-guide-samba--dynamic-usb-shares-on-t95armbian"></a>
-
-# 📚 Complete guide: Samba + dynamic USB shares on T95/Armbian
+# ⚙️ Technical reference: Samba and USB
 
 [Deutsch](SAMBA-USB-SETUP.md) | **English**
 
-This is the technical reference for the reproducible T95 Samba/USB module.
-Use the installation script in [../README.en.md](../README.en.md) for the
-normal supported path; use this document to understand, audit, adapt, or
-restore the components.
+New users should follow the [module guide](../README.en.md). This reference
+describes the implementation updated 2026-10-19. Earlier manual recipes have
+been replaced by the installer and its `--update` mode.
 
-| Component | Purpose and detail section |
+| Layer | Purpose |
 | --- | --- |
-| 📂 Samba | [Fixed share and usershares](#4-samba-configuration) |
-| 🔌 UDisks + Polkit + udiskie | [Mount permissions and user service](#5-udisks-polkit-and-udiskie-service) |
-| ⚙️ Event hook + usb-eject | [Dynamic shares and safe eject](#6-dynamic-share-and-eject-scripts) |
-| ✅ Validation | [Check the configured system](#7-validation) |
-| 🛟 Understand errors | [Common failure patterns](#8-common-failure-patterns) |
+| Samba | Fixed `T95-DATA` plus individual USB usershares |
+| UDisks / udiskie | Mount filesystems and report events |
+| Shared Python core | Device identity, shares, state and targeted eject |
+| udev | Prevent remounting only the ejected drive |
 
-**Run on:** the T95, using an existing account and `sudo` for administration. Configuration blocks are templates; historical failure examples are explanatory.
+## 📦 Installation and updates
 
+The installer verifies the entire package manifest before APT. Replaced files
+and earlier service states are backed up privately at
+`/var/lib/t95-samba/installation-…/`. Dependencies include Python 3 with
+`python3-dbus`, udev and util-linux. Installed core: `/usr/local/lib/t95-usb/`.
+
+`T95_USER` selects an existing normal Linux user; actual UID and primary GID are
+resolved. `DATA_PATH` and `NETBIOS_NAME` customize fresh setup. The default data
+path is `/srv/T95-DATA/Share`; the recommended SD setup explicitly uses
+`/srv/t95-sd-data/Share`.
+
+`--update` preserves Samba configuration, passwords, data path and custom fixed
+shares. It validates required usershare settings and reports missing values.
+Existing `config.yml` stays intact; the service explicitly selects
+`--config=%h/.config/udiskie/config.json`.
+
+After daemon reload, enabling and a deliberate udiskie restart, mounted storage
+is reconciled. A stale user-manager group list prevents false setup success;
+the error requests a controlled reboot followed by another setup invocation.
+
+## 🧩 Shares and state
+
+A short shared lock protects name allocation, publication and state changes.
+Labels are sanitized; unlabelled storage uses names such as `Extern-USB-1`.
+Collisions receive counters. Fixed shares and names reserved for still-attached
+ejected drives are excluded from allocation.
+
+Atomic JSON mappings in `~/.local/state/t95-usb-shares/` contain schema version,
+share, mount, partition and current device identity. Old `.map` files are
+migrated only after validating the current mapping. Records are never executed
+as shell code. Device/Samba query failures are not treated as empty results.
+
+The hook reconciles actual mounts at startup and on device events. Repeated
+events do not create duplicate shares. Failed state writes roll back newly
+created shares or log an explicit repair requirement.
+
+## ⏏️ Targeted eject
+
+`usb-eject` resolves a share to its whole physical USB drive. Boot ID, canonical
+sysfs path and `diskseq` distinguish reused device names. System/foreign mounts,
+swap and unsupported storage topologies prevent ejection.
+
+A root-managed guard is installed under `/run/t95-usb/` before unmounting.
+The udev rule applies `UDISKS_IGNORE=1` and `UDISKS_AUTO=0` only to this disk and
+its partitions. UDisks must confirm the guard and pending device jobs must end.
+**udiskie continues running throughout ejection.**
+
+Connections to all associated Samba shares are closed. Filesystems are synced
+and mounts unmounted from the deepest path outward. Btrfs and FUSE NTFS can
+have anonymous mount device numbers, so the real block source is also used.
+Only confirmed unmounting permits deletion of associated shares and mappings.
+
+Power-off is attempted only when supported and when sibling drives in a shared
+physical device would not be affected. Otherwise confirmed unmounting with an
+active remount guard permits safe unplugging. Unexpected power-off errors are
+reported as failures.
+
+The guard remains until unplugging or reboot. Restarting udiskie does not clear
+it; a new attachment does not inherit it. Operation journals under
+`/run/t95-usb/operations/` are private. Name reservations are readable, but only
+root can change them.
+
+## 🔎 Diagnostics and rollback
+
+**On the T95, normal SSH user:**
+
+```bash
+sudo usb-eject --status
+sudo journalctl -t T95-USB-SHARE -b --no-pager -n 60
+systemctl --user status udiskie.service --no-pager -l
+```
+
+Status lists devices, filesystems, mounts, user access, shares, guards and failed
+ejections. Exit codes: `0` confirmed success, `1` operation failure, `2` invalid
+invocation. Some partitions may already be unmounted after an error; inspect
+status and repeat the same eject command.
+
+Installation failures automatically restore and verify project files and prior
+service states. Failed restoration remains visible as `rollback-failed` with a
+backup path. Packages, groups and linger may remain. A later manual restoration
+requires inspecting the private journal and any subsequent changes.
+
+## 🧪 Evidence and boundaries
+
+[Audit/fix status](../../../docs/SAMBA_USB_AUDIT.en.md) ·
+[Hardware acceptance](RESTORE-CHECKLIST.en.md) · [Troubleshooting](TROUBLESHOOTING.en.md)
+
+Supported scope: ext4, exFAT, FAT32, NTFS and Btrfs on one physical drive.
+Unix permissions, drivers and volume condition still apply. No automatic repair,
+formatting, force-unmounting or recursive permission changes. Hardware acceptance
+of the new implementation is pending.
+
+<!-- Compatibility anchors for older documentation links. -->
+<a id="-1-target-design"></a>
+<a id="-10-restore-limits"></a>
+<a id="-2-verified-server-state"></a>
+<a id="-3-packages-and-account"></a>
+<a id="-4-samba-configuration"></a>
+<a id="-5-udisks-polkit-and-udiskie-service"></a>
+<a id="-6-dynamic-share-and-eject-scripts"></a>
+<a id="-7-validation"></a>
+<a id="-8-common-failure-patterns"></a>
+<a id="-9-security-and-publication"></a>
+<a id="-complete-guide-samba--dynamic-usb-shares-on-t95armbian"></a>
 <a id="1-target-design"></a>
-
-## 🎯 1. Target design
-
-The running Armbian T95 publishes a fixed internal `T95-DATA` share and one
-dynamic Samba usershare for each mounted USB/SSD filesystem. UDisks2 performs
-mount/power operations, Polkit permits the selected user to do so without an
-interactive desktop agent, and udiskie runs persistently as that user's systemd
-user service. `t95-usb-share` receives udiskie events and creates/removes the
-corresponding usershare.
-
-There is deliberately no static `[USB]` share. Per-volume shares correctly
-show capacity/free space and make safe eject targetable. The preferred client
-entry point is `smb://<SERVER-IP>/`.
-
-<a id="2-verified-server-state"></a>
-
-## 🔎 2. Verified server state
-
-The reference is T95 `H616-T95MAX-AXP313A-V3.0`, Armbian 26.8.4/Debian 13,
-kernel 6.18, `end0` Ethernet with DHCP, and an optional ext4 eMMC data mount at
-`/srv/T95-DATA`. eMMC is a data medium here, not a supported Armbian boot
-device. Ensure Linux, SD boot, Ethernet, and SSH work before installing Samba.
-
-<a id="3-packages-and-account"></a>
-
-## 📦 3. Packages and account
-
-Install the package set used by the restore script:
-
-```bash
-sudo apt update
-sudo apt install -y samba samba-common-bin udisks2 udiskie dbus-user-session \
-  polkitd exfatprogs ntfs-3g
-```
-
-Select an existing regular Linux user and set variables:
-
-```bash
-export T95_USER=serveruser
-export T95_UID="$(id -u "$T95_USER")"
-id "$T95_USER"
-sudo smbpasswd -a "$T95_USER"
-```
-
-The user needs Samba membership and a writable usershare directory:
-
-```bash
-sudo usermod -aG sambashare "$T95_USER"
-sudo install -d -o root -g sambashare -m 1770 /var/lib/samba/usershares
-sudo install -d -o "$T95_USER" -g "$T95_USER" -m 2770 /srv/T95-DATA/Share
-```
-
-When the data path is on eMMC, mount it permanently before this step and verify
-with `findmnt`; do not format/partition eMMC from this module.
-
-<a id="4-samba-configuration"></a>
-
-## 📂 4. Samba configuration
-
-Use `config/samba/smb.conf.fragment` as the known reference. It configures
-standalone Samba, SMB2 minimum protocol, usershares below
-`/media/$T95_USER`, and `[T95-DATA]` at `/srv/T95-DATA/Share`. Validate and
-start services:
-
-```bash
-sudo testparm -s
-sudo systemctl enable --now smbd nmbd
-```
-
-Back up an existing `/etc/samba/smb.conf` before replacement. Do not create a
-static `[USB]` share.
-
-<a id="5-udisks-polkit-and-udiskie-service"></a>
-
-## 🔌 5. UDisks, Polkit, and udiskie service
-
-Install `config/polkit/50-t95-udisks.rules` as
-`/etc/polkit-1/rules.d/50-t95-udisks.rules`. Copy
-`config/udiskie/config.json` to
-`/home/$T95_USER/.config/udiskie/config.json` and
-`config/systemd-user/udiskie.service` to
-`/home/$T95_USER/.config/systemd/user/udiskie.service`; set ownership to
-`$T95_USER:$T95_USER`.
-
-Enable lingering so the user service starts without an interactive login, then
-enable it:
-
-```bash
-sudo loginctl enable-linger "$T95_USER"
-sudo -u "$T95_USER" XDG_RUNTIME_DIR="/run/user/$T95_UID" \
-  systemctl --user enable --now udiskie.service
-```
-
-The service's pre-start hook runs `t95-usb-share startup` to restore valid
-usershares after service restart.
-
-<a id="6-dynamic-share-and-eject-scripts"></a>
-
-## ⏏️ 6. Dynamic share and eject scripts
-
-Install `scripts/t95-usb-share` and `scripts/usb-eject` as
-`/usr/local/bin/t95-usb-share` and `/usr/local/bin/usb-eject`, mode `0755`.
-The first script records mount/share mappings under
-`~/.local/state/t95-usb-shares/`, turns labels into safe names, uses
-`Extern-USB-N` for unlabelled media, resolves name collisions with `-2`,
-`-3`, and is idempotent for repeated events.
-
-`usb-eject SHARENAME` stops udiskie temporarily, closes only selected Samba
-share connections, runs `sync`, unmounts all device partitions, removes state
-only after success, calls UDisks power-off, then restarts udiskie. Use the
-share name, not a guessed `/dev/sdX`.
-
-<a id="7-validation"></a>
-
-## ✅ 7. Validation
-
-```bash
-sudo testparm -s
-systemctl --no-pager --full status smbd nmbd
-sudo -u "$T95_USER" net usershare list
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-journalctl -t T95-USB-SHARE --no-pager -n 30
-```
-
-Insert a USB volume. A labelled filesystem should appear as a sanitized
-label-derived share; an unlabelled one as `Extern-USB-1`. Test an
-authenticated client connection at `smb://<SERVER-IP>/`, upload/download a
-small file, then eject it using `sudo usb-eject SHARENAME`. Confirm the mount,
-usershare, and physical device have disappeared; reinserting recreates it.
-
-<a id="8-common-failure-patterns"></a>
-
-## 🛟 8. Common failure patterns
-
-| Symptom | First check | Relevant fix |
-| --- | --- | --- |
-| Mount exists, no share | `net usershare list`, `journalctl -t T95-USB-SHARE` | inspect event hook and Polkit/user service |
-| Duplicate `Extern-USB-N` | usershares pointing to same path | retain idempotent mount-point check |
-| `command not found` inside script | `PATH` was overwritten | use a variable such as `SAVED_PATH` |
-| `DeviceBusy` | `fuser`, `smbstatus --shares` | `smbcontrol smbd close-share SHARENAME` |
-| Immediate remount | udiskie still active | stop it for unmount/power-off sequence |
-
-See [TROUBLESHOOTING.en.md](TROUBLESHOOTING.en.md) for commands and recovery
-details.
-
-<a id="9-security-and-publication"></a>
-
-## 🔒 9. Security and publication
-
-Do not publish Samba passwords, `passdb.tdb`, `/etc/shadow`, private SSH keys,
-complete system images, local UART captures, or personal configuration. The
-module templates contain no Samba credentials; `smbpasswd` creates them only
-on the target T95. Verify `MANIFEST.sha256` after checkout and regenerate it
-after intentional public module changes.
-
 <a id="10-restore-limits"></a>
-
-## ↩️ 10. Restore limits
-
-The script backs up an existing Samba configuration as
-`/etc/samba/smb.conf.before-t95.<TIMESTAMP>`. Restore a selected file with
-`cp -a`, validate via `testparm -s`, then restart `smbd`. A complete uninstall
-of every package, Polkit rule, and user file is intentionally not supplied.
+<a id="2-verified-server-state"></a>
+<a id="3-packages-and-account"></a>
+<a id="4-samba-configuration"></a>
+<a id="5-udisks-polkit-and-udiskie-service"></a>
+<a id="6-dynamic-share-and-eject-scripts"></a>
+<a id="7-validation"></a>
+<a id="8-common-failure-patterns"></a>
+<a id="9-security-and-publication"></a>
+<a id="complete-guide-samba--dynamic-usb-shares-on-t95armbian"></a>

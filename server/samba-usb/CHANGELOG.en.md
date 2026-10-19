@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-19
+
+- Shared Python core for device identity, atomic mappings and locked share-name allocation.
+- Per-attachment udev guards replace stopping the automounter during eject.
+- Whole-drive eject covers all partitions, Btrfs/FUSE sources, sibling protection and resumable failures.
+- Private configuration backups and checked rollback; `--update` preserves Samba settings/passwords.
+- Read-only `usb-eject --status`; automated regression tests and separate pending hardware checklist.
+
 [Deutsch](CHANGELOG.md) | **English**
 
 ## 2026-09-16

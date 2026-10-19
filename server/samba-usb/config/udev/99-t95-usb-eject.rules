@@ -1,0 +1,5 @@
+# Per-attachment guard. diskseq is a kernel-generated number, not an sdX name.
+SUBSYSTEM=="block", ACTION=="add|change", ENV{DEVTYPE}=="disk", ATTR{diskseq}=="?*", TEST=="/run/t95-usb/guards/$attr{diskseq}", ENV{UDISKS_IGNORE}="1", ENV{UDISKS_AUTO}="0"
+SUBSYSTEM=="block", ACTION=="add|change", ENV{DEVTYPE}=="partition", ATTRS{diskseq}=="?*", TEST=="/run/t95-usb/guards/$attr{diskseq}", ENV{UDISKS_IGNORE}="1", ENV{UDISKS_AUTO}="0"
+# Short cleanup only; never mount, unmount or start services from a udev worker.
+SUBSYSTEM=="block", ACTION=="remove", ENV{DEVTYPE}=="disk", ENV{DISKSEQ}=="?*", RUN+="/usr/bin/python3 /usr/local/lib/t95-usb/t95_usb.py guard-cleanup $env{DISKSEQ}"

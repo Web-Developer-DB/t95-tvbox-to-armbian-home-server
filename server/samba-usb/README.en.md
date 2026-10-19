@@ -2,408 +2,215 @@
 
 # 📂 File sharing and USB drives on the T95
 
-<a id="t95-samba--usb-automount"></a>
-
 [Deutsch](README.md) | **English**
 
-Share files with PCs, phones, and VLC on your home network. The module uses
-regular Samba packages with a **custom project configuration tailored to
-this TV box and its USB ports**, together with USB helpers. Once set up,
-USB sticks, SSDs, external hard drives, and other USB storage with supported
-filesystems are mounted automatically and made available as separate SMB
-network shares. **Everyday use needs no manual mounting or share creation.**
+**Plug in USB storage and share files at home.** This module combines regular
+Samba packages with a project configuration for the T95 and its USB ports.
+Supported sticks, SSDs and disks are mounted automatically and published as
+individual shares for PCs, phones and VLC.
 
-The recommended fixed **`T95-DATA` share uses the system SD** at
-`/srv/t95-sd-data/Share`, independently of the USB shares.
-Internal eMMC is not formatted or configured.
+**Ejecting one drive keeps the others usable.** The automounter continues
+running and accepts newly connected USB devices during ejection.
+The recommended fixed `T95-DATA` share uses the system SD at
+`/srv/t95-sd-data/Share`; USB shares are independent.
 
-| Your goal | Go here |
+| Your goal | Continue here |
 | --- | --- |
-| 🚀 Set up once | [Requirements](#requirements) → [Set up file sharing](#set-up-file-sharing) |
-| 📂 Open and save files | [Connect PC, phone, or VLC](#client-and-vlc-access) |
-| 🔌 Unplug a USB drive | [Safely eject that drive](#safely-eject-usb-storage) |
-| ↩️ Restore configuration | [Undo setup](#undo-setup) |
-
-[Base installation](../../docs/INSTALLATION.en.md#7-set-up-file-sharing) · [Daily use](../../docs/DAILY_USE.en.md) · [Troubleshooting](../../docs/TROUBLESHOOTING.en.md)
-
-> [!TIP]
-> **Set up once, then use USB storage day to day.** Supported drives are mounted and shared individually without manual setup. Always [eject safely](#safely-eject-usb-storage) before unplugging.
+| 🚀 New file server | [Requirements](#requirements) → [Setup](#set-up-file-sharing) |
+| 🔄 Update an existing setup | [Preserve Samba configuration](#update-an-existing-setup) |
+| 📂 Access files | [PCs, phones and VLC](#client-and-vlc-access) |
+| ⏏️ Unplug a drive | [Eject that drive safely](#safely-eject-usb-storage) |
+| 🔎 Understand an error | [Status and troubleshooting](docs/TROUBLESHOOTING.en.md) |
 
 > [!IMPORTANT]
-> **Filesystem support has limits.** Mounting depends on the kernel, UDisks and
-> the volume's condition; ext4 also retains Unix ownership and permissions.
-> Known eject/error-handling cases are still open. Read the
-> [Samba/USB audit](../../docs/SAMBA_USB_AUDIT.en.md) before generalizing the tested setup to other drives.
+> **USB implementation updated 2026-10-19:** audit fixes are covered by automated
+> tests. Their own hardware acceptance is pending. Earlier reference acceptance
+> applies to the earlier scripts. [Evidence and checklist](../../docs/SAMBA_USB_AUDIT.en.md).
 
 <a id="requirements"></a>
 
 ## 📋 Requirements
 
-- T95 runs from the verified SD and you are logged in over SSH as a normal user.
-- [Kernel/DTB holds](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates) are enabled.
-- Your T95 user can use `sudo`; installation requires internet access.
-- USB disks have adequate external power when needed.
+- T95 running the tested Armbian image; normal SSH user with `sudo`.
+- [Kernel/DTB protection](../../docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates) enabled; Internet for installation.
+- Healthy ext4, exFAT, FAT32 or NTFS USB storage. Existing ext4 Unix permissions still apply.
+- Btrfs: one physical drive, including subvolumes. LUKS, LVM, RAID and multi-device Btrfs are outside the supported scope.
+- Adequate power; externally power disks when needed.
 
-A [full SD backup](../../docs/BACKUP.en.md) is optional.
-
-> [!WARNING]
-> Existing Samba configuration is backed up and replaced. For a customized
-> installation, read the [technical reference](docs/SAMBA-USB-SETUP.en.md) first.
-
-<a id="quick-start-reproducible-restore"></a>
+An [SD backup](../../docs/BACKUP.en.md) is optional. Internal eMMC is not prepared
+or formatted by this module.
 
 <a id="set-up-file-sharing"></a>
+<a id="quick-start-reproducible-restore"></a>
 
 ## 🚀 Set up file sharing
 
-Run installation commands **on the T95**, not the PC, in the same SSH window.
-Install Git first if it is missing:
+> [!WARNING]
+> **Fresh setup replaces Samba configuration after a private backup.**
+> Use [update mode](#update-an-existing-setup) for an existing installation.
 
 **On the T95, normal SSH user; `sudo` where shown:**
 
 ```bash
 sudo apt update
 sudo apt install -y git
-```
-
-### 1. Get the module and verify its manifest
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-git clone --branch main --depth 1 \
-  https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
+git clone --branch main --depth 1 https://github.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server.git
 cd t95-tvbox-to-armbian-home-server/server/samba-usb
 sha256sum -c MANIFEST.sha256
 ```
 
-**Success:** all check lines end with `OK`. Stop for any `FAILED` entry.
-If the destination exists, inspect that checkout and its local changes rather
-than overwriting it. The PC's release-tools folder is separate from current server modules.
+Expected: all checksum entries show `OK`. If the repository folder already
+exists, inspect local changes and use an up-to-date verified copy.
 
-### 2. Check your Linux user and network
-
-**On the T95, normal SSH user; `sudo` where shown:**
+**On the T95, same terminal, normal SSH user:**
 
 ```bash
 export T95_USER="$(id -un)"
 id "$T95_USER"
-ip -brief address
+sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share ./scripts/restore-samba-usb-setup.sh
 ```
 
-**Success:** `id` shows your normal T95 user, not `root`. Note the IPv4 address
-for file access from your PC.
+`sudo` requests your Linux password. If no Samba account exists, setup then
+requests a separate Samba password. Password input stays invisible.
+**Success: `Fertig.`** Then [verify access](#verify-after-installation).
 
-### 3. Run installation
+If setup reports that the user manager does not yet know `sambashare`, it reports
+failure and restores project configuration. Reboot the box in a controlled
+manner, then repeat the same setup command. With linger enabled, a new SSH login
+alone does not refresh that manager's groups.
 
-**On the T95, normal SSH user; `sudo` where shown:**
+<a id="update-an-existing-setup"></a>
+
+## 🔄 Update an existing setup
+
+**Prerequisite:** current verified repository copy; work in `server/samba-usb`.
+Inspect local changes before updating that copy.
+
+**On the T95, normal SSH user:**
 
 ```bash
-sudo T95_USER="$T95_USER" DATA_PATH=/srv/t95-sd-data/Share \
-  ./scripts/restore-samba-usb-setup.sh
+sha256sum -c MANIFEST.sha256
+sudo T95_USER="$(id -un)" ./scripts/restore-samba-usb-setup.sh --update
 ```
 
-`sudo` asks for your Linux password. If no Samba account exists, the script
-then asks for a **Samba password** for file access. No characters appear while
-typing. The passwords have different roles even if you choose the same text.
-
-**Success:** setup finishes with `Fertig.`. In the **client PC file manager**,
-open `smb://<SERVER-IP>/T95-DATA`; in Windows Explorer use
-`\\<SERVER-IP>\T95-DATA`. Replace `<SERVER-IP>` with the box address;
-this address is not a terminal command. Log in with your T95 username and
-Samba password. Write and reopen a small test file; no USB drive is needed yet.
-
-**File writes and reads work?** Continue with everyday controls below.
-For errors, [check shares and authentication](../../docs/TROUBLESHOOTING.en.md#share-missing-or-access-denied).
-
-<a id="client-and-vlc-access"></a>
-
-## 📂 Client and VLC access
-
-Use the server root first:
-
-```text
-smb://<SERVER-IP>/
-```
-
-Direct paths include `T95-DATA`, label-derived shares, or `Extern-USB-1`.
-Linux file managers use `smb://<SERVER-IP>/`; Windows Explorer uses
-`\\<SERVER-IP>\`; Android file managers add an SMB share; VLC opens the network
-share and selects a compatible file. Use the Samba password of `T95_USER`; no
-guest account or clear-text credentials are configured.
-
-<a id="safely-eject-usb-storage"></a>
-
-## ⏏️ Safely eject USB storage
-
-An attached USB drive appears as a separate share. Close client files and
-finish transfers before unplugging it. List USB shares first:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-T95_USER="$(id -un)"
-sudo -u "$T95_USER" net usershare list
-```
-
-**Example response — read only:**
-
-```text
-SunDiskUSB
-```
-
-An empty list is normal without mounted USB storage. The fixed SD share
-`T95-DATA` does not belong in this USB list. For a listed drive, start this prompt:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-read -r -p 'Share name of the USB drive to eject: ' T95_SHARE
-```
-
-Enter the actual name from your list and press Enter. Then eject
-**that one drive**:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-sudo usb-eject "$T95_SHARE"
-```
-
-**Success:** `USB-Datenträger kann entfernt werden.` or `Der Datenträger kann entfernt werden.`
-means safe to unplug; the second message can follow unsupported USB power-off. For `DeviceBusy`, close
-open files and playback; a terminal must not be inside the USB folder either.
-Retry, or use [USB help](../../docs/TROUBLESHOOTING.en.md#usb-drive-missing-or-busy).
-
-Check afterward:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-sudo -u "$T95_USER" net usershare list
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-```
-
-The share is gone; after power-off the device should disappear from `lsblk`.
-Reinsertion creates the share again.
-
-<details>
-<summary>What ejection does</summary>
-
-`usb-eject` temporarily stops udiskie, closes connections to the selected share,
-syncs writes, unmounts all partitions of that USB device, and powers it off.
-State is removed only after successful unmount, then udiskie starts again.
-
-</details>
-
-<a id="undo-setup"></a>
-
-## ↩️ Undo setup
-
-An earlier Samba configuration can be restored from its backup. The module
-has no full uninstaller for all packages and user files. Instructions are
-under “Technical details and restoration” below.
-
-<details>
-<summary>Technical details and restoration</summary>
-
-All following shell commands run on the T95 as your normal SSH user; `sudo`
-is shown where needed. Customization examples replace the recommended
-installation command; they are not additional required steps.
-
-<a id="result-at-a-glance"></a>
-
-## 📊 Result at a glance
-
-The server root `smb://<SERVER-IP>/` displays both the fixed
-`T95-DATA` share and all currently attached USB/SSD shares. There is purposely
-no static `[USB]` aggregate share: every volume retains its real capacity and
-free-space information.
-
-<a id="what-does-the-samba-module-set-up"></a>
-
-## ⚙️ What does the Samba module set up?
-
-The module turns the running T95 into an authenticated file server:
-
-- `T95-DATA` is a permanent share for the storage directory you choose.
-- USB sticks and disks are mounted automatically.
-- Each mounted USB filesystem gets its own share.
-- Linux, Windows, Android, and VLC use the same Linux/Samba account.
-- `usb-eject` safely disconnects a USB drive before you unplug it.
-
-The fixed `T95-DATA` share and dynamic USB shares are separate. Choose the
-fixed share location during setup with `DATA_PATH`. USB storage is mounted and
-shared automatically; it does not need a manual path change.
-
-### Which storage location should I use?
-
-| Location | Example `DATA_PATH` | When to use it |
-| --- | --- | --- |
-| System microSD | `/srv/t95-sd-data/Share` | Small amounts of data and the simplest setup. Frequent writes may wear the SD card faster. |
-| Internal eMMC | `/srv/T95-DATA/Share` | Better for regular or larger data when eMMC is already mounted persistently at `/srv/T95-DATA`. |
-| USB drive | No `DATA_PATH` needed | USB storage is added automatically as a separate dynamic share. |
-
-The default `/srv/T95-DATA/Share` assumes an eMMC filesystem is mounted at
-`/srv/T95-DATA`. Without that mount, the folder is created on the SD card's
-system filesystem. To deliberately use the system SD, choose a separate path
-such as `/srv/t95-sd-data/Share`. If using eMMC, set it up, mount it
-persistently, and verify it with `findmnt` first. The Samba script never
-formats, partitions, or moves existing files.
-
-| Area | Tested reference |
-| --- | --- |
-| Hardware | T95 `H616-T95MAX-AXP313A-V3.0`, Allwinner AC300 Ethernet |
-| System | Armbian 26.8.4, Debian 13 Trixie, kernel 6.18 |
-| Network | `end0`, DHCP, SMB2/SMB3 |
-| Automount | UDisks2 + udiskie + dynamic Samba usershares |
-| Acceptance | `T95-DATA`, USB automount, safe eject/reinsert, VLC over SMB |
-
-Other Debian/Armbian systems may work, but are not automatically validated by
-this project.
-
-### Customize setup
-
-These alternatives replace the quick-start installation command. Use them
-only to deliberately choose a different storage location or server name.
-
-Set the username, server name, and fixed share path when running the script.
-Replace `serveruser` with your ordinary Linux username. `DATA_PATH` selects
-where the fixed `T95-DATA` share points:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-sudo T95_USER=serveruser \
-  NETBIOS_NAME=T95-SERVER \
-  DATA_PATH=/srv/t95-sd-data/Share \
-  ./scripts/restore-samba-usb-setup.sh
-```
-
-| Variable | Required | Default | Meaning |
-| --- | :---: | --- | --- |
-| `T95_USER` | **yes** | – | existing Linux and Samba user |
-| `NETBIOS_NAME` | no | `T95-SERVER` | SMB network server name |
-| `DATA_PATH` | no | `/srv/T95-DATA/Share` | fixed-share directory |
-
-For the recommended SD path, use the command in [Set up file sharing](#set-up-file-sharing).
-
-Example: use eMMC already mounted at `/srv/T95-DATA`:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-findmnt /srv/T95-DATA
-```
-
-Continue only when the expected eMMC mount is shown. Then run:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-sudo T95_USER=serveruser \
-  DATA_PATH=/srv/T95-DATA/Share \
-  ./scripts/restore-samba-usb-setup.sh
-```
-
-Run the eMMC command only after `findmnt` shows the expected eMMC mount. If it
-does not, the directory would be created on the filesystem underneath it,
-usually the system SD.
-
-The script also uses `/media/<T95_USER>` as the USB mount base and
-`~/.local/state/t95-usb-shares` for dynamic USB mappings.
-
-### Change settings later
-
-Change to the cloned module directory and rerun the restore script with the new
-values. For example, to move the `T95-DATA` share location from eMMC to the SD:
-
-**On the T95, normal SSH user; `sudo` where shown:**
-
-```bash
-cd ~/t95-tvbox-to-armbian-home-server/server/samba-usb
-sudo T95_USER=serveruser \
-  DATA_PATH=/srv/t95-sd-data/Share \
-  ./scripts/restore-samba-usb-setup.sh
-```
-
-The script saves `/etc/samba/smb.conf` with a timestamp and generates a new
-configuration. It does **not** move your files to the new location. Copy or
-move them yourself and verify the new path before deleting old data. Direct
-changes to `/etc/samba/smb.conf` are replaced when the script runs again;
-backups are kept at `/etc/samba/smb.conf.before-t95.*`.
-
-### What each script does
-
-| Script | What it does | Do I run it myself? |
-| --- | --- | --- |
-| `scripts/restore-samba-usb-setup.sh` | Installs packages and services, creates `T95-DATA`, and configures Samba and USB automount. | Yes, once during setup; run again only to change configuration. |
-| `scripts/t95-usb-share` | Creates or removes the dynamic share for a mounted USB filesystem. | No, `udiskie` invokes it automatically. |
-| `scripts/usb-eject` | Disconnects the selected share, syncs writes, unmounts the drive, and powers it off. | Yes, before physically unplugging a USB drive. |
-
-Use [safe USB ejection](#safely-eject-usb-storage) to select the actual drive.
+Expected: `Fertig. Bestehende Samba-Konfiguration erhalten.` Samba passwords,
+data path and custom Samba shares are preserved. Missing required Samba settings
+are reported with correction guidance; update mode does not rewrite them.
+udiskie restarts to load its configuration, then existing mounts are reconciled
+with shares.
 
 <a id="verify-after-installation"></a>
 
 ## ✅ Verify after installation
 
-**On the T95, normal SSH user; `sudo` where shown:**
+**On the T95, normal SSH user:**
 
 ```bash
-T95_USER="$(id -un)"
-sudo testparm -s
-systemctl --no-pager --full status smbd
-systemctl --no-pager --full status nmbd
-sudo -u "$T95_USER" net usershare list
-T95_UID="$(id -u "$T95_USER")"
-sudo -u "$T95_USER" XDG_RUNTIME_DIR="/run/user/$T95_UID" \
-  systemctl --user --no-pager --full status udiskie.service
+sudo usb-eject --status
+net usershare list
 ```
 
-Expect valid `testparm` output containing `[T95-DATA]` and your selected
-path, active `smbd`/where available `nmbd`, and active `udiskie.service`.
-`net usershare list` shows dynamic USB shares only; it may be empty when no
-USB drive is mounted. The fixed `T95-DATA` share does not belong in that list.
+Expected: active automounter and a separate share for each supported mounted
+USB filesystem. The usershare list may be empty without USB storage.
+Fixed `T95-DATA` is not included in that list.
 
-On the client, open `smb://<SERVER-IP>/T95-DATA`, create a small test file,
-and read it back to confirm actual access.
+<a id="client-and-vlc-access"></a>
 
-After inserting USB storage:
+## 📂 Client and VLC access
 
-**On the T95, normal SSH user; `sudo` where shown:**
+| Client | Address or action |
+| --- | --- |
+| Linux file manager | `smb://SERVER-IP/` |
+| Windows Explorer | `\\SERVER-IP\` |
+| Phone / VLC | SMB network access → server address → select share |
+
+Replace `SERVER-IP` with the box address. Use your T95 username and **Samba
+password**. Write and reopen a small file in `T95-DATA` or the chosen USB share.
+Setup does not automatically change a read-only filesystem or existing ext4 permissions.
+
+<a id="safely-eject-usb-storage"></a>
+
+## ⏏️ Safely eject USB storage
+
+**On the T95, normal SSH user:**
 
 ```bash
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-sudo -u "$T95_USER" net usershare list
-journalctl -t T95-USB-SHARE --no-pager -n 30
+net usershare list
+read -r -p 'Share name of the drive to eject: ' T95_SHARE
 ```
 
-A labelled volume uses a sanitized label such as `SunDiskUSB`; unlabelled
-media use `Extern-USB-1`, then `Extern-USB-2`, and so on. A published mount
-point must not create a duplicate share.
+Enter its actual name from the list and press Enter. Then:
 
+**On the T95, same terminal, normal SSH user:**
+
+```bash
+sudo usb-eject "$T95_SHARE"
+```
+
+**This ejects the entire physical drive, including its other partitions and
+shares.** Other physical drives remain usable.
+
+| Message | Meaning and next action |
+| --- | --- |
+| `USB-Datenträger kann entfernt werden.` | Power-off confirmed by device removal; unplug. |
+| `Sicher ausgehängt; Hardware bleibt eingeschaltet. Du kannst das Laufwerk abziehen.` | Mounts/shares removed; a per-drive remount guard is active. Safe to unplug. |
+| `FEHLER: Auswurf unvollständig…` | Do not unplug. Check status, close open files/terminal working directories and retry. |
+
+An error may leave some partitions already unmounted. The guard still applies
+only to this drive. Repeating the command can resume an interrupted operation.
+After successful unmounting, the drive remains guarded until unplugged.
+Reconnecting creates a share again; rebooting also clears runtime guards.
+
+<a id="undo-setup"></a>
 <a id="restore-configuration-and-keep-secrets-private"></a>
 
-## 🔒 Restore configuration and keep secrets private
+## ↩️ Backup and recovery
 
-Before replacement, the script saves `/etc/samba/smb.conf.before-t95.<TIMESTAMP>`.
-Restore a selected backup using `cp -a`, then `testparm -s` and restart `smbd`.
-The module deliberately has no full uninstall for packages, Polkit rules, and
-user files.
+Before changes, private backups are created at
+`/var/lib/t95-samba/installation-…/`, including file copies and `state.json`.
+Activation failures restore backed-up project files and earlier service states.
+A failed rollback is recorded as `rollback-failed`. Packages, groups and shared
+linger may remain.
 
-Never publish Samba passwords, `/var/lib/samba/private/passdb.tdb`,
-`/etc/shadow`, private SSH keys, full system backups, local images, UART logs,
-or personal configuration. Templates contain no Samba password; `smbpasswd`
-sets it only on the T95.
+A later deliberate return to an older setup is a manual administrative step:
+inspect the selected backup and current changes first. There is no blanket
+uninstall/restore command. Backups can contain private configuration and stay
+on the box.
 
+<a id="what-does-the-samba-module-set-up"></a>
+<a id="result-at-a-glance"></a>
+
+## ⚙️ Components and boundaries
+
+| Component | Purpose |
+| --- | --- |
+| Samba | Fixed data share and authenticated dynamic USB usershares |
+| UDisks + udiskie | Mount supported devices using an explicit project configuration |
+| Shared Python core | Device identity, name locks, atomic JSON mappings and eject |
+| udev eject guard | Hold back only the selected drive's current attachment |
+
+`T95_USER`, `DATA_PATH` and `NETBIOS_NAME` customize fresh setup.
+Without `DATA_PATH`, the default is `/srv/T95-DATA/Share`; without an eMMC mount
+there, that folder also resides on SD. The recommended command therefore sets
+an explicit SD path. `--update` preserves the existing Samba data path.
+There is no automatic filesystem repair, formatting, force-mounting or recursive
+change of existing ownership/permissions.
+
+[Technical reference](docs/SAMBA-USB-SETUP.en.md) · [Troubleshooting](docs/TROUBLESHOOTING.en.md) ·
+[Acceptance checklist](docs/RESTORE-CHECKLIST.en.md) · [Audit and limits](../../docs/SAMBA_USB_AUDIT.en.md)
+
+<!-- Compatibility anchors for older documentation links. -->
+<a id="-further-documentation"></a>
+<a id="-restore-configuration-and-keep-secrets-private"></a>
+<a id="-result-at-a-glance"></a>
+<a id="-undo-setup"></a>
+<a id="-what-does-the-samba-module-set-up"></a>
+<a id="1-get-the-module-and-verify-its-manifest"></a>
+<a id="2-check-your-linux-user-and-network"></a>
+<a id="3-run-installation"></a>
+<a id="change-settings-later"></a>
+<a id="customize-setup"></a>
 <a id="further-documentation"></a>
-
-## 📚 Further documentation
-
-- [Complete technical setup](docs/SAMBA-USB-SETUP.en.md)
-- [Restore checklist](docs/RESTORE-CHECKLIST.en.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.en.md)
-- [GitHub publishing](docs/GITHUB-PUBLISH.en.md)
-- [Changelog](CHANGELOG.en.md)
-
-</details>
+<a id="t95-samba--usb-automount"></a>
+<a id="what-each-script-does"></a>
+<a id="which-storage-location-should-i-use"></a>

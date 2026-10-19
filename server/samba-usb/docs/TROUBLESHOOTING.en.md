@@ -1,96 +1,96 @@
-<a id="troubleshooting"></a>
-
-# 🛟 Troubleshooting
+# 🔎 Samba/USB troubleshooting
 
 [Deutsch](TROUBLESHOOTING.md) | **English**
 
-> [!NOTE]
-> **Technical diagnosis on the T95.** Beginners should start with [simple USB help](../../../docs/TROUBLESHOOTING.en.md#usb-drive-missing-or-busy). These examples need your actual user, device, mount, and share names; hook tests change usershares.
+Identify the failing layer first. This guide assumes the [current project
+installation](../README.en.md).
 
-| Your symptom | Start here |
+| Observation | Next check |
 | --- | --- |
-| 📂 USB mounted, share absent | [Check events and service](#usb-mounts-but-no-samba-share-appears) |
-| 🔁 Duplicate share | [Compare mount points](#duplicate-extern-usb-n-share) |
-| 🛠️ Script commands missing | [Check PATH](#command-not-found-for-rmloggerheadsync-in-a-script) |
-| 🔒 Drive busy | [Investigate DeviceBusy](#devicebusy-during-eject) |
-| 🔌 Drive remounts immediately | [Check udiskie during eject](#device-remounts-immediately-after-unmount) |
-| ✅ Confirm eject | [Check mount, share, and device](#verify-a-successful-eject) |
+| Device absent from `lsblk` | Cable, USB port, power and kernel messages. |
+| Device present, no mount | udiskie/kernel logs, filesystem state and eject guard. |
+| Mounted, no share | Event hook and Samba settings. |
+| Readable share, writes fail | Samba account and actual permissions; ext4 retains UID/GID/ACLs. |
+| Eject failed | Do not unplug; inspect status/mounts and retry. |
 
-Commands use anonymized `$T95_USER` and `$T95_UID`; set them before testing:
+## 📋 Collect status
 
-```bash
-export T95_USER=serveruser
-export T95_UID="$(id -u "$T95_USER")"
-```
-
-<a id="usb-mounts-but-no-samba-share-appears"></a>
-
-## 📂 USB mounts but no Samba share appears
+**On the T95, normal SSH user; these commands do not change settings:**
 
 ```bash
-sudo -u $T95_USER net usershare list
-journalctl -t T95-USB-SHARE --no-pager -n 50
-sudo -u $T95_USER XDG_RUNTIME_DIR=/run/user/$T95_UID \
-  journalctl --user -u udiskie.service --no-pager -n 100
-sudo -u $T95_USER /usr/local/bin/t95-usb-share \
-  device_mounted /dev/sda1 /media/$T95_USER/NAME LABEL UUID
+sudo usb-eject --status
+lsblk -o NAME,TYPE,SIZE,FSTYPE,TRAN,MOUNTPOINTS
+net usershare list
+systemctl --user status udiskie.service --no-pager -l
+sudo journalctl -t T95-USB-SHARE -b --no-pager -n 60
+sudo journalctl -b -u udisks2.service --no-pager -n 60
+sudo journalctl -k -b --no-pager -n 80
 ```
 
-<a id="duplicate-extern-usb-n-share"></a>
+If the user journal is unavailable, query the system journal using your actual UID:
 
-## 🔁 Duplicate `Extern-USB-N` share
+**On the T95, normal SSH user:**
 
 ```bash
-for s in $(sudo -u $T95_USER net usershare list); do
-  sudo -u $T95_USER net usershare info "$s"
-done
+sudo journalctl -b "_UID=$(id -u)" --no-pager -n 80
 ```
 
-The reference `t95-usb-share` is idempotent and must not publish one mount
-point twice.
+Logs can contain serials, UUIDs and usernames; inspect them before public sharing.
+Empty usershare output is normal without mounted USB storage. Fixed `T95-DATA`
+is not listed there.
 
+## 💾 Filesystems and permissions
+
+- ext4: mounting and write permission are separate. Inspect rights deliberately; do not recursively replace ownership indiscriminately.
+- NTFS: dirty state, hibernation or Fast Startup can prevent mounting. Back up data and plan an appropriate repair separately. The script does not force a mount.
+- Read-only media remain read-only. Status checks access as the actual Samba user.
+- If the device is absent from `lsblk`, the share hook cannot process it yet. This differs from a missing SMB share.
+
+## ⏏️ Eject remains incomplete
+
+Close open files, VLC and terminals working inside the drive. Select its actual
+share name:
+
+**On the T95, normal SSH user:**
+
+```bash
+read -r -p 'Share name of the affected USB drive: ' T95_SHARE
+```
+
+Enter its name and press Enter. Then in the same T95 terminal:
+
+```bash
+sudo usb-eject "$T95_SHARE"
+```
+
+`failed` may mean partial completion. The guard applies only to that drive;
+other storage continues automounting. Do not stop the entire automounter or
+manually delete guard files. After a successful eject, unplug/reconnect to use
+the drive again. Rebooting also clears runtime guards.
+
+## 🔄 Setup or update fails
+
+`--update` preserves Samba configuration. For missing settings, inspect the
+reported values; do not use a full fresh setup as the first troubleshooting
+step. If the user manager does not yet know `sambashare`, reboot the box in a
+controlled manner and repeat setup.
+
+Private backups and `state.json` are at `/var/lib/t95-samba/installation-…/`.
+`rolled-back` confirms verified restoration. `rollback-failed` requires inspecting
+the given backup and error message. Keep backups private.
+
+<!-- Compatibility anchors for older documentation links. -->
+<a id="-command-not-found-for-rmloggerheadsync-in-a-script"></a>
+<a id="-device-remounts-immediately-after-unmount"></a>
+<a id="-devicebusy-during-eject"></a>
+<a id="-duplicate-extern-usb-n-share"></a>
+<a id="-troubleshooting"></a>
+<a id="-usb-mounts-but-no-samba-share-appears"></a>
+<a id="-verify-a-successful-eject"></a>
 <a id="command-not-found-for-rmloggerheadsync-in-a-script"></a>
-
-## 🛠️ `command not found` for rm/logger/head/sync in a script
-
-Check whether the shell `PATH` variable was overwritten:
-
-```bash
-grep -n '\bPATH\b' /usr/local/bin/t95-usb-share
-grep -n '\bPATH\b' /usr/local/bin/usb-eject
-```
-
-`PATH` is only the command search path. Use names such as `SAVED_PATH` for file
-paths.
-
-<a id="devicebusy-during-eject"></a>
-
-## 🔒 `DeviceBusy` during eject
-
-```bash
-fuser -vm /media/$T95_USER/MOUNTNAME
-smbstatus --shares
-sudo smbcontrol smbd close-share SHARENAME
-```
-
-The reference `usb-eject` performs the close-share step automatically.
-
 <a id="device-remounts-immediately-after-unmount"></a>
-
-## 🔌 Device remounts immediately after unmount
-
-udiskie must not run while unmount/power-off occurs. The reference script stops
-the user service temporarily and starts it again afterward.
-
+<a id="devicebusy-during-eject"></a>
+<a id="duplicate-extern-usb-n-share"></a>
+<a id="troubleshooting"></a>
+<a id="usb-mounts-but-no-samba-share-appears"></a>
 <a id="verify-a-successful-eject"></a>
-
-## ✅ Verify a successful eject
-
-```bash
-findmnt /media/$T95_USER/MOUNTNAME
-sudo -u $T95_USER net usershare list
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
-```
-
-After successful `udisksctl power-off`, physical `/dev/sdX` should disappear
-from `lsblk`.

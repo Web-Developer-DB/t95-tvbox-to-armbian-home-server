@@ -43,28 +43,52 @@ DASHBOARD_USB_HELP_PATH = "/etc/update-motd.d/35-armbian-tips"
 DASHBOARD_USB_HELP = r'''#!/bin/bash
 # T95 dashboard: display-only USB cheat sheet. Never execute the shown commands.
 command -v usb-eject >/dev/null 2>&1 || exit 0
-printf '\n\033[0;90m Tips:\033[0m\n'
+
+reset='' section_color='' title_color='' label_color='' command_color='' note_color=''
+# PAM may omit TERM; Bash's implicit, unexported "dumb" is not a user preference.
+if [[ -z ${NO_COLOR:-} && ( ${TERM:-} != dumb || ${TERM@a} != *x* ) ]]; then
+    reset=$'\033[0m'
+    section_color=$'\033[0;90m'
+    title_color=$'\033[1;36m'
+    label_color=$'\033[1;33m'
+    command_color=$'\033[1;92m'
+    note_color=$'\033[0;37m'
+fi
 
 case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
     de*)
-        printf '%s\n' '' \
-            ' USB-Laufwerke sicher entfernen' \
-            '   Status und Freigaben: sudo usb-eject --status' \
-            '   Laufwerk auswerfen:   sudo usb-eject "NAME"' \
-            '   NAME durch den Freigabenamen aus dem Status ersetzen.' \
-            '   Betrifft das ganze USB-Laufwerk mit allen Partitionen.' \
-            '   Dateiübertragungen beenden. Erst nach Erfolgsmeldung abziehen.' ''
+        heading='USB-Laufwerke sicher entfernen'
+        status_label='1 Status/Freigaben'
+        eject_label='2 Laufwerk auswerfen'
+        name_help='= Freigabename aus dem Status.'
+        scope_help='Gilt für das ganze USB-Laufwerk mit allen Partitionen.'
+        warning_label='Wichtig:'
+        transfer_help='Dateiübertragungen zuerst beenden.'
+        unplug_help='Erst nach Erfolgsmeldung abziehen.'
         ;;
     *)
-        printf '%s\n' '' \
-            ' Safely remove USB drives' \
-            '   Status and shares: sudo usb-eject --status' \
-            '   Eject a drive:     sudo usb-eject "NAME"' \
-            '   Replace NAME with the share name shown by status.' \
-            '   Ejects the whole USB drive, including all its partitions.' \
-            '   Finish file transfers. Unplug only after the success message.' ''
+        heading='Safely remove USB drives'
+        status_label='1 Status and shares'
+        eject_label='2 Eject drive'
+        name_help='= share name shown by status.'
+        scope_help='Whole USB drive, including all its partitions.'
+        warning_label='Important:'
+        transfer_help='Finish file transfers first.'
+        unplug_help='Unplug only after the success message.'
         ;;
 esac
+
+printf '\n%s Tips:%s\n\n' "$section_color" "$reset"
+printf ' %s%s%s\n\n' "$title_color" "$heading" "$reset"
+printf '  %s%-20s%s  %s%s%s\n' "$label_color" "$status_label" "$reset" \
+    "$command_color" 'sudo usb-eject --status' "$reset"
+printf '  %s%-20s%s  %s%s%s\n' "$label_color" "$eject_label" "$reset" \
+    "$command_color" 'sudo usb-eject "NAME"' "$reset"
+printf '\n  %sNAME%s %s%s%s\n' "$title_color" "$reset" "$note_color" "$name_help" "$reset"
+printf '  %s%s%s\n\n' "$note_color" "$scope_help" "$reset"
+printf '  %s%s%s %s%s%s\n' "$label_color" "$warning_label" "$reset" \
+    "$note_color" "$transfer_help" "$reset"
+printf '  %*s %s%s%s\n\n' "${#warning_label}" '' "$note_color" "$unplug_help" "$reset"
 '''.encode('utf-8')
 
 

@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import pwd
+import re
 import shutil
 import subprocess
 import tempfile
@@ -262,18 +263,28 @@ class SetupTests(unittest.TestCase):
         executable = binaries / 'usb-eject'
         executable.write_text('#!/bin/sh\n: > "$T95_TEST_MARKER"\nexit 99\n')
         executable.chmod(0o755)
-        for locale, label in [('C', 'Safely remove USB drives'), ('de_DE.UTF-8', 'USB-Laufwerke sicher entfernen')]:
-            with self.subTest(locale=locale):
+        for locale, label, options in [
+                ('C', 'Safely remove USB drives', {}),
+                ('de_DE.UTF-8', 'USB-Laufwerke sicher entfernen', {}),
+                ('C', 'Safely remove USB drives', {'NO_COLOR': '1'}),
+                ('de_DE.UTF-8', 'USB-Laufwerke sicher entfernen', {'TERM': 'dumb'})]:
+            with self.subTest(locale=locale, options=options):
                 env['LANG'] = locale
-                result = subprocess.run(['/bin/bash', str(script)], env=env, capture_output=True, text=True)
+                result = subprocess.run(['/bin/bash', str(script)], env=env | options, capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn(label, result.stdout)
-                self.assertIn('sudo usb-eject --status', result.stdout)
-                self.assertIn('sudo usb-eject "NAME"', result.stdout)
-                self.assertIn('Tips:', result.stdout)
-                self.assertNotIn('Imager', result.stdout)
-                self.assertNotIn('Proxmox', result.stdout)
-                self.assertTrue(all(len(line) <= 80 for line in result.stdout.splitlines()))
+                visible = re.sub(r'\x1b\[[0-9;]*m', '', result.stdout)
+                self.assertIn(label, visible)
+                self.assertIn('sudo usb-eject --status', visible)
+                self.assertIn('sudo usb-eject "NAME"', visible)
+                self.assertIn('Tips:', visible)
+                self.assertNotIn('Imager', visible)
+                self.assertNotIn('Proxmox', visible)
+                self.assertTrue(all(len(line) <= 64 for line in visible.splitlines()))
+                if options:
+                    self.assertNotIn('\x1b[', result.stdout)
+                else:
+                    self.assertIn('\x1b[1;36m' + label, result.stdout)
+                    self.assertIn('\x1b[1;92msudo usb-eject --status', result.stdout)
                 self.assertFalse(marker.exists())
 
     def test_dashboard_tampered_payload_refused_before_apt(self):

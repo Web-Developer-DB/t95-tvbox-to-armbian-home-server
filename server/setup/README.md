@@ -263,9 +263,10 @@ Neue Rücknahmefälle prüfen Sicherung vor Paketänderungen, private Archivrech
 alte MPD-Konfiguration, vorher aktive Dienste, fehlgeschlagene Stopps, falsche
 Dienst-Erfolgsmeldungen, Paketfehler, Runtime-Autostart, alte Rücknahmejournale,
 fehlendes rfkill-Paket und eine Statusabfrage ohne Dienstaktivierung.
-Die USB-Kurzhilfe wird auf deutsche/englische Ausgabe, höchstens 80 Zeichen
-pro Anzeigezeile, Ausblenden ohne Werkzeug und unterlassene Befehlsausführung
-geprüft. Weitere Fälle prüfen Ergänzung eines alten Dashboards ohne APT,
+Die USB-Kurzhilfe wird auf deutsche/englische Ausgabe, höchstens 64 sichtbare
+Zeichen pro Anzeigezeile, farbige Befehle und eine ausgerichtete Ausgabe ohne
+Farben geprüft. Auch das Ausblenden ohne Werkzeug und das Unterlassen der
+Befehlsausführung sind abgedeckt. Weitere Fälle prüfen Ergänzung eines alten Dashboards ohne APT,
 Erhalt der ersten Sicherung, Rücknahme und Schutz manueller Änderungen.
 
 Zusätzlich wurde die neue MPD-

@@ -226,8 +226,9 @@ configuration/output choice, data and firmware-alias preservation, service
 failure rollback, bounded package removal, wrong hardware, offline on/off,
 individual starters, and the combined menu. Ownership changes are simulated;
 the original firmware payload is not copied into tests.
-The USB hint is checked for German/English output, at most 80 characters per
-display line, hiding without the tool and never executing shown commands.
+The USB hint is checked for German/English output, at most 64 visible characters
+per display line, colored commands and aligned output without colors, hiding
+without the tool and never executing shown commands.
 Other cases cover updating an old dashboard's tips without APT, preserving the first
 backup, rollback and protecting manual edits.
 

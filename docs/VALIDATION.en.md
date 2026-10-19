@@ -106,7 +106,10 @@ Tips section shows status/eject commands, share-name selection,
 whole-drive scope and the required success message before unplugging. It does
 not execute these commands. Five additional setup tests cover both languages,
 line width, absent tools, upgrading existing installs without APT, backups,
-rollback and manual changes. This addition is not yet accepted on the T95.
+rollback and manual changes. The subsequently supplied T95 screenshot confirms
+the initial English hint in the Tips section. The later colored design with
+separate descriptions/commands passes automated checks, including 64 visible
+terminal columns and output without colors; its own T95 display is not yet confirmed.
 
 The [Samba/USB audit](SAMBA_USB_AUDIT.en.md) separately records confirmed error
 paths and filesystem limits; general USB acceptance is not a per-filesystem or

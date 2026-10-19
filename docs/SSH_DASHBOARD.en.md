@@ -98,12 +98,22 @@ SSH login, replacing rotating Armbian recommendations:
 
 ```text
 Safely remove USB drives
-  Status and shares: sudo usb-eject --status
-  Eject a drive:     sudo usb-eject "NAME"
-  Replace NAME with the share name shown by status.
-  Ejects the whole USB drive, including all its partitions.
-  Finish file transfers. Unplug only after the success message.
+
+  1 Status and shares   sudo usb-eject --status
+  2 Eject drive         sudo usb-eject "NAME"
+
+  NAME = share name shown by status.
+  Whole USB drive, including all its partitions.
+
+  Important: Finish file transfers first.
+             Unplug only after the success message.
 ```
+
+The heading is cyan, action labels are yellow and copyable commands are
+highlighted in green. Explanations use neutral text underneath, with unplugging
+guidance in a separate block. Visible lines fit 64 terminal columns.
+`NO_COLOR=1` or an explicitly set `TERM=dumb` disables colors while preserving
+the layout.
 
 The display does not run these commands. It stays hidden without `usb-eject`.
 German or English follows the login session's language.

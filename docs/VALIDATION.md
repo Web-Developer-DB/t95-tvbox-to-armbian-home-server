@@ -108,7 +108,11 @@ Freigabenamen, Geltung für alle Partitionen und die nötige Erfolgsmeldung vor
 dem Abziehen. Die Anzeige läuft ohne Ausführung dieser Befehle. Fünf zusätzliche
 Setup-Tests prüfen Ausgabe in beiden Sprachen, Zeilenbreite, fehlendes Werkzeug,
 Ergänzung bestehender Installationen ohne APT, Sicherung, Rücknahme und
-manuelle Änderungen. Die Ergänzung ist noch nicht auf der T95 abgenommen.
+manuelle Änderungen. Der anschließend übermittelte T95-Screenshot bestätigt
+die erste englische Kurzhilfe im Tipps-Bereich. Die danach ergänzte farbige
+Gestaltung mit getrennten Beschreibungen und Befehlen ist automatisiert geprüft,
+einschließlich 64 sichtbarer Terminalspalten und der Darstellung ohne Farben;
+ihre eigene Anzeige auf der T95 ist noch nicht bestätigt.
 
 Der [Samba-/USB-Audit](SAMBA_USB_AUDIT.md) hält separat bestätigte Fehlerpfade und
 Dateisystemgrenzen fest. Die allgemeine USB-Abnahme ist keine Zertifizierung

@@ -104,12 +104,22 @@ Kurzhilfe anstelle der wechselnden Armbian-Empfehlungen:
 
 ```text
 USB-Laufwerke sicher entfernen
-  Status und Freigaben: sudo usb-eject --status
-  Laufwerk auswerfen:   sudo usb-eject "NAME"
-  NAME durch den Freigabenamen aus dem Status ersetzen.
-  Betrifft das ganze USB-Laufwerk mit allen Partitionen.
-  Dateiübertragungen beenden. Erst nach Erfolgsmeldung abziehen.
+
+  1 Status/Freigaben    sudo usb-eject --status
+  2 Laufwerk auswerfen  sudo usb-eject "NAME"
+
+  NAME = Freigabename aus dem Status.
+  Gilt für das ganze USB-Laufwerk mit allen Partitionen.
+
+  Wichtig: Dateiübertragungen zuerst beenden.
+           Erst nach Erfolgsmeldung abziehen.
 ```
+
+Die Überschrift ist cyan, Aktionsnamen sind gelb und die kopierbaren Befehle
+grün hervorgehoben. Erklärungen stehen darunter in neutraler Schrift; der
+Hinweis zum Abziehen bildet einen eigenen Bereich. Die sichtbaren Zeilen passen
+in 64 Terminalspalten. `NO_COLOR=1` oder ein ausdrücklich gesetztes `TERM=dumb`
+schalten die Farben ab; die Anordnung bleibt gleich.
 
 Die Anzeige führt diese Befehle nicht aus. Ohne installiertes `usb-eject`
 bleibt sie verborgen. Deutsch oder Englisch richtet sich nach der Sprache der

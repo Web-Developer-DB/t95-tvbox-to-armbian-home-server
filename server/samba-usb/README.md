@@ -31,6 +31,12 @@ Der eingebaute eMMC-Speicher wird nicht formatiert oder eingerichtet.
 > [!TIP]
 > **Einmal einrichten, USB-Speicher im Alltag einfach nutzen.** Unterstützte Datenträger werden automatisch gemountet und einzeln freigegeben. Vor dem Abziehen immer [sicher auswerfen](#usb-sicher-auswerfen).
 
+> [!IMPORTANT]
+> **Dateisysteme haben unterschiedliche Voraussetzungen.** Mounten hängt von
+> Kernel, UDisks und dem Zustand des Mediums ab; bei ext4 gelten zusätzlich die
+> gespeicherten Unix-Rechte. Bekannte Auswurf- und Fehlerfälle sind noch offen.
+> Der [Samba-/USB-Audit](../../docs/SAMBA_USB_AUDIT.md) beschreibt Grenzen und Korrekturvorschläge.
+
 <a id="voraussetzungen"></a>
 
 ## 📋 Voraussetzungen

@@ -29,6 +29,12 @@ Internal eMMC is not formatted or configured.
 > [!TIP]
 > **Set up once, then use USB storage day to day.** Supported drives are mounted and shared individually without manual setup. Always [eject safely](#safely-eject-usb-storage) before unplugging.
 
+> [!IMPORTANT]
+> **Filesystem support has limits.** Mounting depends on the kernel, UDisks and
+> the volume's condition; ext4 also retains Unix ownership and permissions.
+> Known eject/error-handling cases are still open. Read the
+> [Samba/USB audit](../../docs/SAMBA_USB_AUDIT.en.md) before generalizing the tested setup to other drives.
+
 <a id="requirements"></a>
 
 ## 📋 Requirements

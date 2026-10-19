@@ -45,6 +45,8 @@ docs/*
 !docs/DAILY_USE.en.md
 !docs/TROUBLESHOOTING.md
 !docs/TROUBLESHOOTING.en.md
+!docs/SAMBA_USB_AUDIT.md
+!docs/SAMBA_USB_AUDIT.en.md
 !docs/TECHNICAL_REFERENCE.md
 !docs/TECHNICAL_REFERENCE.en.md
 !docs/SSH_DASHBOARD.en.md

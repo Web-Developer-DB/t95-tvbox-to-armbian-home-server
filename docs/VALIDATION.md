@@ -118,7 +118,7 @@ Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten gefü
 
 | Prüfung | Stand |
 | --- | --- |
-| 55 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden |
+| 70 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden; einschließlich Freigabedateien ohne Mountordner |
 | Bisherige 32 Setup-Tests | Bestanden |
 | udev-Regel: Syntax | Bestanden |
 | Paketmanifeste: 25 Samba- und 14 Dashboard-Einträge | Bestanden |
@@ -126,7 +126,7 @@ Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten gefü
 | Update einer vorhandenen T95-Einrichtung bei `aef4e9f` | Auf Hardware bestätigt; siehe Teilabnahme unten |
 | Bestehende feste Freigaben und Samba-Konfiguration nach Update | Unverändert; Dateivergleich ohne Unterschiede |
 | Bereits gemountetes exFAT-Laufwerk nach Update | Freigabe erkannt; Rechteprüfung für Lesen/Schreiben positiv |
-| Neue Geräte-Sperre und Auswurf auf echter T95 | Offen |
+| Neue Geräte-Sperre und Auswurf auf echter T95 | Auswurf bei `aef4e9f` fehlgeschlagen; Korrektur automatisiert geprüft, erneuter Hardwaretest offen |
 | Dateisystemmatrix, 20 ext4-Zyklen und Mehrgerätebetrieb | Offen |
 
 **Teilabnahme am 19.10.2026, Revision `aef4e9f`:** Der Projektbetreiber hat
@@ -145,6 +145,21 @@ tatsächlichen Datei- oder SMB-Clientzugriff. Samba-Anmeldung mit dem bisherigen
 Passwort, Inhaltsvergleich, Auswurf, Wiederanstecken und Mehrgerätebetrieb
 bleiben separat zu prüfen. Interne SD/eMMC- und ZRAM-Geräte wurden im Status
 erwartungsgemäß als nicht von der USB-Verwaltung verwaltet eingeordnet.
+
+**Anschließender exFAT-Auswurf bei `aef4e9f`: fehlgeschlagen.** Die übermittelte
+Terminalausgabe meldet nach Beginn des Auswurfs `Path is not a directory` für
+die noch vorhandene Usershare-Definition. Auch ohne offenes Samba-Fenster trat
+der Fehler erneut auf. Die Statusabfrage brach ab, bevor Geräte und Protokoll
+sichtbar wurden. Aus dieser Rückmeldung allein folgt keine Abziehfreigabe.
+
+Der Fehler wurde mit entfernten Mountordnern und einer Samba-CLI-Simulation
+reproduziert. Die Korrektur liest geprüfte gespeicherte Freigabedefinitionen
+unabhängig vom existierenden Zielordner und zeigt Geräte/Vorgänge auch bei
+fehlerhaften Definitionen weiter an. 15 zusätzliche Tests prüfen unter anderem
+Bereinigung, Wiederaufnahme nach Update-Abgleich, mehrere Partitionen,
+Nachbarlaufwerke, alle vier vorgesehenen Dateisysteme, Power-off sowie
+Datei-/Verzeichnis-Sicherheitsprüfungen. Insgesamt bestehen 70 Modul- und 32
+Setup-Tests. Der korrigierte Auswurf ist noch nicht auf der T95 bestätigt.
 
 Die frühere USB-Referenzabnahme bestätigt die damaligen Skripte. Die neue
 Implementierung übernimmt diese Bestätigung nicht. [Audit und Testgrenzen](SAMBA_USB_AUDIT.md) ·

@@ -117,7 +117,7 @@ tracked separately from the confirmed steps.
 
 | Check | Status |
 | --- | --- |
-| 55 Samba/USB tests with simulated system effects | Passed |
+| 70 Samba/USB tests with simulated system effects | Passed; includes share definitions with missing mount directories |
 | Existing 32 setup tests | Passed |
 | udev rule syntax | Passed |
 | Package manifests: 25 Samba + 14 dashboard entries | Passed |
@@ -125,7 +125,7 @@ tracked separately from the confirmed steps.
 | Update of an existing T95 setup at `aef4e9f` | Confirmed on hardware; see partial acceptance below |
 | Existing fixed shares and Samba configuration after update | Unchanged; file comparison reported no differences |
 | Already mounted exFAT drive after update | Share detected; read/write permission checks passed |
-| New per-drive guard and eject on physical T95 | Pending |
+| New per-drive guard and eject on physical T95 | Eject failed at `aef4e9f`; correction tested automatically, hardware retry pending |
 | Filesystem matrix, 20 ext4 cycles and multiple devices | Pending |
 
 **Partial acceptance on 2026-10-19, revision `aef4e9f`:** The maintainer ran
@@ -143,6 +143,20 @@ or SMB client access. Authentication with the existing Samba password,
 content verification, eject, reconnection and multiple-device operation still
 require separate checks. Internal SD/eMMC and ZRAM devices were correctly
 reported as outside the USB manager's scope.
+
+**Subsequent exFAT eject at `aef4e9f`: failed.** The supplied terminal output
+reports `Path is not a directory` for a remaining usershare definition after
+eject started. Retrying without an open Samba window produced the same error.
+Status stopped before showing devices and operation history. This feedback
+alone does not establish permission to unplug.
+
+The failure was reproduced with removed mount directories and a Samba CLI
+simulation. The correction reads checked stored share definitions independently
+of target directory existence and continues device/operation diagnostics when
+definitions fail validation. Fifteen additional tests cover cleanup, resuming
+after update reconciliation, multiple partitions, neighbour drives, all four
+intended filesystems, power-off and file/directory security checks. All 70
+module tests and 32 setup tests pass. Corrected eject on the T95 remains unconfirmed.
 
 Earlier USB reference acceptance applies to the earlier scripts. It does not
 confirm the new implementation. [Audit and limits](SAMBA_USB_AUDIT.en.md) ·

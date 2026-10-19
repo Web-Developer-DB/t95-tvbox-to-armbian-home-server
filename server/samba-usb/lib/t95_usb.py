@@ -573,12 +573,95 @@ class UserState:
 class Net:
     def __init__(self, system, user):
         self.system, self.user = system, user
+        self.owner = 0
+
+    @contextmanager
+    def directory(self):
+        configured = self.system.run(["testparm", "-s", "--parameter-name=usershare path"]).stdout.strip()
+        if configured != "/var/lib/samba/usershares":
+            raise USBError("Unerwarteter Samba-usershare-Pfad; Projektkonfiguration prüfen")
+        # Open every component without following links, including while running as root.
+        fd = os.open(self.system.root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            for part in Path(configured).parts[1:]:
+                next_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+                os.close(fd)
+                fd = next_fd
+                metadata = os.fstat(fd)
+                if metadata.st_uid != self.owner:
+                    raise USBError("Samba-usershare-Verzeichnis gehört nicht root")
+                if part != "usershares" and metadata.st_mode & 0o022:
+                    raise USBError("Unsicheres übergeordnetes Samba-Verzeichnis")
+            metadata = os.fstat(fd)
+            if metadata.st_mode & 0o002 or (metadata.st_mode & 0o020 and not metadata.st_mode & stat.S_ISVTX):
+                raise USBError("Samba-usershare-Verzeichnis benötigt geschützte Schreibrechte/Sticky-Bit")
+            yield fd
+        finally:
+            os.close(fd)
+
+    @staticmethod
+    def definition(filename, content):
+        """Read name/path metadata, without requiring a still-mounted target.
+
+        Samba's net usershare info/list both opendir(path); this is invalid as
+        an inventory after UDisks removes an unmounted mountpoint. Activation
+        is still validated by Samba itself in add(). Device ownership is never
+        inferred from this metadata: Manager validates mounts/attachment IDs.
+        """
+        lines = content.splitlines()
+        if not lines or lines[0] not in ("#VERSION 1", "#VERSION 2"):
+            raise USBError("Unbekannte Samba-usershare-Dateiversion")
+        keys = ["path", "comment", "usershare_acl"]
+        if lines[0] == "#VERSION 2":
+            keys.append("guest_ok")
+            if len(lines) == 6:
+                keys.append("sharename")
+        if len(lines) != len(keys) + 1:
+            raise USBError("Unvollständige Samba-usershare-Definition")
+        fields = {}
+        for key, line in zip(keys, lines[1:]):
+            if not line.startswith(key + "="):
+                raise USBError("Ungültige Samba-usershare-Feldfolge")
+            fields[key] = plain(line[len(key) + 1:])
+        name, path = fields.get("sharename", filename), fields["path"].strip(" ")
+        if (not name or name.casefold() != filename.casefold() or name in (".", "..")
+                or any(c in name for c in '/\\:*?"<>|[]')):
+            raise USBError("Ungültiger oder widersprüchlicher Samba-Freigabename")
+        if not Path(path).is_absolute() or ".." in Path(path).parts:
+            raise USBError("Samba-Freigabepfad ist nicht absolut/eindeutig")
+        if not re.fullmatch(r"S-1-\d+(?:-\d+)+:[FRD](?:,S-1-\d+(?:-\d+)+:[FRD])*", fields["usershare_acl"], re.I):
+            raise USBError("Ungültige Samba-usershare-ACL")
+        if fields.get("guest_ok", "n") not in ("y", "n"):
+            raise USBError("Ungültige Samba-usershare-Gasteinstellung")
+        return plain(name), plain(path)
 
     def shares(self):
-        result = self.system.as_user(self.user, ["net", "usershare", "info"])
-        parser = configparser.ConfigParser(interpolation=None, delimiters=("=",), strict=True)
-        parser.read_string(result.stdout)
-        return {plain(name): plain(parser[name]["path"]) for name in parser.sections()}
+        shares = {}
+        try:
+            with self.directory() as directory:
+                for filename in sorted(os.listdir(directory)):
+                    if filename.startswith(":tmp"):
+                        continue  # Samba's in-progress atomic add, never a published share.
+                    metadata = os.stat(filename, dir_fd=directory, follow_symlinks=False)
+                    if metadata.st_uid != self.user.uid:
+                        continue  # Match net usershare info's default: only this user's definitions.
+                    fd = os.open(filename, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+                    with os.fdopen(fd) as input_file:
+                        opened = os.fstat(input_file.fileno())
+                        if (not stat.S_ISREG(opened.st_mode) or opened.st_uid != self.user.uid
+                                or opened.st_mode & 0o022 or opened.st_size > 10240
+                                or (opened.st_dev, opened.st_ino) != (metadata.st_dev, metadata.st_ino)):
+                            raise USBError(f"Unsichere Samba-usershare-Datei: {filename}")
+                        content = input_file.read(10241)
+                        if len(content.encode()) > 10240:
+                            raise USBError(f"Samba-usershare-Datei ist zu groß: {filename}")
+                    name, path = self.definition(filename, content)
+                    if name.casefold() in {n.casefold() for n in shares}:
+                        raise USBError("Mehrdeutiger Samba-Freigabename")
+                    shares[name] = path
+        except (OSError, ValueError, USBError) as error:
+            raise CommandError(f"Samba-Freigabedefinitionen nicht vollständig lesbar: {error}") from error
+        return shares
 
     def reserved(self):
         result = self.system.run(["testparm", "-s"])
@@ -590,6 +673,13 @@ class Net:
         self.system.as_user(self.user, ["net", "usershare", "add", name, path,
                                        "T95 USB automatisch", self.user.name + ":F", "guest_ok=n"])
         if self.shares().get(name) != path:
+            raise USBError("Samba hat die neue Freigabe nicht bestätigt")
+        # Validate only the newly mounted share; an unrelated stale definition
+        # must not prevent healthy devices being published.
+        result = self.system.as_user(self.user, ["net", "usershare", "info", name])
+        parser = configparser.ConfigParser(interpolation=None, delimiters=("=",), strict=True)
+        parser.read_string(result.stdout)
+        if not parser.has_section(name) or parser[name].get("path") != path:
             raise USBError("Samba hat die neue Freigabe nicht bestätigt")
 
     def delete(self, name):
@@ -846,7 +936,13 @@ class Manager:
         snapshot = self.system.snapshot()
         print("USB-Automounter:", self.system.service(self.user, ["is-active", "udiskie.service"], check=False).stdout.strip())
         print("Samba-USB-Freigaben:")
-        for name, path in self.net.shares().items():
+        share_error = None
+        try:
+            shares = self.net.shares()
+        except USBError as error:
+            shares, share_error = {}, error
+            print(f"  FEHLER: {error}")
+        for name, path in shares.items():
             print(f"  {name}: {path}")
         seen = set()
         for node in snapshot.nodes.values():
@@ -871,13 +967,16 @@ class Manager:
                 print(f"  Nicht zum Auswerfen freigegeben: {error}")
                 continue
             if not mounts:
-                print("  Nicht eingehängt. Mountfehler im Kernel-/udiskie-Protokoll prüfen.")
+                print("  Nicht eingehängt; Auswurfsperre aktiv." if self.runtime.guarded(disk) else
+                      "  Nicht eingehängt. Mountfehler im Kernel-/udiskie-Protokoll prüfen.")
             for mount in mounts:
                 read, write, traverse = self.system.permissions(self.user, mount["target"])
                 print(f"  {mount['target']} ({mount['fstype']}); Benutzerrechte: lesen={read and traverse}, schreiben={write and traverse}")
         for operation in self.runtime.operations():
             print(f"Vorgang {operation['device']}: {operation['phase']}; {operation.get('error') or '–'}")
         print("ext4: Linux-Dateirechte gelten weiter. NTFS: dirty/hiberniert kann Mount verhindern. Keine automatische Reparatur.")
+        if share_error is not None:
+            raise USBError("Status unvollständig: Samba-Freigabedefinitionen konnten nicht vollständig geprüft werden") from share_error
 
 
 def cleanup_guard(seq, runtime=RUNTIME):

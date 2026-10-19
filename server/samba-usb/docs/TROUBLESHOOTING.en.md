@@ -12,6 +12,7 @@ installation](../README.en.md).
 | Mounted, no share | Event hook and Samba settings. |
 | Readable share, writes fail | Samba account and actual permissions; ext4 retains UID/GID/ACLs. |
 | Eject failed | Do not unplug; inspect status/mounts and retry. |
+| `Path is not a directory` after eject | Update the older implementation; a removed mount directory could block share cleanup. See below. |
 
 ## 📋 Collect status
 
@@ -67,6 +68,26 @@ sudo usb-eject "$T95_SHARE"
 other storage continues automounting. Do not stop the entire automounter or
 manually delete guard files. After a successful eject, unplug/reconnect to use
 the drive again. Rebooting also clears runtime guards.
+
+### 🛠️ `Path is not a directory` after unmount
+
+During the T95 test of revision `aef4e9f`, Samba could no longer open the share
+path as a directory after exFAT eject started. The `net usershare info` query
+validates that directory, blocking outstanding share cleanup. The old status command also
+stopped there. An open Samba window alone does not explain this failure.
+
+The correction reads stored usershare definitions with directory, owner, file
+type, size and format checks; missing mount directories no longer prevent
+cleanup. Device identity and mount boundaries are still checked independently.
+Samba still confirms newly created shares individually.
+
+Update the repository copy and run
+[update mode](../README.en.md#update-an-existing-setup), keeping the drive
+connected. Then run `sudo usb-eject --status` and retry eject using the original
+share name. The root-protected operation journal permits resumption even if the
+update reconciliation has already removed the stale share.
+Do not create empty replacement mount directories or delete guard files.
+Permission to unplug requires a successful completion of the new eject attempt.
 
 ## 🔄 Setup or update fails
 

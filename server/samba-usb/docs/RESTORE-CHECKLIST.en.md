@@ -12,6 +12,11 @@ automounter and detection of an already mounted exFAT share with positive
 read/write permission checks. The feedback does not yet confirm actual file/SMB
 access or eject. [Evidence and limits](../../../docs/VALIDATION.en.md#-new-sambausb-implementation--2026-10-19).
 
+**Subsequent eject failed:** at `aef4e9f`, a share path no longer accessible as
+a directory blocked cleanup and status. Retrying without an open Samba window
+also failed. The correction is covered by file-backed Samba fixtures; eject
+acceptance remains pending until a successful new hardware run.
+
 | Filesystem | Client read/write with content verification | Eject and reconnect | Result |
 | --- | --- | --- | --- |
 | ext4 | ☐ | ☐ 20 cycles | Not tested |

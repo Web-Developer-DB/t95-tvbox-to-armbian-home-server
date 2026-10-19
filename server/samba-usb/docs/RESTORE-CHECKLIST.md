@@ -12,6 +12,12 @@ aktiver Automounter und Erkennung einer bereits gemounteten exFAT-Freigabe mit
 positiver Lese-/Schreibrechte-Prüfung. Die Rückmeldung enthält noch keinen
 tatsächlichen Datei-/SMB-Zugriff und keinen Auswurf. [Nachweis und Grenzen](../../../docs/VALIDATION.md#-neue-samba-usb-verwaltung--19102026).
 
+**Anschließender Auswurf fehlgeschlagen:** Bei `aef4e9f` blockierte ein nicht mehr
+als Verzeichnis lesbarer Freigabepfad Bereinigung und Statusabfrage. Wiederholung
+ohne offenes Samba-Fenster ebenfalls fehlgeschlagen. Die Korrektur ist mit
+dateibasierten Samba-Fixtures geprüft; die Auswurf-Abnahme bleibt bis zum
+erfolgreichen neuen Hardwaredurchlauf offen.
+
 | Dateisystem | Client lesen/schreiben mit Inhaltsprüfung | Auswurf und Wiedereinstecken | Ergebnis |
 | --- | --- | --- | --- |
 | ext4 | ☐ | ☐ 20 Zyklen | Nicht geprüft |

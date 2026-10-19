@@ -12,6 +12,7 @@ Zuerst prüfen, auf welcher Ebene der Fehler liegt. Diese Anleitung setzt die
 | Eingehängt, aber Freigabe fehlt | Freigabe-Hook und Samba-Einstellungen prüfen. |
 | Freigabe lesbar, Schreiben scheitert | Samba-Konto und tatsächliche Dateirechte prüfen; bei ext4 gelten vorhandene UID/GID/ACLs. |
 | Auswurf fehlgeschlagen | Nicht abziehen; Status und betroffene Mounts prüfen, dann erneut auswerfen. |
+| `Path is not a directory` nach Auswurf | Älteren Stand aktualisieren; bereits ausgehängter Mountordner konnte die Freigabebereinigung blockieren. Siehe unten. |
 
 ## 📋 Status sammeln
 
@@ -68,6 +69,28 @@ auf das betroffene Laufwerk begrenzt; andere Geräte werden weiter eingebunden.
 Nicht manuell den gesamten Automounter stoppen oder die Sperrdatei löschen.
 Nach erfolgreichem Auswurf abziehen und neu verbinden, wenn das Laufwerk wieder
 benutzt werden soll. Auch ein Rechnerneustart hebt Laufzeitsperren auf.
+
+### 🛠️ `Path is not a directory` nach dem Aushängen
+
+Beim T95-Test von Revision `aef4e9f` konnte Samba nach Beginn des exFAT-Auswurfs
+den Freigabepfad nicht mehr als Verzeichnis öffnen. `net usershare info` prüft
+diesen Ordner und verhinderte dadurch die noch ausstehende Freigabebereinigung.
+Auch die damalige Statusabfrage brach an dieser Stelle ab. Ein geöffnetes
+Samba-Fenster allein erklärt diesen Fehler nicht.
+
+Die Korrektur liest gespeicherte Usershare-Definitionen mit Prüfungen von
+Verzeichnis, Eigentümer, Dateityp, Größe und Format; fehlende Mountordner
+verhindern die Bereinigung nicht mehr. Geräteidentität und Mountgrenzen werden
+weiter unabhängig geprüft. Neue Freigaben bestätigt Samba weiterhin einzeln.
+
+Die Repository-Kopie aktualisieren und den
+[Update-Modus](../README.md#vorhandene-einrichtung-aktualisieren) ausführen.
+Das Laufwerk dabei angeschlossen lassen. Danach `sudo usb-eject --status`
+aufrufen und den Auswurf mit dem bisherigen Freigabenamen wiederholen.
+Das rootgeschützte Vorgangsprotokoll ermöglicht die Wiederaufnahme auch dann,
+wenn der Update-Abgleich die veraltete Freigabe bereits entfernt hat.
+Keine leeren Ersatz-Mountordner anlegen und keine Sperrdateien löschen.
+Eine Abziehfreigabe gilt erst nach erfolgreichem Abschluss des erneuten Auswurfs.
 
 ## 🔄 Installation oder Update scheitert
 

@@ -170,6 +170,52 @@ class FakeNet:
         self.data.pop(name, None)
 
 
+class SambaRegistry:
+    """Samba CLI boundary: info validates target directories; delete does not."""
+    def __init__(self, system, user):
+        self.system, self.user = system, user
+        self.path = system.path('/var/lib/samba/usershares')
+        self.path.mkdir(parents=True)
+        for parent in ('/var', '/var/lib', '/var/lib/samba'):
+            system.path(parent).chmod(0o755)
+        self.path.chmod(0o1770)
+        self.calls = []
+        self.fail_delete = self.fail_config = False
+
+    def write(self, name, path):
+        record = self.path / name.lower()
+        record.write_text(f'#VERSION 2\npath={path}\ncomment=T95 USB automatisch\n'
+                          f'usershare_acl=S-1-5-21-123-1000:F\nguest_ok=n\nsharename={name}\n')
+        record.chmod(0o644)
+
+    def run(self, args, check=True, **kwargs):
+        self.calls.append(args)
+        output, error = '', ''
+        if args[0] == 'testparm':
+            if self.fail_config:
+                raise usb.CommandError('testparm failed')
+            output = '/var/lib/samba/usershares\n' if '--parameter-name=usershare path' in args else '[global]\n[T95-DATA]\n'
+        elif args[:3] == ['net', 'usershare', 'add']:
+            self.write(args[3], args[4])
+        elif args[:3] == ['net', 'usershare', 'delete']:
+            if self.fail_delete:
+                raise usb.CommandError('delete failed')
+            (self.path / args[3].lower()).unlink()
+        elif args[:3] == ['net', 'usershare', 'info']:
+            files = [self.path / args[3].lower()] if len(args) == 4 else sorted(self.path.iterdir())
+            for record in files:
+                fields = dict(line.split('=', 1) for line in record.read_text().splitlines()[1:])
+                if not Path(fields['path']).is_dir():
+                    error = f'info_fn: file {record} is not a well formed usershare file.\ninfo_fn: Error was Path is not a directory.'
+                    break
+                output += f"[{fields['sharename']}]\npath={fields['path']}\n\n"
+        else:
+            raise AssertionError(f'Unexpected Samba fixture command: {args}')
+        if error and check:
+            raise usb.CommandError(error)
+        return subprocess.CompletedProcess(args, int(bool(error)), output, error)
+
+
 class USBTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -195,6 +241,208 @@ class USBTests(unittest.TestCase):
         self.system.add_disk(**kwargs)
         self.manager.reconcile()
         return next(iter(self.net.data))
+
+    def real_net(self):
+        registry = SambaRegistry(self.system, self.user)
+        self.system.run = registry.run
+        self.manager.net = usb.Net(self.system, self.user)
+        self.manager.net.owner = os.getuid()  # Temporary registry ownership, never host root paths.
+        return registry
+
+    def test_real_samba_registry_allows_cleanup_after_mount_directory_disappears(self):
+        registry = self.real_net()
+        self.system.add_disk(fs='exfat', label='Medion64')
+        self.manager.reconcile()
+        mount = self.system.mount_list[-1]['target']
+        self.system.on_unmount = lambda: Path(mount).rmdir()
+        self.manager.eject('Medion64')
+        self.assertFalse(list(registry.path.iterdir()))
+        self.assertFalse(list(self.user.state.glob('*.json')))
+        self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
+        self.assertTrue(self.runtime.guarded(self.system.snapshot().disk('/dev/sda')))
+
+    def test_real_registry_resumes_failed_eject_with_missing_mount_directory(self):
+        registry = self.real_net()
+        self.system.add_disk(fs='exfat', label='Medion64')
+        self.manager.reconcile()
+        mount = self.system.mount_list[-1]['target']
+        self.system.on_unmount = lambda: Path(mount).rmdir()
+        registry.fail_delete = True
+        with self.assertRaises(usb.USBError):
+            self.manager.eject('Medion64')
+        self.assertFalse(Path(mount).exists())
+        self.assertEqual(self.runtime.operations()[-1]['phase'], 'failed')
+        registry.fail_delete = False
+        self.manager.eject('Medion64')
+        self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
+        self.assertFalse(list(registry.path.iterdir()))
+
+    def test_real_registry_other_disk_can_publish_during_unmount_cleanup(self):
+        registry = self.real_net()
+        self.system.add_disk(label='DATA')
+        self.manager.reconcile()
+        target = self.system.mount_list[-1]['target']
+        def hotplug():
+            Path(target).rmdir()
+            self.system.add_disk('sdb', '20', label='OTHER')
+            self.manager.reconcile()
+        self.system.on_unmount = hotplug
+        self.manager.eject('DATA')
+        self.assertEqual(set(self.manager.net.shares()), {'OTHER'})
+        self.assertNotIn(('close-share', 'OTHER'), self.system.calls)
+        self.assertEqual([p.name for p in registry.path.iterdir()], ['other'])
+
+    def test_real_registry_missing_old_target_does_not_block_new_share(self):
+        registry = self.real_net()
+        registry.write('REMOVED', str(self.user.base / 'gone'))
+        self.system.add_disk(label='NEW')
+        self.manager.reconcile()
+        self.assertEqual(set(self.manager.net.shares()), {'REMOVED', 'NEW'})
+        queries = [c for c in registry.calls if c[:3] == ['net', 'usershare', 'info']]
+        self.assertEqual(queries, [['net', 'usershare', 'info', 'NEW']])
+
+    def test_status_keeps_device_and_operation_diagnostics_when_samba_query_fails(self):
+        name = self.ready()
+        disk = self.system.snapshot().disk('/dev/sda')
+        self.runtime.operation(disk, 'failed', {name}, 'prior failure')
+        self.net.fail_query = True
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            with self.assertRaises(usb.USBError):
+                self.manager.status()
+        self.assertIn('USB: /dev/sda', output.getvalue())
+        self.assertIn('prior failure', output.getvalue())
+
+    def test_real_registry_all_supported_filesystems_handle_removed_mountpoints(self):
+        registry = self.real_net()
+        for index, filesystem in enumerate(('ext4', 'exfat', 'vfat', 'ntfs', 'ntfs3'), 100):
+            with self.subTest(filesystem=filesystem):
+                self.system.nodes.clear()
+                self.system.object_list.clear()
+                self.system.add_disk(fs=filesystem, seq=str(index), label='DATA')
+                self.manager.reconcile()
+                mount = self.system.mount_list[-1]['target']
+                self.system.on_unmount = lambda: Path(mount).rmdir()
+                self.manager.eject('DATA')
+                self.assertFalse(list(registry.path.iterdir()))
+                self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
+
+    def test_real_registry_all_partition_mount_directories_can_disappear(self):
+        registry = self.real_net()
+        self.system.add_disk(parts=2)
+        self.manager.reconcile()
+        normal = self.system.unmount
+        def unmount(path):
+            normal(path)
+            Path(path).rmdir()
+        self.system.unmount = unmount
+        self.manager.eject('DATA')
+        self.assertFalse(list(registry.path.iterdir()))
+        self.assertEqual(len([c for c in self.system.calls if c[0] == 'unmount']), 2)
+
+    def test_real_registry_missing_target_still_allows_confirmed_power_off(self):
+        registry = self.real_net()
+        self.system.add_disk(power=True)
+        self.manager.reconcile()
+        mount = self.system.mount_list[-1]['target']
+        self.system.on_unmount = lambda: Path(mount).rmdir()
+        self.manager.eject('DATA')
+        self.assertFalse(list(registry.path.iterdir()))
+        self.assertEqual(self.runtime.operations()[-1]['phase'], 'powered-off')
+
+    def test_real_registry_read_failure_does_not_unmount_or_delete_state(self):
+        registry = self.real_net()
+        self.system.add_disk()
+        self.manager.reconcile()
+        registry.fail_config = True
+        with self.assertRaises(usb.USBError):
+            self.manager.eject('DATA')
+        self.assertTrue(list(registry.path.iterdir()))
+        self.assertTrue(list(self.user.state.glob('*.json')))
+        self.assertFalse(any(c[0] == 'unmount' for c in self.system.calls))
+
+    def test_real_registry_accepts_legacy_versions_without_target_directory(self):
+        registry = self.real_net()
+        for version in ('#VERSION 1', '#VERSION 2'):
+            content = f'{version}\npath={self.user.base}/gone\ncomment=old\nusershare_acl=S-1-1-0:R\n'
+            if version == '#VERSION 2':
+                content += 'guest_ok=n\n'
+            (registry.path / 'legacy').write_text(content)
+            (registry.path / 'legacy').chmod(0o644)
+            self.assertEqual(self.manager.net.shares(), {'legacy': str(self.user.base / 'gone')})
+
+    def test_reconciliation_during_update_does_not_prevent_eject_resumption(self):
+        registry = self.real_net()
+        self.system.add_disk(label='Medion64')
+        self.manager.reconcile()
+        mount = self.system.mount_list[-1]['target']
+        self.system.on_unmount = lambda: Path(mount).rmdir()
+        registry.fail_delete = True
+        with self.assertRaises(usb.USBError): self.manager.eject('Medion64')
+        registry.fail_delete = False
+        self.manager.reconcile()  # The installer's final step, with the drive still guarded/unmounted.
+        self.assertFalse(list(registry.path.iterdir()))
+        self.assertFalse(self.manager.state.read())
+        self.manager.eject('Medion64')
+        self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
+
+    def test_real_registry_rejects_malformed_unsafe_and_incomplete_definitions(self):
+        registry = self.real_net()
+        registry.write('DATA', str(self.user.base / 'gone'))
+        record = registry.path / 'data'
+        original = record.read_text()
+        cases = {
+            'wrong name': original.replace('sharename=DATA', 'sharename=OTHER'),
+            'relative path': original.replace(f'path={self.user.base}/gone', 'path=relative'),
+            'invalid ACL': original.replace('S-1-5-21-123-1000:F', 'not-an-acl'),
+            'incomplete': '#VERSION 2\npath=/gone\n',
+            'unknown version': original.replace('#VERSION 2', '#VERSION 3'),
+            'oversized': original + 'x' * 10241,
+        }
+        for description, content in cases.items():
+            with self.subTest(description=description):
+                record.write_text(content)
+                with self.assertRaises(usb.CommandError): self.manager.net.shares()
+        record.write_text(original)
+        record.chmod(0o666)
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
+        record.unlink()
+        record.symlink_to(self.root / 'outside')
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
+        record.unlink()
+        os.mkfifo(record)
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
+
+    def test_real_registry_directory_links_and_unprotected_group_write_are_refused(self):
+        registry = self.real_net()
+        registry.path.chmod(0o770)
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
+        registry.path.rmdir()
+        elsewhere = self.root / 'elsewhere'
+        elsewhere.mkdir()
+        registry.path.symlink_to(elsewhere)
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
+
+    def test_real_registry_ignores_samba_temporary_files_and_foreign_owners(self):
+        registry = self.real_net()
+        (registry.path / ':tmpABCDEF').write_text('not finished')
+        registry.write('FOREIGN', str(self.user.base / 'other'))
+        real_stat = usb.os.stat
+        def foreign_stat(path, *args, **kwargs):
+            result = real_stat(path, *args, **kwargs)
+            return SimpleNamespace(st_uid=self.user.uid + 1) if path == 'foreign' else result
+        with patch.object(usb.os, 'stat', side_effect=foreign_stat):
+            self.assertEqual(self.manager.net.shares(), {})
+
+    def test_real_registry_partial_failure_keeps_other_devices_visible_in_status(self):
+        registry = self.real_net()
+        self.system.add_disk()
+        self.manager.reconcile()
+        (registry.path / 'data').write_text('invalid')
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            with self.assertRaisesRegex(usb.USBError, 'Status unvollständig'):
+                self.manager.status()
+        self.assertIn('USB: /dev/sda', output.getvalue())
+        self.assertIn('FEHLER:', output.getvalue())
 
     def test_supported_filesystems_are_published_and_ejected_without_global_stop(self):
         for fs in ("ext4", "exfat", "vfat", "ntfs", "ntfs3"):
@@ -480,11 +728,10 @@ class USBTests(unittest.TestCase):
         self.assertTrue(all(c[0] == "service" and c[1] == "is-active" for c in self.system.calls))
 
     def test_actual_net_adapter_distinguishes_empty_and_failed_queries(self):
-        system = usb.System(runner=lambda args, **kwargs: subprocess.CompletedProcess(args, 0, "", ""))
-        adapter = usb.Net(system, self.user)
-        self.assertEqual(adapter.shares(), {})
-        system.run = lambda *args, **kwargs: (_ for _ in ()).throw(usb.CommandError("query failed"))
-        with self.assertRaises(usb.CommandError): adapter.shares()
+        registry = self.real_net()
+        self.assertEqual(self.manager.net.shares(), {})
+        registry.fail_config = True
+        with self.assertRaises(usb.CommandError): self.manager.net.shares()
 
     def test_failed_first_query_uses_saved_mapping_then_requires_healthy_samba(self):
         name = self.ready()

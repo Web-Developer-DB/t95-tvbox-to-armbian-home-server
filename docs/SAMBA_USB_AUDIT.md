@@ -13,6 +13,8 @@ Quellprüfung und isolierte Simulationen ersetzen keinen Datenträgertest.
 > durch automatisierte Tests abgesichert. Der Auswurf arbeitet jetzt je Laufwerk;
 > udiskie bleibt aktiv. **Die Hardware-Abnahme hat begonnen; der vollständige
 > Durchlauf steht noch aus.** Update und exFAT-Status sind als Teilabnahme bestätigt.
+> Der anschließende exFAT-Auswurf deckte einen weiteren Fehler bei fehlendem
+> Mountordner auf. Die Korrektur ist automatisiert geprüft; Hardware-Wiederholung offen.
 > Der ursprüngliche sporadische ext4-Fehler ist damit noch nicht auf echter
 > Hardware als behoben nachgewiesen.
 
@@ -127,10 +129,12 @@ offenen Dateien, nicht unterstütztes Power-off, Neustart und erneutes Anstecken
 
 ## ✅ Abnahme der neuen USB-Verwaltung
 
-- **55 neue automatisierte Tests bestanden**: Freigaben/Auswurf, Parser und Update-/Rollback-Fixtures. Zusätzlich bestehen die bisherigen 32 Dashboard-/Bluetooth-Tests.
+- **70 automatisierte Modul-Tests bestanden**: Freigaben/Auswurf, Parser und Update-/Rollback-Fixtures, einschließlich 15 zusätzlicher Fälle nach dem Hardwarebefund. Zusätzlich bestehen die bisherigen 32 Dashboard-/Bluetooth-Tests.
 - **udev-Regel syntaktisch geprüft**; noch kein Nachweis ihrer Laufzeitwirkung auf der T95.
 - **Simulationen verändern keine echten Datenträger oder Dienste.** Sie verwenden temporäre Verzeichnisse und System-Doubles.
 - **Teilabnahme auf T95 bei `aef4e9f`:** Update einer vorhandenen Einrichtung erfolgreich; private Sicherung angelegt, Samba-Konfiguration einschließlich eigener fester Freigaben unverändert, Automounter aktiv und vorhandene exFAT-Freigabe mit positiven Benutzerrechte-Prüfungen erkannt. Nachweis: vom Projektbetreiber übermittelte Terminalausgabe vom 19.10.2026; noch kein Datei-/SMB-Zugriff oder Auswurf. [Details und Grenzen](VALIDATION.md#-neue-samba-usb-verwaltung--19102026).
+- **Anschließender Auswurf bei `aef4e9f` fehlgeschlagen:** `net usershare info` verweigert die Abfrage, wenn es den Freigabepfad nicht mehr als Verzeichnis öffnen kann. Dadurch blieben Bereinigung und Status hängen; der Fehler trat auch ohne offenes Samba-Fenster auf. Die bisherige reine Dictionary-Simulation der Freigaben bildete diese Samba-Prüfung nicht nach. Neue dateibasierte CLI-Fixtures reproduzieren den Fehler mit verschwundenem Mountordner.
+- **Korrektur dieses zusätzlichen Befunds:** Eigentümer-/Format-geprüfte Usershare-Definitionen unabhängig vom Mountziel lesen; neue Freigaben gezielt durch Samba bestätigen; Geräte-/Vorgangsstatus trotz Definitionsfehler ausgeben und unvollständige Abfragen weiterhin als Fehler melden. Keine Ersatzverzeichnisse oder pauschal ignorierten Abfragefehler. Wiederaufnahme auch nach Update-Abgleich automatisiert geprüft; Hardware-Wiederholung offen. Die zugrunde liegende Pfadprüfung steht im [Samba-Parser](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/param/loadparm.c), die Verwendung durch Info/List im [Usershare-Kommando](https://github.com/samba-team/samba/blob/samba-4.22.4/source3/utils/net_usershare.c).
 - **Hardware offen:** Client lesen/schreiben mit Inhaltsvergleich für ext4, exFAT, FAT32 und NTFS; Btrfs-Subvolumes; 20 ext4-Ansteck-/Auswurfzyklen; Mehrgerätebetrieb an beiden Ports und mit Hub; Power-off und Wiederaufnahme.
 
 Die [Abnahmecheckliste](../server/samba-usb/docs/RESTORE-CHECKLIST.md) hält diese

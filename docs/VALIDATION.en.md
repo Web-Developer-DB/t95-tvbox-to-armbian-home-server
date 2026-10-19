@@ -109,7 +109,10 @@ line width, absent tools, upgrading existing installs without APT, backups,
 rollback and manual changes. The subsequently supplied T95 screenshot confirms
 the initial English hint in the Tips section. The later colored design with
 separate descriptions/commands passes automated checks, including 64 visible
-terminal columns and output without colors; its own T95 display is not yet confirmed.
+terminal columns and output without colors. The maintainer subsequently
+confirmed on **2026-10-19** that the updated version works on the T95 and
+approved it for `main`. This includes the colored hint; it does not replace
+separate acceptance of the outstanding filesystem matrix or audio rollback.
 
 The [Samba/USB audit](SAMBA_USB_AUDIT.en.md) separately records confirmed error
 paths and filesystem limits; general USB acceptance is not a per-filesystem or

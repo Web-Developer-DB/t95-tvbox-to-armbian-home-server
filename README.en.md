@@ -106,7 +106,9 @@ The maintainer confirmed the dashboard/Bluetooth steps work on **2026-10-17**.
 [Test evidence](docs/VALIDATION.en.md) tracks further acceptance and long-term tests.
 Ethernet: 100 Mbit/s, measured at about 11–12 MB/s.
 
-**New USB implementation:** automated tests pass; hardware acceptance is pending. [Fix status](docs/SAMBA_USB_AUDIT.en.md).
+**New USB implementation:** automated tests pass; exFAT Samba access,
+eject/power-off and reconnection are confirmed on the T95. Other filesystem
+and multiple-device tests remain pending. [Fix status](docs/SAMBA_USB_AUDIT.en.md).
 
 <a id="daily-use"></a>
 

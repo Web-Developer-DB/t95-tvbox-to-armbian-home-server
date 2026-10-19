@@ -111,8 +111,11 @@ Ergänzung bestehender Installationen ohne APT, Sicherung, Rücknahme und
 manuelle Änderungen. Der anschließend übermittelte T95-Screenshot bestätigt
 die erste englische Kurzhilfe im Tipps-Bereich. Die danach ergänzte farbige
 Gestaltung mit getrennten Beschreibungen und Befehlen ist automatisiert geprüft,
-einschließlich 64 sichtbarer Terminalspalten und der Darstellung ohne Farben;
-ihre eigene Anzeige auf der T95 ist noch nicht bestätigt.
+einschließlich 64 sichtbarer Terminalspalten und der Darstellung ohne Farben.
+Der Projektbetreiber bestätigte anschließend am **19.10.2026**, dass der
+aktualisierte Stand auf der T95 funktioniert, und gab ihn für `main` frei.
+Das schließt die farbige Kurzhilfe ein; es ersetzt keine gesonderte Abnahme
+der weiterhin offenen Dateisystemmatrix oder Audio-Rücknahme.
 
 Der [Samba-/USB-Audit](SAMBA_USB_AUDIT.md) hält separat bestätigte Fehlerpfade und
 Dateisystemgrenzen fest. Die allgemeine USB-Abnahme ist keine Zertifizierung

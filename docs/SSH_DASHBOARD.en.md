@@ -132,9 +132,9 @@ For an already recorded installation this adds/updates only the USB help.
 Other dashboard files, custom settings and the original backup are preserved;
 no packages are reinstalled for this update. Manual changes to the managed
 hint are reported. Log in again and use `t95-dashboard status` to check the
-managed files. The new display is automatically tested; the
-[earlier hardware confirmation](VALIDATION.en.md#dashboard-and-bluetooth)
-still applies to the previously tested dashboard version.
+managed files. The colored USB hint passes automated tests and the maintainer
+confirmed it works on the T95 on **2026-10-19**.
+[Evidence and remaining individual checks](VALIDATION.en.md#dashboard-and-bluetooth).
 
 <a id="remove"></a>
 

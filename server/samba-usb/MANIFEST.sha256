@@ -1,8 +1,8 @@
 e9500fdb8a091ae223f3ce6bc35b2dbdcef64fbdef0bd17cca59fa3229e6f4c4  ./.gitignore
 a91d62b81a9cbc15ac3cecccd4b54445e7919a100441875ce955a901f95d8aa7  ./CHANGELOG.en.md
 65d8e47ef86e00c0d3d3f7695b2b6ece45c487bd0514b24abb462921180a549e  ./CHANGELOG.md
-b65dfc47b6c3f08c55862656ace6d34c7797dc4b2ee0f2bfc86e29fa6891d1f9  ./README.en.md
-1218c070d3e9f0146dd8af8d73cafc44406cdc52ec0c0e83364a11b65d7cb5e3  ./README.md
+ed429bede5bf29623fd66e47c74141ea03efffc4885835e55b707d27182f59b1  ./README.en.md
+017f0daf4226e8b3fc2bbf2e2eda733a6a3ea0df29d607ba681ee5ea1f5dffcf  ./README.md
 142fda918ab8b1452c7761fabde5e73d259c3b421293c1e6690874db791e96ac  ./config/polkit/50-t95-udisks.rules
 dd1d510824690fa158f4d43f1a81804085c36ea411af9130d39351936e960259  ./config/samba/smb.conf.fragment
 12cdd7e5be901a49e8a8f346eebda8e1cbe153bc5501dd1567a2c82d7aa6fd1f  ./config/systemd-user/udiskie.service
@@ -22,4 +22,4 @@ f64dbb6891a08342861fd36a3819db916d6af651bd3fd88b63fc4bf1f0866443  ./lib/t95_usb.
 5dbbe3b8d4e99c2891ab797c79609e6173a766fba547f06e1b3f15f2cf54e132  ./scripts/t95-usb-share
 7f035c1387706b368a17ea219fc4234c82b1032d3270b4705968a944e5a27490  ./scripts/usb-eject
 dc31db6bcb62afda6e7050f177d59afa3044a9e3e3fe4526533649c3033a9999  ./tests/test_install.py
-b7c172b023437396038013a89ec2ef93faa508f5713d32b86d53e3de84e01f3d  ./tests/test_usb.py
+7e253b8d17fb21cbc861ce8a1b2a4ee56161f4bae9b97f1a7723ce54927ae69c  ./tests/test_usb.py

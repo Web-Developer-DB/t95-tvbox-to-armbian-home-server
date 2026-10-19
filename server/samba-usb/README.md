@@ -24,8 +24,10 @@ unter `/srv/t95-sd-data/Share`; USB-Freigaben sind davon unabhängig.
 
 > [!IMPORTANT]
 > **Neue USB-Verwaltung vom 19.10.2026:** Die Auditkorrekturen sind automatisiert
-> geprüft. Ihr eigener Hardwaredurchlauf steht noch aus. Die frühere
-> Referenzabnahme gilt für die damaligen Skripte. [Prüfstand und Abnahme](../../docs/SAMBA_USB_AUDIT.md).
+> geprüft. Auf der T95 bestätigt sind das Update einer vorhandenen Einrichtung
+> sowie Samba-Lesen/-Schreiben, Auswurf/Power-off und Wiedereinstecken eines
+> exFAT-Sticks. Weitere Dateisystem- und Mehrgerätetests bleiben offen.
+> [Prüfstand und Abnahme](../../docs/SAMBA_USB_AUDIT.md).
 
 <a id="voraussetzungen"></a>
 

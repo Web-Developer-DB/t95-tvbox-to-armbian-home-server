@@ -109,7 +109,9 @@ Die Dashboard-/Bluetooth-Schritte hat der Projektbetreiber am **17.10.2026**
 als funktionsfähig bestätigt. Weitere Abnahmen und Langzeittests stehen in den
 [Testnachweisen](docs/VALIDATION.md).
 
-**Neue USB-Verwaltung:** automatisiert geprüft; Hardware-Abnahme noch offen. [Korrekturstand](docs/SAMBA_USB_AUDIT.md).
+**Neue USB-Verwaltung:** automatisiert geprüft; exFAT mit Samba-Zugriff,
+Auswurf/Power-off und Wiedereinstecken auf der T95 bestätigt. Weitere
+Dateisystem- und Mehrgerätetests bleiben offen. [Korrekturstand](docs/SAMBA_USB_AUDIT.md).
 
 Ethernet: 100 Mbit/s, gemessen etwa 11–12 MB/s.
 

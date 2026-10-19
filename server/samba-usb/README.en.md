@@ -24,8 +24,9 @@ The recommended fixed `T95-DATA` share uses the system SD at
 
 > [!IMPORTANT]
 > **USB implementation updated 2026-10-19:** audit fixes are covered by automated
-> tests. Their own hardware acceptance is pending. Earlier reference acceptance
-> applies to the earlier scripts. [Evidence and checklist](../../docs/SAMBA_USB_AUDIT.en.md).
+> tests. An existing-setup update and exFAT Samba read/write, eject/power-off and
+> reconnection are confirmed on the T95. Other filesystem and multiple-device
+> tests remain pending. [Evidence and checklist](../../docs/SAMBA_USB_AUDIT.en.md).
 
 <a id="requirements"></a>
 

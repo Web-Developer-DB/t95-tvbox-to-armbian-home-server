@@ -251,11 +251,11 @@ class USBTests(unittest.TestCase):
 
     def test_real_samba_registry_allows_cleanup_after_mount_directory_disappears(self):
         registry = self.real_net()
-        self.system.add_disk(fs='exfat', label='Medion64')
+        self.system.add_disk(fs='exfat', label='ExampleUSB')
         self.manager.reconcile()
         mount = self.system.mount_list[-1]['target']
         self.system.on_unmount = lambda: Path(mount).rmdir()
-        self.manager.eject('Medion64')
+        self.manager.eject('ExampleUSB')
         self.assertFalse(list(registry.path.iterdir()))
         self.assertFalse(list(self.user.state.glob('*.json')))
         self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
@@ -263,17 +263,17 @@ class USBTests(unittest.TestCase):
 
     def test_real_registry_resumes_failed_eject_with_missing_mount_directory(self):
         registry = self.real_net()
-        self.system.add_disk(fs='exfat', label='Medion64')
+        self.system.add_disk(fs='exfat', label='ExampleUSB')
         self.manager.reconcile()
         mount = self.system.mount_list[-1]['target']
         self.system.on_unmount = lambda: Path(mount).rmdir()
         registry.fail_delete = True
         with self.assertRaises(usb.USBError):
-            self.manager.eject('Medion64')
+            self.manager.eject('ExampleUSB')
         self.assertFalse(Path(mount).exists())
         self.assertEqual(self.runtime.operations()[-1]['phase'], 'failed')
         registry.fail_delete = False
-        self.manager.eject('Medion64')
+        self.manager.eject('ExampleUSB')
         self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
         self.assertFalse(list(registry.path.iterdir()))
 
@@ -372,17 +372,17 @@ class USBTests(unittest.TestCase):
 
     def test_reconciliation_during_update_does_not_prevent_eject_resumption(self):
         registry = self.real_net()
-        self.system.add_disk(label='Medion64')
+        self.system.add_disk(label='ExampleUSB')
         self.manager.reconcile()
         mount = self.system.mount_list[-1]['target']
         self.system.on_unmount = lambda: Path(mount).rmdir()
         registry.fail_delete = True
-        with self.assertRaises(usb.USBError): self.manager.eject('Medion64')
+        with self.assertRaises(usb.USBError): self.manager.eject('ExampleUSB')
         registry.fail_delete = False
         self.manager.reconcile()  # The installer's final step, with the drive still guarded/unmounted.
         self.assertFalse(list(registry.path.iterdir()))
         self.assertFalse(self.manager.state.read())
-        self.manager.eject('Medion64')
+        self.manager.eject('ExampleUSB')
         self.assertEqual(self.runtime.operations()[-1]['phase'], 'ejected')
 
     def test_real_registry_rejects_malformed_unsafe_and_incomplete_definitions(self):

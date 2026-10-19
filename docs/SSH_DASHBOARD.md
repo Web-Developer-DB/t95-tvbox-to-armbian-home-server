@@ -139,9 +139,9 @@ die USB-Kurzhilfe. Die übrigen Dashboard-Dateien, eigene Einstellungen und die
 ursprüngliche Sicherung bleiben erhalten; dafür werden keine Pakete erneut
 installiert. Manuelle Änderungen an der bereits verwalteten Kurzhilfe werden
 gemeldet. Danach neu per SSH anmelden; `t95-dashboard status` kontrolliert die
-verwalteten Dateien. Die neue Anzeige ist automatisiert geprüft; die
-[bisherige Hardwarebestätigung](VALIDATION.md#dashboard-und-bluetooth) gilt
-weiter für den zuvor getesteten Dashboard-Stand.
+verwalteten Dateien. Die farbige USB-Kurzhilfe ist automatisiert geprüft und
+wurde vom Projektbetreiber am **19.10.2026** auf der T95 als funktionsfähig
+bestätigt. [Testnachweise und verbleibende Einzelprüfungen](VALIDATION.md#dashboard-und-bluetooth).
 
 <a id="entfernen"></a>
 

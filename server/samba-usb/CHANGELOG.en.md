@@ -2,6 +2,7 @@
 
 ## 2026-10-20
 
+- Removed the general ext4/NTFS advisory line from USB status output.
 - USB status focuses on connected USB drives; internal SD/eMMC and ZRAM devices no longer appear as unmanaged.
 - Hide operations from earlier connections and powered-off devices; keep current eject failures and USB validation/mount warnings visible. Stored operations are not deleted.
 - Explicitly report an empty USB overview. Six additional regression tests; all 79 module tests pass.

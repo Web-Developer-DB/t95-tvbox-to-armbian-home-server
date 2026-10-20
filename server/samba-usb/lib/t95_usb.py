@@ -990,8 +990,6 @@ class Manager:
                 continue
             print(f"Vorgang {operation['device']} (diskseq={operation['diskseq']}; aktuelle Verbindung): "
                   f"{operation['phase']}; {operation.get('error') or '–'}")
-        if seen:
-            print("ext4: Linux-Dateirechte gelten weiter. NTFS: dirty/hiberniert kann Mount verhindern. Keine automatische Reparatur.")
         if share_error is not None:
             raise USBError("Status unvollständig: Samba-Freigabedefinitionen konnten nicht vollständig geprüft werden") from share_error
 

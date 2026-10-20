@@ -944,14 +944,24 @@ class Manager:
             print(f"  FEHLER: {error}")
         for name, path in shares.items():
             print(f"  {name}: {path}")
+        if not shares and share_error is None:
+            print("  Keine USB-Freigaben.")
+        # Filter the display only. Eject still performs the full independent
+        # device/mount validation. Either source can identify a USB candidate;
+        # incomplete or conflicting USB metadata must remain visible as an error.
+        usb_numbers = {int(block.get("DeviceNumber", -1)) for block in snapshot.blocks.values()
+                       if str(snapshot.drives.get(str(block.get("Drive")), {}).get("ConnectionBus")) == "usb"}
+        candidates = [node for node in snapshot.nodes.values() if node["type"] == "disk" and
+                      (node.get("tran") == "usb" or
+                       os.makedev(*map(int, str(node["maj:min"]).split(":"))) in usb_numbers)]
+        if not candidates:
+            print("Keine USB-Laufwerke angeschlossen.")
         seen, identities = set(), {}
-        for node in snapshot.nodes.values():
-            if node["type"] != "disk":
-                continue
+        for node in candidates:
             try:
                 disk = snapshot.disk(node["name"])
             except USBError as error:
-                print(f"Nicht verwaltet: {node['name']}: {error}")
+                print(f"USB-Prüfung fehlgeschlagen: {node['name']}: {error}")
                 continue
             if disk.seq in seen:
                 continue
@@ -976,10 +986,12 @@ class Manager:
         for operation in self.runtime.operations():
             current = identities.get(operation['device'])
             same_attachment = current is not None and all(operation.get(k) == v for k, v in current.items())
-            connection = "aktuelle Verbindung" if same_attachment else "frühere Verbindung"
-            print(f"Vorgang {operation['device']} (diskseq={operation['diskseq']}; {connection}): "
+            if not same_attachment:
+                continue
+            print(f"Vorgang {operation['device']} (diskseq={operation['diskseq']}; aktuelle Verbindung): "
                   f"{operation['phase']}; {operation.get('error') or '–'}")
-        print("ext4: Linux-Dateirechte gelten weiter. NTFS: dirty/hiberniert kann Mount verhindern. Keine automatische Reparatur.")
+        if seen:
+            print("ext4: Linux-Dateirechte gelten weiter. NTFS: dirty/hiberniert kann Mount verhindern. Keine automatische Reparatur.")
         if share_error is not None:
             raise USBError("Status unvollständig: Samba-Freigabedefinitionen konnten nicht vollständig geprüft werden") from share_error
 

@@ -92,10 +92,16 @@ sudo journalctl -t T95-USB-SHARE -b --no-pager -n 60
 systemctl --user status udiskie.service --no-pager -l
 ```
 
-Status zeigt Geräte, Dateisysteme, Mounts, Benutzerrechte, Freigaben, Sperren und
-fehlgeschlagene Auswürfe. Exitstatus: `0` bestätigter Erfolg, `1` Betriebsfehler,
+Status zeigt angeschlossene USB-Laufwerke mit Dateisystemen, Mounts,
+Benutzerrechten, Freigaben und Sperren. Interne SD/eMMC-, ZRAM-Geräte und
+Vorgänge früherer Verbindungen werden ausgeblendet. Ein Vorgang erscheint nur,
+wenn Bootkennung, Gerätepfad, Sysfs-Pfad und diskseq zur aktuellen Verbindung
+passen; die gespeicherten Protokolle bleiben für Diagnose und Wiederaufnahme
+erhalten. Fehler bei der Prüfung tatsächlicher USB-Geräte bleiben sichtbar.
+Exitstatus: `0` bestätigter Erfolg der Abfrage beziehungsweise des Auswurfs, `1` Betriebsfehler,
 `2` ungültiger Aufruf. Bei Auswurffehlern können einzelne Partitionen bereits
 ausgehängt sein; den Status prüfen und den gleichen Aufruf wiederholen.
+Eine erfolgreiche Statusabfrage allein ist keine Freigabe zum Abziehen.
 
 Bei Installationsfehlern werden gesicherte Projektdateien und vorherige
 Dienstzustände automatisch wiederhergestellt und geprüft. Misslingt dies,

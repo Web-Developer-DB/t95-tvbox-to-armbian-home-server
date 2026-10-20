@@ -132,7 +132,7 @@ tracked separately from the confirmed steps.
 
 | Check | Status |
 | --- | --- |
-| 73 Samba/USB tests with simulated system effects | Passed; includes missing mount directories and historical status operations |
+| 79 Samba/USB tests with simulated system effects (2026-10-20) | Passed; includes missing mount directories, focused USB inventory and current-attachment status mapping |
 | 37 setup tests including dashboard USB help | Passed |
 | udev rule syntax | Passed |
 | Package manifests: 25 Samba + 14 dashboard entries | Passed |
@@ -185,9 +185,16 @@ diskseq changed from 13 to 18; the eject guard was off, exFAT was mounted again
 and its usershare restored. Actual Samba reading and writing were then
 explicitly confirmed. No separate content/checksum comparison was provided.
 
-The old operation remained visible in status after reconnection. Status now
-shows diskseq and distinguishes current from previous attachments, covered by
-three additional tests. The display change itself is only automatically tested.
+The old operation remained visible in status after reconnection. Status initially
+added diskseq and distinguished current from previous attachments, covered by
+three additional tests.
+
+**Status overview revised on 2026-10-20:** Internal SD/eMMC, ZRAM and operations
+from earlier connections are now hidden. Current USB validation/mount warnings
+and failed ejections remain visible. Stored operation records are not deleted.
+Six additional tests cover both USB identification sources, two connected drives,
+internal devices, relevant warnings, old connections/boot IDs and drives that
+remain connected after unmounting. The display change itself is only automatically tested.
 This exFAT test does not accept ext4/FAT32/NTFS, 20 ext4 cycles, Btrfs or
 multiple-device operation.
 

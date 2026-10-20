@@ -135,7 +135,7 @@ Einzelprüfungen; sie werden daher getrennt von den bestätigten Schritten gefü
 
 | Prüfung | Stand |
 | --- | --- |
-| 73 Samba-/USB-Tests mit simulierten Systemeffekten | Bestanden; einschließlich Freigabedateien ohne Mountordner und historischer Statusvorgänge |
+| 79 Samba-/USB-Tests mit simulierten Systemeffekten (20.10.2026) | Bestanden; einschließlich Freigabedateien ohne Mountordner, gezielter USB-Übersicht und Zuordnung aktueller Statusvorgänge |
 | 37 Setup-Tests einschließlich USB-Dashboard-Hilfe | Bestanden |
 | udev-Regel: Syntax | Bestanden |
 | Paketmanifeste: 25 Samba- und 14 Dashboard-Einträge | Bestanden |
@@ -193,9 +193,17 @@ Lesen und Schreiben über Samba wurden anschließend ausdrücklich bestätigt.
 Ein gesonderter Inhalts-/Prüfsummenvergleich wurde nicht übermittelt.
 
 Der Status des älteren Vorgangs blieb nach dem Wiedereinstecken sichtbar.
-Die Anzeige nennt deshalb jetzt die diskseq und unterscheidet aktuelle von
-früheren Geräteverbindungen; drei zusätzliche Tests sichern diese Zuordnung ab.
-Die Statusdarstellung selbst ist bisher automatisiert geprüft. ext4/FAT32/NTFS,
+Die Anzeige nannte deshalb zunächst die diskseq und unterschied aktuelle von
+früheren Geräteverbindungen; drei zusätzliche Tests sicherten diese Zuordnung ab.
+
+**Statusübersicht am 20.10.2026 überarbeitet:** Interne SD/eMMC- und ZRAM-Geräte
+sowie Vorgänge früherer Verbindungen werden nun ausgeblendet. Aktuelle
+USB-Prüf-/Mountfehler und fehlgeschlagene Auswürfe bleiben sichtbar. Die
+Protokolle werden dabei nicht gelöscht. Sechs zusätzliche Tests prüfen beide
+USB-Erkennungsquellen, zwei gleichzeitig angeschlossene Laufwerke, interne
+Geräte, relevante Warnungen, alte Verbindungen/Bootkennungen und weiterhin
+angeschlossene ausgehängte Laufwerke. Die Statusdarstellung selbst ist bisher
+automatisiert geprüft. ext4/FAT32/NTFS,
 20 ext4-Zyklen, Btrfs und Mehrgerätebetrieb sind durch diesen exFAT-Test nicht abgenommen.
 
 Die frühere USB-Referenzabnahme bestätigt die damaligen Skripte. Die neue

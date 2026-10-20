@@ -40,6 +40,13 @@ Protokolle können Seriennummern, UUIDs und Benutzernamen enthalten. Vor dem
 öffentlichen Teilen prüfen. Eine leere Usershare-Liste ist ohne eingebundenen
 USB-Datenträger korrekt; die feste `T95-DATA`-Freigabe wird dort nicht gelistet.
 
+`usb-eject --status` konzentriert sich auf angeschlossene USB-Laufwerke und
+Vorgänge ihrer aktuellen Verbindung. Interne SD/eMMC- und ZRAM-Geräte sowie
+alte Auswurfvorgänge werden ausgeblendet. USB-Prüf- und Mountfehler bleiben
+sichtbar. Für die vollständige Liste aller Blockgeräte den obigen `lsblk`-Befehl
+verwenden. Fehlt ein USB-Gerät auch dort, zuerst Kabel, Stromversorgung und
+Kernelmeldungen prüfen.
+
 ## 💾 Dateisystem und Zugriffsrechte
 
 - ext4: Mounten und Schreibberechtigung sind getrennte Fragen. Rechte am Datenträger gezielt prüfen; keine pauschalen rekursiven Eigentümerwechsel.

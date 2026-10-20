@@ -735,7 +735,48 @@ class USBTests(unittest.TestCase):
             self.manager.status()
         self.assertIn('diskseq=10; aktuelle Verbindung): failed; busy', output.getvalue())
 
-    def test_status_distinguishes_old_eject_from_reused_device_name(self):
+    def test_status_hides_internal_disks_but_keeps_both_usb_drives(self):
+        self.ready()
+        self.system.add_disk(name='sdb', seq='11', fs='exfat', label='BACKUP')
+        for name, number, transport, filesystem in (
+                ('mmcblk0', '179:0', 'mmc', None), ('mmcblk2', '179:16', 'mmc', None),
+                ('mmcblk2boot0', '179:24', None, None), ('zram0', '252:0', None, 'swap')):
+            self.system.nodes['/dev/' + name] = {
+                'name': '/dev/' + name, 'type': 'disk', 'maj:min': number,
+                'tran': transport, 'fstype': filesystem}
+        self.manager.reconcile()
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        text = output.getvalue()
+        self.assertIn('USB: /dev/sda;', text)
+        self.assertIn('USB: /dev/sdb;', text)
+        self.assertIn('BACKUP:', text)
+        for unwanted in ('mmcblk', 'zram', 'Nicht verwaltet', 'USB-Prüfung fehlgeschlagen'):
+            self.assertNotIn(unwanted, text)
+
+    def test_status_recognizes_usb_without_lsblk_transport(self):
+        self.ready()
+        self.system.nodes['/dev/sda']['tran'] = None
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('USB: /dev/sda;', output.getvalue())
+
+    def test_status_keeps_usb_identity_errors_visible(self):
+        self.ready()
+        self.system.object_list.pop('/blocks/sda')
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('USB-Prüfung fehlgeschlagen: /dev/sda: UDisks-Geräteidentität', output.getvalue())
+        self.assertNotIn('Keine USB-Laufwerke', output.getvalue())
+
+    def test_status_keeps_unsafe_usb_mount_warning_visible(self):
+        self.ready()
+        self.system.mount_list[-1]['target'] = '/srv/foreign-data'
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('Nicht zum Auswerfen freigegeben: Fremder/System-Mount', output.getvalue())
+
+    def test_status_hides_old_eject_after_reused_device_name(self):
         name = self.ready()
         self.manager.eject(name)
         self.system.path('/sys/class/block/sda/diskseq').write_text('18')
@@ -745,15 +786,37 @@ class USBTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()) as output:
             self.manager.status()
         self.assertIn('diskseq=18; Auswurfsperre=aus', output.getvalue())
-        self.assertIn('diskseq=10; frühere Verbindung): ejected', output.getvalue())
-        self.assertNotIn('aktuelle Verbindung): ejected', output.getvalue())
+        self.assertNotIn('Vorgang ', output.getvalue())
 
-    def test_status_marks_powered_off_removed_device_as_previous_attachment(self):
+    def test_status_hides_powered_off_removed_device_without_deleting_history(self):
         name = self.ready(power=True)
+        self.manager.eject(name)
+        before = {p.name: p.read_bytes() for p in (self.runtime.path / 'operations').iterdir()}
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('Keine USB-Laufwerke angeschlossen.', output.getvalue())
+        self.assertIn('Keine USB-Freigaben.', output.getvalue())
+        self.assertNotIn('Vorgang ', output.getvalue())
+        self.assertNotIn('/dev/sda', output.getvalue())
+        self.assertEqual(before, {p.name: p.read_bytes() for p in (self.runtime.path / 'operations').iterdir()})
+
+    def test_status_keeps_current_eject_without_power_off_visible(self):
+        name = self.ready()
         self.manager.eject(name)
         with contextlib.redirect_stdout(io.StringIO()) as output:
             self.manager.status()
-        self.assertIn('diskseq=10; frühere Verbindung): powered-off', output.getvalue())
+        self.assertIn('Nicht eingehängt; Auswurfsperre aktiv.', output.getvalue())
+        self.assertIn('diskseq=10; aktuelle Verbindung): ejected', output.getvalue())
+
+    def test_status_hides_operation_from_previous_boot(self):
+        name = self.ready()
+        disk = self.system.snapshot().disk('/dev/sda')
+        self.runtime.operation(disk, 'failed', {name}, 'old boot failure')
+        self.system.path('/proc/sys/kernel/random/boot_id').write_text('next-fixture-boot')
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('USB: /dev/sda;', output.getvalue())
+        self.assertNotIn('old boot failure', output.getvalue())
 
     def test_actual_net_adapter_distinguishes_empty_and_failed_queries(self):
         registry = self.real_net()

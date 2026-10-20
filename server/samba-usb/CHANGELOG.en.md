@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-20
+
+- USB status focuses on connected USB drives; internal SD/eMMC and ZRAM devices no longer appear as unmanaged.
+- Hide operations from earlier connections and powered-off devices; keep current eject failures and USB validation/mount warnings visible. Stored operations are not deleted.
+- Explicitly report an empty USB overview. Six additional regression tests; all 79 module tests pass.
+
 ## 2026-10-19
 
 - Hardware confirmation at `52b6be1`: exFAT eject/power-off, reconnection and Samba read/write access. Historical eject operations now show diskseq and are distinguished from the current attachment; 73 module tests pass.

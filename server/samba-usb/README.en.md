@@ -115,6 +115,12 @@ Expected: active automounter and a separate share for each supported mounted
 USB filesystem. The usershare list may be empty without USB storage.
 Fixed `T95-DATA` is not included in that list.
 
+The drive overview shows connected USB drives; internal SD, eMMC and ZRAM
+devices are hidden. Operations from earlier device connections are hidden too.
+Warnings about a currently connected USB drive remain visible, including
+mount failures or blocked ejections. Status alone does not establish that it
+is safe to unplug; use the [eject command](#safely-eject-usb-storage).
+
 <a id="client-and-vlc-access"></a>
 
 ## 📂 Client and VLC access

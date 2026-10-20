@@ -116,6 +116,13 @@ Erwartet: aktiver Automounter und eine eigene Freigabe je unterstütztem,
 eingebundenem USB-Dateisystem. Ohne USB darf die Usershare-Liste leer sein.
 `T95-DATA` ist eine feste Samba-Freigabe und steht nicht in dieser Liste.
 
+Die Laufwerksübersicht zeigt angeschlossene USB-Laufwerke; interne SD-Karte,
+eMMC und ZRAM werden ausgeblendet. Vorgänge früherer Geräteverbindungen
+erscheinen ebenfalls nicht mehr. Warnungen zu einem aktuell angeschlossenen
+USB-Laufwerk bleiben sichtbar, auch wenn es nicht eingehängt werden konnte
+oder der Auswurf blockiert ist. Die Statusanzeige allein gibt keine Freigabe
+zum Abziehen; dafür den [Auswurfbefehl](#usb-sicher-auswerfen) verwenden.
+
 <a id="zugriff-von-clients-und-vlc"></a>
 
 ## 📂 Zugriff von Clients und VLC

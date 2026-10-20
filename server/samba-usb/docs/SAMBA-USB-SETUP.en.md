@@ -86,10 +86,15 @@ sudo journalctl -t T95-USB-SHARE -b --no-pager -n 60
 systemctl --user status udiskie.service --no-pager -l
 ```
 
-Status lists devices, filesystems, mounts, user access, shares, guards and failed
-ejections. Exit codes: `0` confirmed success, `1` operation failure, `2` invalid
+Status lists connected USB drives with filesystems, mounts, user access, shares
+and guards. Internal SD/eMMC, ZRAM and operations from earlier connections are
+hidden. An operation is shown only when its boot ID, device path, sysfs path
+and diskseq match the current connection; stored records remain available for
+diagnosis and retries. Validation errors for actual USB devices remain visible.
+Exit codes: `0` confirmed query or eject success, `1` operation failure, `2` invalid
 invocation. Some partitions may already be unmounted after an error; inspect
 status and repeat the same eject command.
+A successful status query alone does not establish that unplugging is safe.
 
 Installation failures automatically restore and verify project files and prior
 service states. Failed restoration remains visible as `rollback-failed` with a

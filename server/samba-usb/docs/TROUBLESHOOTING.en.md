@@ -40,6 +40,12 @@ Logs can contain serials, UUIDs and usernames; inspect them before public sharin
 Empty usershare output is normal without mounted USB storage. Fixed `T95-DATA`
 is not listed there.
 
+`usb-eject --status` focuses on connected USB drives and operations from their
+current connection. Internal SD/eMMC, ZRAM and earlier eject operations are
+hidden. USB validation and mount errors remain visible. Use the `lsblk` command
+above for the complete block-device inventory. If the USB device is missing
+there too, check cables, power and kernel messages first.
+
 ## 💾 Filesystems and permissions
 
 - ext4: mounting and write permission are separate. Inspect rights deliberately; do not recursively replace ownership indiscriminately.

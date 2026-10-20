@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-20
+
+- USB-Status auf angeschlossene USB-Laufwerke konzentriert; interne SD/eMMC- und ZRAM-Geräte erscheinen nicht mehr als „Nicht verwaltet“.
+- Vorgänge früherer Verbindungen und bereits abgeschalteter Geräte ausgeblendet; aktuelle Auswurffehler und Hinweise zu USB-Prüf-/Mountfehlern bleiben sichtbar. Gespeicherte Vorgänge werden nicht gelöscht.
+- Leere USB-Übersicht ausdrücklich gekennzeichnet. Sechs zusätzliche Regressionstests; insgesamt 79 Modul-Tests bestanden.
+
 ## 2026-10-19
 
 - Hardwarebestätigung bei `52b6be1`: exFAT-Auswurf/Power-off, Wiederanstecken und Samba-Lesen/-Schreiben. Historische Auswurfvorgänge zeigen jetzt ihre diskseq und werden von der aktuellen Verbindung unterschieden; 73 Modul-Tests bestanden.

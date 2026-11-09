@@ -62,6 +62,26 @@ Es erscheinen keine Zeichen oder Sternchen. **Ergebnis:** Der Starter beendet
 die Einrichtung mit `Fertig.`. Bei einem Fehler zuerst die
 [Modul-Fehlerhilfe](TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) öffnen.
 
+<details>
+<summary>SD-Frühwarnung aus dem Entwicklungsbranch installieren</summary>
+
+Der Entwicklungsstand enthält die SD-Fehleranzeige. Führe diesen Starter auf
+der T95 aus, um das Dashboard zu installieren oder zu aktualisieren.
+
+```bash
+(
+  set -e
+  ref='codex/t95-sd-dashboard'
+  installer=$(mktemp)
+  trap 'rm -f -- "$installer"' EXIT
+  curl -fsSL -o "$installer" \
+    "https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/$ref/tools/t95-setup.sh"
+  T95_SETUP_REF="$ref" bash "$installer" dashboard install
+)
+```
+
+</details>
+
 <a id="erfolg-prüfen"></a>
 
 ## ✅ Erfolg prüfen
@@ -86,8 +106,8 @@ ssh alex@192.168.178.50
 ```
 
 **Ergebnis:** Bei der neuen SSH-Anmeldung erscheint die Systemübersicht.
-[Eine bereinigte Beispielansicht](images/t95-ssh-status-redacted.png) zeigt den
-Aufbau; Zahlen und angezeigte Laufwerke unterscheiden sich je nach Box.
+Die Beispielansicht zeigt die SD-Zähler mit simulierten Journalmeldungen und
+Laufwerkswerten. [Beispielansicht öffnen](images/t95-sd-dashboard-example.png)
 
 <a id="benutzen"></a>
 
@@ -109,7 +129,7 @@ Auch der Kartenleser, Kontakte oder die Stromversorgung können Fehler verursach
 `0 erkannt` bedeutet, dass im ausgewerteten Kerneljournal keine passenden
 Meldungen vorlagen. Die Schreibmenge misst die Belastung durch das System.
 Die Karte kann auch ohne protokollierte Vorwarnung ausfallen.
-`Prüfung nicht möglich` erscheint bei fehlenden oder unlesbaren
+Der gelbe Status `Prüfung nicht möglich` erscheint bei fehlenden oder unlesbaren
 Kernelmeldungen, einem Timeout oder unklarer Gerätezuordnung. Der vorige
 Journalstart ist der letzte davor gespeicherte Start. Seine Zähler beziehen
 sich auf die damals als `mmcblk0` erkannte SD, nach einem Kartenwechsel also

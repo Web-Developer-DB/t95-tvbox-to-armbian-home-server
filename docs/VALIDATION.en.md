@@ -114,6 +114,13 @@ confirmed on **2026-10-19** that the updated version works on the T95 and
 approved it for `main`. This includes the colored hint; it does not replace
 separate acceptance of the outstanding filesystem matrix or audio rollback.
 
+**2026-11-09 — microSD early warnings:** The maintainer confirmed the aligned,
+color-coded SD display at SSH login on the T95. Replaying the two supplied
+kernel journals yielded zero `SD-I/O/MMC` and `SD-ext4` matches per boot.
+The 46 setup tests cover device identification, unavailable journals, time
+limits, status colors, updates and rollback. The yellow and red matches in
+the README example use simulated data.
+
 The [Samba/USB audit](SAMBA_USB_AUDIT.en.md) separately records confirmed error
 paths and filesystem limits; general USB acceptance is not a per-filesystem or
 all-error-cases certification.

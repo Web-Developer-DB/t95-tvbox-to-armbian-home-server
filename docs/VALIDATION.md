@@ -117,6 +117,13 @@ aktualisierte Stand auf der T95 funktioniert, und gab ihn für `main` frei.
 Das schließt die farbige Kurzhilfe ein; es ersetzt keine gesonderte Abnahme
 der weiterhin offenen Dateisystemmatrix oder Audio-Rücknahme.
 
+**09.11.2026 — microSD-Frühwarnung:** Der Projektbetreiber bestätigte die
+farbige und bündige SD-Anzeige beim SSH-Login auf der T95. Ein Replay der beiden
+bereitgestellten Kerneljournale ergab je Start null Treffer für `SD-I/O/MMC`
+und `SD-ext4`. Die 46 Setup-Tests prüfen unter anderem die Gerätezuordnung,
+fehlende Journalzugriffe, Zeitlimits, Warnfarben sowie Update und Rücknahme.
+Die gelben und roten Treffer in der README-Beispielansicht sind simuliert.
+
 Der [Samba-/USB-Audit](SAMBA_USB_AUDIT.md) hält separat bestätigte Fehlerpfade und
 Dateisystemgrenzen fest. Die allgemeine USB-Abnahme ist keine Zertifizierung
 jedes Dateisystems und sämtlicher Fehlerfälle.

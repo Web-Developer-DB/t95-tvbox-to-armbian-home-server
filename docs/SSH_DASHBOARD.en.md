@@ -58,6 +58,26 @@ Enter your T95 user's Linux password if asked. No letters or stars appear.
 **Success:** setup finishes with `Fertig.`. For errors, use
 [module help](TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails) first.
 
+<details>
+<summary>Install microSD early warnings from the development branch</summary>
+
+The development branch includes the SD error display. Run this launcher on the
+T95 for a fresh install or an update.
+
+```bash
+(
+  set -e
+  ref='codex/t95-sd-dashboard'
+  installer=$(mktemp)
+  trap 'rm -f -- "$installer"' EXIT
+  curl -fsSL -o "$installer" \
+    "https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/$ref/tools/t95-setup.sh"
+  T95_SETUP_REF="$ref" bash "$installer" dashboard install
+)
+```
+
+</details>
+
 <a id="verify-success"></a>
 
 ## ✅ Verify success
@@ -80,9 +100,9 @@ user `alex` and address `192.168.178.50` with your normal T95 user and router ad
 ssh alex@192.168.178.50
 ```
 
-**Success:** the new SSH login shows the system overview. A
-[redacted example](images/t95-ssh-status-redacted.png) illustrates its layout;
-values and available drives vary.
+**Success:** the new SSH login shows the system overview. The example shows
+the SD counters with simulated journal messages and drive figures.
+[Open the example](images/t95-sd-dashboard-example.png)
 
 <a id="use-it"></a>
 
@@ -102,8 +122,9 @@ The reader, contacts or power supply can also cause errors.
 
 `0 detected` means the kernel journal contained no matching messages for the
 boot checked. The write counter measures the system's write load. The card
-can fail without a logged warning. `Check unavailable` means the kernel log
-was missing, unreadable or timed out, or the device could not be identified.
+can fail without a logged warning. The yellow `Check unavailable` status means
+the kernel log was missing, unreadable or timed out, or the device could not be
+identified.
 The previous journal boot is the preceding boot retained by the journal. Its
 counts refer to the SD identified as `mmcblk0` during that boot, which may be
 a different card if it was replaced.

@@ -148,18 +148,25 @@ ist optional.
 > [Laufwerk sicher auswerfen](server/samba-usb/README.md#usb-sicher-auswerfen)
 
 > [!NOTE]
-> ### 📊 Dashboard: Speicher und SD-Schreiblast sofort im Blick
+> ### 📊 SSH-Dashboard für Speicher und microSD
 >
 > **Sieh bei jeder SSH-Anmeldung, was auf deiner Box und ihren Laufwerken los ist.**
 >
 > - **SD-Schreiblast verfolgen:** `SD-Writes` zeigt die seit dem letzten Systemstart
 >   auf die SD-Karte geschriebene Datenmenge.
+> - **SD-Fehler erkennen:** `SD-I/O/MMC` und `SD-ext4` zeigen protokollierte Fehler
+>   für den aktuellen und den vorigen verfügbaren Journalstart. Warnungen sind gelb,
+>   kritische oder gehäufte Meldungen rot.
 > - **USB-Speicher zuordnen:** Die Übersicht der eingebundenen Laufwerke zeigt
 >   Gerätenamen und Einhängepfade, einschließlich angeschlossener USB-Speicher.
 > - **Platzprobleme erkennen:** Gesamtgröße, freier Platz und Belegung stehen direkt
 >   dabei; ab 90 % Belegung wird der Prozentwert rot hervorgehoben.
 >
 > **[→ SSH-Dashboard einrichten](docs/SSH_DASHBOARD.md)**
+>
+> ![SSH-Dashboard mit grünen SD-Zählern, gelber MMC-Warnung und rotem ext4-Fehler](docs/images/t95-sd-dashboard-example.png)
+>
+> *Beispielansicht mit simulierten Journalmeldungen und Laufwerkswerten.*
 
 **Weitere optionale Wege:**
 

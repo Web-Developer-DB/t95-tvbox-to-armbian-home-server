@@ -142,18 +142,25 @@ want. A [full SD backup](docs/INSTALLATION.en.md#6-back-up-the-base-system) is o
 > [Eject a drive safely](server/samba-usb/README.en.md#safely-eject-usb-storage)
 
 > [!NOTE]
-> ### 📊 Dashboard: see storage and SD writes at a glance
+> ### 📊 SSH dashboard for storage and microSD
 >
 > **See what is happening on your box and its drives at every SSH login.**
 >
 > - **Track SD writes:** `SD-Writes` shows how much has been written to the SD
 >   card since the last boot.
+> - **Spot SD errors:** `SD-I/O/MMC` and `SD-ext4` show logged errors for the current
+>   and previous available journal boots. Warnings appear in yellow, critical or
+>   repeated events in red.
 > - **Identify USB storage:** The mounted-drive overview includes connected USB
 >   storage, with device names and mount paths.
 > - **Spot storage pressure:** Total capacity, free space, and usage are shown
 >   together; usage of 90% or more is highlighted in red.
 >
 > **[→ Set up the SSH dashboard](docs/SSH_DASHBOARD.en.md)**
+>
+> ![SSH dashboard with green SD counters, a yellow MMC warning and a red ext4 error](docs/images/t95-sd-dashboard-example.png)
+>
+> *Example with simulated journal messages and drive figures.*
 
 **Other optional paths:**
 

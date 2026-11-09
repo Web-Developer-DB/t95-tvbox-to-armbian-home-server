@@ -256,7 +256,7 @@ Konfiguration/Audio-Auswahl, Erhalt von Daten und schon vorhandenem Firmware-
 Alias, Rücknahme bei Dienstfehlern, begrenzte Paketentfernung, falsche Hardware
 sowie aus/an ohne Neustart und ohne Löschen der Kopplungen.
 
-Die 37 automatisierten Tests bestehen, einschließlich lokaler und
+Die 46 automatisierten Tests bestehen, einschließlich lokaler und
 heruntergeladener Einzelstarter, gemeinsamem Menü und Abbruch bei Fehlern.
 Neue Rücknahmefälle prüfen Sicherung vor Paketänderungen, private Archivrechte,
 alte MPD-Konfiguration, vorher aktive Dienste, fehlgeschlagene Stopps, falsche
@@ -267,6 +267,8 @@ Zeichen pro Anzeigezeile, farbige Befehle und eine ausgerichtete Ausgabe ohne
 Farben geprüft. Auch das Ausblenden ohne Werkzeug und das Unterlassen der
 Befehlsausführung sind abgedeckt. Weitere Fälle prüfen Ergänzung eines alten Dashboards ohne APT,
 Erhalt der ersten Sicherung, Rücknahme und Schutz manueller Änderungen.
+Für die SD-Anzeige prüfen simulierte Kerneljournale die Trennung der Starts,
+Gerätezuordnung, Timeouts und die Ausrichtung und Farben der Statuszeilen.
 
 Zusätzlich wurde die neue MPD-
 Streamregel mit dem auf der Ausgangsbox installierten `pw-config` eingelesen:

@@ -218,7 +218,7 @@ python3 tools/restore-ssh-dashboard.py
 git diff --check
 ```
 
-The 37 automated tests use temporary filesystems and simulated APT/systemd/BlueZ;
+The 46 automated tests use temporary filesystems and simulated APT/systemd/BlueZ;
 they do not change PC packages or services. They cover dashboard install,
 idempotence, rollback, hashes, redirected targets, later edits, Bluetooth
 configuration/output choice, data and firmware-alias preservation, service
@@ -230,6 +230,8 @@ per display line, colored commands and aligned output without colors, hiding
 without the tool and never executing shown commands.
 Other cases cover updating an old dashboard's tips without APT, preserving the first
 backup, rollback and protecting manual edits.
+Simulated kernel journals cover boot separation, device identification, timeouts,
+alignment and colors in the SD status display.
 
 New rollback fixtures cover backup before package mutation, private archive
 permissions, legacy MPD configuration, restoration of previously active services,

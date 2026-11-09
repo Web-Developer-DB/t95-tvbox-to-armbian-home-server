@@ -58,26 +58,6 @@ Enter your T95 user's Linux password if asked. No letters or stars appear.
 **Success:** setup finishes with `Fertig.`. For errors, use
 [module help](TROUBLESHOOTING.en.md#dashboard-or-bluetooth-fails) first.
 
-<details>
-<summary>Install microSD early warnings from the development branch</summary>
-
-The development branch includes the SD error display. Run this launcher on the
-T95 for a fresh install or an update.
-
-```bash
-(
-  set -e
-  ref='codex/t95-sd-dashboard'
-  installer=$(mktemp)
-  trap 'rm -f -- "$installer"' EXIT
-  curl -fsSL -o "$installer" \
-    "https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/$ref/tools/t95-setup.sh"
-  T95_SETUP_REF="$ref" bash "$installer" dashboard install
-)
-```
-
-</details>
-
 <a id="verify-success"></a>
 
 ## ✅ Verify success

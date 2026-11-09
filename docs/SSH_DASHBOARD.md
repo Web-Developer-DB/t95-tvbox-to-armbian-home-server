@@ -62,26 +62,6 @@ Es erscheinen keine Zeichen oder Sternchen. **Ergebnis:** Der Starter beendet
 die Einrichtung mit `Fertig.`. Bei einem Fehler zuerst die
 [Modul-Fehlerhilfe](TROUBLESHOOTING.md#dashboard-oder-bluetooth-funktioniert-nicht) öffnen.
 
-<details>
-<summary>SD-Frühwarnung aus dem Entwicklungsbranch installieren</summary>
-
-Der Entwicklungsstand enthält die SD-Fehleranzeige. Führe diesen Starter auf
-der T95 aus, um das Dashboard zu installieren oder zu aktualisieren.
-
-```bash
-(
-  set -e
-  ref='codex/t95-sd-dashboard'
-  installer=$(mktemp)
-  trap 'rm -f -- "$installer"' EXIT
-  curl -fsSL -o "$installer" \
-    "https://raw.githubusercontent.com/Web-Developer-DB/t95-tvbox-to-armbian-home-server/$ref/tools/t95-setup.sh"
-  T95_SETUP_REF="$ref" bash "$installer" dashboard install
-)
-```
-
-</details>
-
 <a id="erfolg-prüfen"></a>
 
 ## ✅ Erfolg prüfen

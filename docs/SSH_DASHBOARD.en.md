@@ -12,6 +12,7 @@ login display. At each SSH login, alongside load and memory information, you see
 | Display | What it tells you |
 | --- | --- |
 | ✍️ **`SD-Writes`** | Amount written to SD since the last boot; starts over after a reboot. |
+| **`SD-I/O/MMC`, `SD-ext4`** | Logged errors for the system microSD, shown separately for the current and previous available journal boots. |
 | 🔌 **Drives** | Mounted filesystems, including mounted USB sticks, SSDs, and hard drives: device name (e.g. `sda1`) and mount path. |
 | 📊 **Storage** | Total capacity, free space, and usage per filesystem; **90% or more** is highlighted in red. |
 | ⏏️ **Tips: USB quick help** | Replaces rotating promotions: when `usb-eject` is installed, shows status, eject by share name and safe-unplug guidance. |
@@ -90,6 +91,33 @@ values and available drives vary.
 The dashboard appears automatically at later SSH logins. It does not continuously
 refresh an already open window. Continue with normal shell commands after the display.
 
+### Interpret microSD errors
+
+`SD-I/O/MMC` marks events such as timeouts and CRC errors as **WARNING**
+and failed block operations as **CRITICAL**. `SD-ext4` shows critical filesystem
+errors. When there are matches, each category shows the count and latest
+timestamp for that boot. One incident may produce several kernel messages.
+The reader, contacts or power supply can also cause errors.
+
+`0 detected` means the kernel journal contained no matching messages for the
+boot checked. The write counter measures the system's write load. The card
+can fail without a logged warning. `Check unavailable` means the kernel log
+was missing, unreadable or timed out, or the device could not be identified.
+The previous journal boot is the preceding boot retained by the journal. Its
+counts refer to the SD identified as `mmcblk0` during that boot, which may be
+a different card if it was replaced.
+
+**On the T95**, compare the dashboard with the kernel journal:
+
+```bash
+sudo journalctl -k -b --no-pager -o short-iso
+sudo journalctl -k -b -1 --no-pager -o short-iso
+```
+
+The second command requires a retained previous boot. At login the dashboard
+reads the existing journal with a time limit per boot and creates no history
+file of its own. The SD counters exclude USB and eMMC messages.
+
 ### ⏏️ Safely remove USB drives
 
 With the [Samba/USB extension](../server/samba-usb/README.en.md) installed,
@@ -119,6 +147,8 @@ The display does not run these commands. It stays hidden without `usb-eject`.
 German or English follows the login session's language.
 [Eject and success messages](../server/samba-usb/README.en.md#safely-eject-usb-storage).
 
+### Update the dashboard
+
 **Add to an existing dashboard:** rerun the current dashboard launcher or use
 a current repository copy from its root directory:
 
@@ -128,11 +158,11 @@ a current repository copy from its root directory:
 sudo python3 server/setup/t95_setup.py dashboard install --user "$(id -un)"
 ```
 
-For an already recorded installation this adds/updates only the USB help.
-Other dashboard files, custom settings and the original backup are preserved;
-no packages are reinstalled for this update. Manual changes to the managed
-hint are reported. Log in again and use `t95-dashboard status` to check the
-managed files. The colored USB hint passes automated tests and the maintainer
+For an already recorded installation this updates the USB help and SD error
+display. Setup keeps the initial backup and reports manual changes to either
+file before writing. The update requires no package installation. Log in again
+and use `t95-dashboard status` to check the managed files. The colored USB hint
+passes automated tests and the maintainer
 confirmed it works on the T95 on **2026-10-19**.
 [Evidence and remaining individual checks](VALIDATION.en.md#dashboard-and-bluetooth).
 
@@ -197,11 +227,10 @@ upgrade counts are snapshots and are recalculated on later logins.
 `manifest.json` records destinations, modes, and hashes; `SHA256SUMS` checks
 the same payloads. Keep unredacted captures, credentials, and private keys private.
 
-The current setup installer uses `/etc/update-motd.d/35-armbian-tips` for
-USB help. The 14 historical source files remain archived as a reference;
-their capture still shows the former tips. The setup journal preserves the
-original tips file and restores it on `remove`. For an older recorded
-installation, setup updates only this tips component.
+The current setup installer uses maintained sources for the USB help and the
+expanded SD statistics. The setup journal preserves the original files for
+`remove`. The 14 archived files reflect the original dashboard and supply the
+separate restore tool.
 
 The launcher installs display/system packages via APT and preserves its
 first backup at `/var/lib/t95-setup/dashboard`. Reinstalling does not replace

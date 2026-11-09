@@ -1,0 +1,195 @@
+#!/bin/bash
+
+current_sd_host() {
+    local root_device disk card card_type
+    root_device=$(findmnt -n -o MAJ:MIN --target /) || return 1
+    [[ $root_device =~ ^[0-9]+:[0-9]+$ ]] || return 1
+    root_device=$(readlink -e -- "/sys/dev/block/$root_device") || return 1
+    disk=$(readlink -e -- /sys/block/mmcblk0) || return 1
+    if [[ $root_device != "$disk" ]]; then
+        [[ ${root_device%/*} == "$disk" && ${root_device##*/} =~ ^mmcblk0p[0-9]+$ ]] || return 1
+    fi
+    card=$(readlink -e -- /sys/block/mmcblk0/device) || return 1
+    read -r card_type < "$card/type" || return 1
+    [[ $card_type == SD && ${card##*/} =~ ^(mmc[0-9]+):[[:xdigit:]]{4}$ ]] || return 1
+    printf '%s\n' "${BASH_REMATCH[1]}"
+}
+
+scan_sd_journal() {
+    local boot_id host=''
+    read -r boot_id < /proc/sys/kernel/random/boot_id || return 1
+    boot_id=${boot_id//-/}
+    [[ $boot_id =~ ^[[:xdigit:]]{32}$ ]] || return 1
+    if [[ $1 == current ]]; then
+        host=$(current_sd_host) || return 1
+    else
+        boot_id+=-1
+    fi
+
+    # Stream the journal within the same timeout as the parser. Print only counts
+    # and validated timestamps, so raw kernel text never reaches the login banner.
+    set -o pipefail
+    export LC_ALL=C SYSTEMD_COLORS=0
+    journalctl --system -k --boot="$boot_id" --no-pager --no-hostname \
+        --truncate-newline -o short-iso 2>&1 | awk -v host="$host" '
+        /^-- Journal begins at / { next }
+        $1 !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9:+-]+$/ {
+            # Includes access warnings, read failures and -- No entries --.
+            unavailable = 1
+            next
+        }
+        $2 != "kernel:" { next }
+        {
+            seen = 1
+            message = tolower(substr($0, index($0, "kernel: ") + 8))
+            field_count = split(message, fields, /[[:space:]]+/)
+
+            if (host == "") {
+                # Link the block device to a card address, then confirm its type
+                # in the same boot. The current boot may use a different host.
+                if (fields[1] == "mmcblk0:" && fields[2] ~ /^mmc[0-9]+:[0-9a-f]{4}$/) {
+                    if (card != "" && card != fields[2]) ambiguous = 1
+                    card = fields[2]
+                }
+                if (message ~ /^mmc[0-9]+: new .* card at address [0-9a-f]{4}$/) {
+                    controller = substr(fields[1], 1, length(fields[1]) - 1)
+                    card_id = fields[1] fields[field_count]
+                    if (host_card[controller] != "" && host_card[controller] != card_id)
+                        reused_host[controller] = 1
+                    host_card[controller] = card_id
+                    if (message ~ / (sd|sdhc|sdxc|sduc) card at address /) sd_card[card_id] = 1
+                    else other_card[card_id] = 1
+                }
+            }
+
+            if (message ~ /^ext4-fs error \(device mmcblk0(p[0-9]+)?\):/ ||
+                message ~ /^ext4-fs \(mmcblk0(p[0-9]+)?\): .*i\/o error/) {
+                ext4_count++
+                ext4_last = $1
+            } else if (message ~ /^buffer i\/o error on dev(ice)? mmcblk0(p[0-9]+)?([,[:space:]]|$)/ ||
+                       message ~ /^([^ ]+: )?[a-z \/]+ error, dev mmcblk0(p[0-9]+)?([,[:space:]]|$)/ ||
+                       message ~ /^mmcblk0(p[0-9]+)?: (i\/o error|error transferring|recovery failed)/) {
+                critical = 1
+                block_count++
+                block_last = $1
+                block_line = NR
+            } else if (fields[1] ~ /^(mmc[0-9]+|mmcblk0(p[0-9]+)?):$/ &&
+                       (message ~ /^[^ ]+: (error|timeout)([[:space:]]|$)/ ||
+                        message ~ /(crc (error|fail)|timeout (waiting|error)|timed out|reset failed|failed to reset)/)) {
+                if (fields[1] ~ /^mmcblk0/) {
+                    block_count++
+                    block_last = $1
+                    block_line = NR
+                } else {
+                    controller = substr(fields[1], 1, length(fields[1]) - 1)
+                    host_count[controller]++
+                    host_last[controller] = $1
+                    host_line[controller] = NR
+                }
+            }
+        }
+        END {
+            if (unavailable || !seen) exit 1
+            if (host == "") {
+                if (ambiguous || !sd_card[card] || other_card[card]) exit 1
+                host = substr(card, 1, index(card, ":") - 1)
+                if (reused_host[host]) exit 1
+            }
+            io_last = host_line[host] > block_line ? host_last[host] : block_last
+            printf "%d %d %s %d %s\n", block_count + host_count[host], critical + 0,
+                io_last != "" ? io_last : "-", ext4_count, ext4_last != "" ? ext4_last : "-"
+        }'
+}
+
+if [[ ${1:-} == --sd-journal ]]; then
+    scan_sd_journal "$2"
+    exit $?
+fi
+
+# Farbcodes definieren
+YELLOW="\e[0;33m"
+GREEN="\e[0;32m"
+GRAY="\e[0;90m"
+CYAN="\e[0;36m"
+RED="\e[0;31m"
+RESET="\e[0m"
+
+# --- TEIL 1: Schreibstatistik der SD-Karte ---
+STAT_FILE="/sys/block/mmcblk0/stat"
+if [ -f "$STAT_FILE" ]; then
+    BOOT_WRITES_GB=$(awk '{printf "%.2f", ($7 * 512) / 1073741824}' "$STAT_FILE")
+
+    printf " ${YELLOW}%-12s${RESET} : ${GREEN}%s GB${RESET} ${GRAY}(since last boot)${RESET}\n" "SD-Writes" "$BOOT_WRITES_GB"
+fi
+
+case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
+    de*)
+        current_boot='Aktueller Start'
+        previous_boot='Voriger Journalstart'
+        unavailable='Prüfung nicht möglich'
+        detected='erkannt'
+        warning='WARNUNG'
+        critical='KRITISCH'
+        last='zuletzt'
+        ;;
+    *)
+        current_boot='Current boot'
+        previous_boot='Previous journal boot'
+        unavailable='Check unavailable'
+        detected='detected'
+        warning='WARNING'
+        critical='CRITICAL'
+        last='last'
+        ;;
+esac
+
+show_sd_count() {
+    local label=$1 count=$2 timestamp=$3 severity=$4
+    printf '   %-12s : ' "$label"
+    if (( count == 0 )); then
+        printf '0 %s\n' "$detected"
+    else
+        printf '%s: %s %s (%s %s)\n' "$severity" "$count" "$detected" "$last" "$timestamp"
+    fi
+}
+
+show_sd_health() {
+    local summary io_count io_critical io_last ext4_count ext4_last severity
+    if summary=$(timeout --kill-after=0.2s 1s /bin/bash "${BASH_SOURCE[0]}" \
+        --sd-journal "$1" </dev/null 2>/dev/null); then
+        read -r io_count io_critical io_last ext4_count ext4_last <<< "$summary"
+        severity=$warning
+        if (( io_critical )); then severity=$critical; fi
+        printf ' %s\n' "$2"
+        show_sd_count SD-I/O/MMC "$io_count" "$io_last" "$severity"
+        show_sd_count SD-ext4 "$ext4_count" "$ext4_last" "$critical"
+    else
+        printf ' %s: %s\n' "$2" "$unavailable"
+    fi
+}
+
+show_sd_health current "$current_boot"
+show_sd_health previous "$previous_boot"
+
+# --- TEIL 2: Speicherplatz aller echten Laufwerke ---
+echo -e "\n${YELLOW}Laufwerksübersicht:${RESET}"
+
+df -h | grep -E '^/dev/|^zram' | while read -r line; do
+    DEV=$(echo "$line" | awk '{print $1}' | sed 's|/dev/||')
+    SIZE=$(echo "$line" | awk '{print $2}')
+    FREE=$(echo "$line" | awk '{print $4}')
+    PERC=$(echo "$line" | awk '{print $5}')
+    MOUNT=$(echo "$line" | awk '{print $6}')
+
+    PERC_NUM=$(echo "$PERC" | tr -d '%')
+
+    # Farbe für die Prozentanzeige bestimmen (Rot ab 90%, sonst Grün)
+    if [ "$PERC_NUM" -ge 90 ] 2>/dev/null; then
+        PERC_COLOR="$RED"
+    else
+        PERC_COLOR="$GREEN"
+    fi
+
+    # Formatierte Ausgabe für jedes Laufwerk
+    printf "  %-12s : Gesamt: %-6s | Frei: ${CYAN}%-6s${RESET} (${PERC_COLOR}%-4s${RESET}) | Mount: %s\n" "$DEV" "$SIZE" "$FREE" "$PERC" "$MOUNT"
+done

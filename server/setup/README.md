@@ -204,12 +204,11 @@ Rücknahme wird auf spätere Dateiänderungen geprüft. `remove --force` darf di
 Änderungen bewusst überschreiben; vorher separat sichern. Alte Journale werden
 bei Neuinstallation archiviert.
 
-Bei einem bereits installierten Dashboard ersetzt ein erneuter `install` nur
-die wechselnden Tipps durch
-die neue [USB-Kurzhilfe](../../docs/SSH_DASHBOARD.md#-usb-laufwerke-sicher-entfernen).
-Die übrigen Dashboard-Dateien und ursprünglichen Sicherungen bleiben erhalten;
-diese Aktualisierung benötigt keine erneute Paketinstallation.
-Die Kurzhilfe zeigt `usb-eject`-Befehle nur an, wenn das Werkzeug vorhanden ist.
+Bei einem bereits installierten Dashboard aktualisiert ein erneuter `install`
+die USB-Kurzhilfe und die SD-Fehleranzeige mit den ursprünglichen Sicherungen.
+Das Update benötigt keine Paketinstallation. Die Kurzhilfe zeigt `usb-eject`
+an, wenn das Werkzeug vorhanden ist.
+[Dashboard aktualisieren](../../docs/SSH_DASHBOARD.md#dashboard-aktualisieren)
 
 Der gemeinsame Quellcache unter `/usr/local/lib/t95-setup` und die beiden kurzen
 Befehle unter `/usr/local/bin` bleiben auch nach Rücknahme erhalten. So sind

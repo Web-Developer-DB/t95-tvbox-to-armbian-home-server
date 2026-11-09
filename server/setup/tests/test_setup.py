@@ -172,6 +172,12 @@ class SetupTests(unittest.TestCase):
         manager.install()
         self.assertEqual(len(manager.state["files"]), 14)
         self.assertEqual(self.root.joinpath(setup.DASHBOARD_USB_HELP_PATH.lstrip('/')).read_bytes(), setup.DASHBOARD_USB_HELP)
+        sd = manager.path(setup.DASHBOARD_SD_STATS_PATH)
+        self.assertEqual(sd.read_bytes(), (setup.SOURCE / setup.DASHBOARD_SD_SOURCE).read_bytes())
+        self.assertEqual(setup.fingerprint(sd)["mode"], 0o755)
+        self.assertEqual(manager.conflicts(), [])
+        cached = self.root / "usr/local/lib/t95-setup" / setup.DASHBOARD_SD_SOURCE
+        self.assertEqual(cached.read_bytes(), sd.read_bytes())
         baseline = manager.state_file.read_bytes()
         self.backend.calls.clear()
         manager.install()
@@ -185,20 +191,26 @@ class SetupTests(unittest.TestCase):
         self.assertFalse((self.root / "etc/update-motd.d/95-sd-card-stats").exists())
         self.assertFalse(self.root.joinpath(setup.DASHBOARD_USB_HELP_PATH.lstrip('/')).exists())
 
-    def old_dashboard(self):
+    def old_dashboard(self, legacy_usb=True):
         manager = self.manager('dashboard')
         manager.install()
-        target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
-        archived = setup.SOURCE / 'server/ssh-dashboard/2026-10-16/rootfs' / setup.DASHBOARD_USB_HELP_PATH.lstrip('/')
-        target.write_bytes(archived.read_bytes())
-        record = next(r for r in manager.state['files'] if r['path'] == str(target))
-        record['installed'] = setup.fingerprint(target)
+        paths = [setup.DASHBOARD_SD_STATS_PATH]
+        if legacy_usb:
+            paths.append(setup.DASHBOARD_USB_HELP_PATH)
+        for path in paths:
+            target = manager.path(path)
+            archived = setup.SOURCE / setup.DASHBOARD_ARCHIVE / 'rootfs' / path.lstrip('/')
+            target.write_bytes(archived.read_bytes())
+            record = next(r for r in manager.state['files'] if r['path'] == str(target))
+            record['installed'] = setup.fingerprint(target)
         manager.save()
         self.backend.calls.clear()
-        return manager, target
+        return manager
 
-    def test_existing_dashboard_gets_usb_hint_without_reinstalling_or_replacing_backup(self):
-        manager, target = self.old_dashboard()
+    def test_existing_dashboard_gets_sd_monitor_and_usb_hint_without_reinstalling(self):
+        manager = self.old_dashboard()
+        target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
+        sd = manager.path(setup.DASHBOARD_SD_STATS_PATH)
         original_records = json.loads(json.dumps(manager.state['files']))
         original_packages = list(manager.state['new_packages'])
         custom = self.root / 'etc/default/armbian-motd'
@@ -208,12 +220,27 @@ class SetupTests(unittest.TestCase):
         for current, original in zip(manager.state['files'], original_records):
             self.assertEqual(current['before'], original['before'])
             self.assertEqual(current.get('backup'), original.get('backup'))
-            if current['path'] != str(target):
+            if current['path'] not in (str(target), str(sd)):
                 self.assertEqual(current, original)
         self.assertEqual(manager.state['new_packages'], original_packages)
         self.assertEqual(custom.read_text(), 'custom dashboard setting\n')
         self.assertEqual(target.read_bytes(), setup.DASHBOARD_USB_HELP)
+        self.assertEqual(sd.read_bytes(), (setup.SOURCE / setup.DASHBOARD_SD_SOURCE).read_bytes())
         self.assertFalse(any(c[0] == 'apt-get' for c in self.backend.calls))
+
+    def test_upgrade_from_dashboard_with_usb_hint_restores_original_sd_module_on_remove(self):
+        target = self.root / setup.DASHBOARD_SD_STATS_PATH.lstrip('/')
+        target.parent.mkdir(parents=True)
+        target.write_text('original SD module\n')
+        target.chmod(0o640)
+        before = setup.fingerprint(target)
+        manager = self.old_dashboard(legacy_usb=False)
+        manager = self.manager('dashboard')
+        manager.install()
+        self.assertEqual(manager.conflicts(), [])
+        self.assertEqual(target.read_bytes(), (setup.SOURCE / setup.DASHBOARD_SD_SOURCE).read_bytes())
+        manager.remove()
+        self.assertEqual(setup.fingerprint(target), before)
 
     def test_dashboard_hint_update_restores_existing_foreign_hint_on_removal(self):
         manager = self.manager('dashboard')
@@ -233,18 +260,30 @@ class SetupTests(unittest.TestCase):
         target = manager.path(setup.DASHBOARD_USB_HELP_PATH)
         target.write_text('manual hint\n')
         original = manager.state_file.read_bytes()
-        with self.assertRaisesRegex(ValueError, 'geänderte USB-Dashboard-Hilfe'):
+        with self.assertRaisesRegex(ValueError, setup.DASHBOARD_USB_HELP_PATH):
             manager.install()
         self.assertEqual(target.read_text(), 'manual hint\n')
         self.assertEqual(manager.state_file.read_bytes(), original)
 
-    def test_dashboard_hint_failed_update_leaves_existing_dashboard_and_journal_intact(self):
-        manager, target = self.old_dashboard()
+    def test_modified_sd_module_blocks_both_dashboard_updates(self):
+        manager = self.old_dashboard()
+        sd = manager.path(setup.DASHBOARD_SD_STATS_PATH)
+        sd.write_text('manual SD module\n')
+        hint = manager.path(setup.DASHBOARD_USB_HELP_PATH)
+        original_hint = hint.read_bytes()
+        original_state = manager.state_file.read_bytes()
+        with self.assertRaisesRegex(ValueError, setup.DASHBOARD_SD_STATS_PATH):
+            manager.install()
+        self.assertEqual(sd.read_text(), 'manual SD module\n')
+        self.assertEqual(hint.read_bytes(), original_hint)
+        self.assertEqual(manager.state_file.read_bytes(), original_state)
+
+    def test_dashboard_failed_update_leaves_existing_dashboard_and_journal_intact(self):
+        manager = self.old_dashboard()
         original = manager.state_file.read_bytes()
         existing = {r['path']: Path(r['path']).read_bytes() for r in manager.state['files']}
         with patch.object(manager, 'cache_tools', side_effect=OSError('simulated cache failure')):
             with self.assertRaises(OSError): manager.install()
-        self.assertTrue(target.exists())
         self.assertEqual(manager.state_file.read_bytes(), original)
         self.assertEqual(existing, {p: Path(p).read_bytes() for p in existing})
 

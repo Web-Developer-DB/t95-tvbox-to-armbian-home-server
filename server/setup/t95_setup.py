@@ -39,6 +39,9 @@ USER_AUDIO_CONFIGS = [
     ".config/wireplumber/wireplumber.conf.d/51-t95-headless-bluetooth.conf",
 ]
 
+DASHBOARD_ARCHIVE = Path("server/ssh-dashboard/2026-10-16")
+DASHBOARD_SD_SOURCE = Path("server/ssh-dashboard/95-sd-card-stats")
+DASHBOARD_SD_STATS_PATH = "/etc/update-motd.d/95-sd-card-stats"
 DASHBOARD_USB_HELP_PATH = "/etc/update-motd.d/35-armbian-tips"
 DASHBOARD_USB_HELP = r'''#!/bin/bash
 # T95 dashboard: display-only USB cheat sheet. Never execute the shown commands.
@@ -421,12 +424,17 @@ class Setup:
         manager = destination / "server/setup/t95_setup.py"
         check_destination(manager)
         manager.parent.mkdir(parents=True, exist_ok=True)
-        atomic_file(manager, Path(__file__).read_bytes())
-        # Cached payload permits dashboard removal without network access.
-        archive = SOURCE / "server/ssh-dashboard/2026-10-16"
-        cached = destination / "server/ssh-dashboard/2026-10-16"
+        # Cache the dashboard sources before publishing the manager that uses them.
+        archive = SOURCE / DASHBOARD_ARCHIVE
+        cached = destination / DASHBOARD_ARCHIVE
         if archive.resolve() != cached.resolve():
             shutil.copytree(archive, cached, dirs_exist_ok=True)
+        sd_source = SOURCE / DASHBOARD_SD_SOURCE
+        cached_sd_source = destination / DASHBOARD_SD_SOURCE
+        check_destination(cached_sd_source)
+        if sd_source != cached_sd_source:
+            atomic_file(cached_sd_source, sd_source.read_bytes())
+        atomic_file(manager, Path(__file__).read_bytes())
         for component in ("bluetooth", "dashboard"):
             wrapper = self.path(f"/usr/local/bin/t95-{component}")
             check_destination(wrapper)
@@ -440,8 +448,14 @@ class Setup:
                 raise ValueError(f"Vorhandenes fremdes Werkzeug: {wrapper}")
             atomic_file(wrapper, content.encode(), 0o755)
 
+    def dashboard_overrides(self):
+        return {
+            DASHBOARD_USB_HELP_PATH: DASHBOARD_USB_HELP,
+            DASHBOARD_SD_STATS_PATH: (SOURCE / DASHBOARD_SD_SOURCE).read_bytes(),
+        }
+
     def install_dashboard(self):
-        archive = SOURCE / "server/ssh-dashboard/2026-10-16"
+        archive = SOURCE / DASHBOARD_ARCHIVE
         entries = json.loads((archive / "manifest.json").read_text())["files"]
         if len({e["path"] for e in entries}) != len(entries):
             raise ValueError("Doppelte Manifestpfade")
@@ -456,47 +470,62 @@ class Setup:
             if fingerprint(archive / "rootfs" / p)["sha256"] != e["sha256"]:
                 raise ValueError("Dashboard-Prüfsumme falsch")
             check_destination(self.path("/" + e["path"]))
-        self.remember(self.path(DASHBOARD_USB_HELP_PATH))
+        overrides = self.dashboard_overrides()
+        for path in overrides:
+            self.remember(self.path(path))
         self.install_packages()
         for e in entries:
-            self.write(self.path("/" + e["path"]), (archive / "rootfs" / e["path"]).read_bytes(), int(e["mode"], 8))
-        self.write(self.path(DASHBOARD_USB_HELP_PATH), DASHBOARD_USB_HELP, 0o755)
+            path = "/" + e["path"]
+            if path not in overrides:
+                self.write(self.path(path), (archive / "rootfs" / e["path"]).read_bytes(), int(e["mode"], 8))
+        for path, content in overrides.items():
+            self.write(self.path(path), content, 0o755)
 
-    def refresh_dashboard_help(self):
-        """Add/update only the hint on existing installs, keeping the first backup."""
-        target = self.path(DASHBOARD_USB_HELP_PATH)
-        check_destination(target)
-        before = fingerprint(target)
-        record = next((r for r in self.state["files"] if r["path"] == str(target)), None)
-        if record and "installed" in record and before != record["installed"]:
-            raise ValueError("Seit Installation geänderte USB-Dashboard-Hilfe; separat sichern/prüfen")
-        if (record and before.get("sha256") == hashlib.sha256(DASHBOARD_USB_HELP).hexdigest()
-                and before.get("mode") == 0o755):
-            print("Dashboard-Tipps mit USB-Hilfe bereits installiert.")
+    def refresh_dashboard(self):
+        """Update the maintained MOTD modules while keeping the first backup."""
+        records = {record["path"]: record for record in self.state["files"]}
+        changes = []
+        for path, content in self.dashboard_overrides().items():
+            target = self.path(path)
+            check_destination(target)
+            before = fingerprint(target)
+            record = records.get(str(target), {})
+            if before != record.get("installed", {"kind": "absent"}):
+                raise ValueError(f"Seit Installation geänderte Dashboard-Datei: {path}. Separat sichern und prüfen.")
+            if (before.get("sha256") != hashlib.sha256(content).hexdigest()
+                    or before.get("mode") != 0o755):
+                previous_content = target.read_bytes() if before["kind"] == "file" else None
+                changes.append((target, content, before, previous_content))
+        if not changes:
+            print("Dashboard mit USB-Kurzhilfe und SD-Fehleranzeige bereits aktuell.")
             return
         previous_state = json.loads(json.dumps(self.state))
-        previous_content = target.read_bytes() if before["kind"] == "file" else None
         self.state["phase"] = "updating"
         self.save()
+        attempted = []
         try:
-            self.write(target, DASHBOARD_USB_HELP, 0o755)
+            for target, content, before, previous_content in changes:
+                attempted.append((target, before, previous_content))
+                self.write(target, content, 0o755)
             self.cache_tools()
             self.state["phase"] = "installed"
             self.save()
         except (Exception, KeyboardInterrupt) as original:
             try:
-                if before["kind"] == "file":
-                    atomic_file(target, previous_content, before["mode"], (before["uid"], before["gid"]))
-                else:
-                    target.unlink(missing_ok=True)
+                for target, before, previous_content in reversed(attempted):
+                    if before["kind"] == "file":
+                        atomic_file(target, previous_content, before["mode"], (before["uid"], before["gid"]))
+                    else:
+                        target.unlink(missing_ok=True)
                 self.state = previous_state
                 self.save()
             except Exception as rollback:
                 self.state["phase"] = "rollback-failed"
                 self.save()
-                raise RuntimeError(f"USB-Dashboard-Hilfe fehlgeschlagen: {original}; Rücknahme fehlgeschlagen: {rollback}") from rollback
+                raise RuntimeError(f"Dashboard-Aktualisierung fehlgeschlagen: {original}. "
+                                   f"Rücknahme fehlgeschlagen: {rollback}") from rollback
             raise
-        print("Dashboard-Tipps auf USB-Hilfe aktualisiert. Übriges Dashboard und ursprüngliche Sicherung erhalten.")
+        print("Dashboard mit USB-Kurzhilfe und SD-Fehleranzeige aktualisiert. Ursprüngliche Sicherung erhalten.")
 
     def firmware_paths(self):
         base = self.path("/lib/firmware/brcm").resolve(strict=True)
@@ -801,7 +830,7 @@ audio_output {{
         if not self.path("/etc/armbian-release").is_file():
             raise ValueError("Eine bestehende Armbian-Installation ist erforderlich")
         if self.component == "dashboard" and self.state and self.state["phase"] == "installed":
-            self.refresh_dashboard_help()
+            self.refresh_dashboard()
             return
         if self.component == "bluetooth":
             if not self.user:

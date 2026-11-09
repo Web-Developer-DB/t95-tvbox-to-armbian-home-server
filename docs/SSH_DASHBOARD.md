@@ -13,6 +13,7 @@ SSH-Anmeldung siehst du neben Auslastung und Arbeitsspeicher:
 | Anzeige | Was du daran erkennst |
 | --- | --- |
 | ✍️ **`SD-Writes`** | Seit dem letzten Start auf die SD geschriebene Datenmenge; beginnt nach einem Neustart von vorn. |
+| **`SD-I/O/MMC`, `SD-ext4`** | Protokollierte Fehler der System-microSD, getrennt nach aktuellem und vorigem verfügbarem Journalstart. |
 | 🔌 **Laufwerke** | Eingebundene Dateisysteme, auch gemountete USB-Sticks, SSDs und Festplatten: Gerätename (z. B. `sda1`) und Einhängepfad (Mountpfad). |
 | 📊 **Speicherplatz** | Gesamtgröße, freier Platz und Belegung pro Dateisystem; **ab 90 %** wird der Prozentwert rot. |
 | ⏏️ **Tipps: USB-Kurzhilfe** | Ersetzt die wechselnden Werbetipps: bei installiertem `usb-eject` Statusbefehl, Auswurf nach Freigabenamen und Hinweis zum sicheren Abziehen. |
@@ -96,6 +97,34 @@ Das Dashboard erscheint automatisch bei späteren SSH-Anmeldungen. Ein laufendes
 Fenster wird dadurch nicht ständig aktualisiert. Für normales Arbeiten kannst
 du nach der Anzeige deine weiteren Befehle eingeben.
 
+### microSD-Fehler einordnen
+
+`SD-I/O/MMC` meldet unter anderem Timeouts und CRC-Fehler als **WARNUNG**
+und fehlgeschlagene Blockzugriffe als **KRITISCH**. `SD-ext4` zeigt kritische
+Dateisystemfehler. Bei Treffern stehen Anzahl und letzter Zeitstempel je
+Kategorie und Start dabei. Eine Störung kann mehrere Kernelmeldungen erzeugen.
+Auch der Kartenleser, Kontakte oder die Stromversorgung können Fehler verursachen.
+
+`0 erkannt` bedeutet, dass im ausgewerteten Kerneljournal keine passenden
+Meldungen vorlagen. Die Schreibmenge misst die Belastung durch das System.
+Die Karte kann auch ohne protokollierte Vorwarnung ausfallen.
+`Prüfung nicht möglich` erscheint bei fehlenden oder unlesbaren
+Kernelmeldungen, einem Timeout oder unklarer Gerätezuordnung. Der vorige
+Journalstart ist der letzte davor gespeicherte Start. Seine Zähler beziehen
+sich auf die damals als `mmcblk0` erkannte SD, nach einem Kartenwechsel also
+möglicherweise auf eine andere Karte.
+
+**Auf der T95**, zum Vergleich mit der Anzeige die Kernelmeldungen lesen:
+
+```bash
+sudo journalctl -k -b --no-pager -o short-iso
+sudo journalctl -k -b -1 --no-pager -o short-iso
+```
+
+Der zweite Befehl benötigt ein gespeichertes Vorgängerjournal. Die Login-Anzeige
+liest das vorhandene Journal mit einem Zeitlimit je Start und legt keine eigene
+Verlaufsdatei an. USB- und eMMC-Meldungen zählen nicht zur SD-Anzeige.
+
 ### ⏏️ USB-Laufwerke sicher entfernen
 
 Ist die [Samba-/USB-Erweiterung](../server/samba-usb/README.md) installiert,
@@ -125,6 +154,8 @@ Die Anzeige führt diese Befehle nicht aus. Ohne installiertes `usb-eject`
 bleibt sie verborgen. Deutsch oder Englisch richtet sich nach der Sprache der
 Anmeldesitzung. [Auswurf und Erfolgsmeldungen](../server/samba-usb/README.md#usb-sicher-auswerfen).
 
+### Dashboard aktualisieren
+
 **Vorhandenes Dashboard ergänzen:** Den aktuellen Dashboard-Starter erneut
 ausführen oder aus einer aktuellen Repository-Kopie im Hauptverzeichnis:
 
@@ -134,12 +165,12 @@ ausführen oder aus einer aktuellen Repository-Kopie im Hauptverzeichnis:
 sudo python3 server/setup/t95_setup.py dashboard install --user "$(id -un)"
 ```
 
-Bei einer bereits protokollierten Installation ergänzt/aktualisiert dies nur
-die USB-Kurzhilfe. Die übrigen Dashboard-Dateien, eigene Einstellungen und die
-ursprüngliche Sicherung bleiben erhalten; dafür werden keine Pakete erneut
-installiert. Manuelle Änderungen an der bereits verwalteten Kurzhilfe werden
-gemeldet. Danach neu per SSH anmelden; `t95-dashboard status` kontrolliert die
-verwalteten Dateien. Die farbige USB-Kurzhilfe ist automatisiert geprüft und
+Bei einer bereits protokollierten Installation aktualisiert der Starter die
+USB-Kurzhilfe und die SD-Fehleranzeige. Er verwendet die ursprüngliche Sicherung
+weiter und meldet manuelle Änderungen an diesen beiden Dateien vor dem Schreiben.
+Für das Update ist keine Paketinstallation erforderlich. Danach neu per SSH
+anmelden und die verwalteten Dateien mit `t95-dashboard status` kontrollieren.
+Die farbige USB-Kurzhilfe ist automatisiert geprüft und
 wurde vom Projektbetreiber am **19.10.2026** auf der T95 als funktionsfähig
 bestätigt. [Testnachweise und verbleibende Einzelprüfungen](VALIDATION.md#dashboard-und-bluetooth).
 
@@ -195,12 +226,10 @@ Ein um IP-Adressen und persönliche Mountpfade bereinigter Mitschnitt steht in [
 
 `manifest.json` ist die maschinenlesbare Grundlage für eine eigene Ein-Klick-Oberfläche: relatives Ziel, Modus und SHA-256 je Datei. `SHA256SUMS` prüft dieselben Dateien mit Standardwerkzeugen. Das bereits vorhandene Wiederherstellungswerkzeug verwendet dieses Manifest.
 
-Der aktuelle Setup-Installer verwendet `/etc/update-motd.d/35-armbian-tips`
-für die USB-Kurzhilfe. Die 14 Quelldateien im historischen Archiv bleiben als
-Referenz erhalten; dessen Mitschnitt zeigt deshalb noch die damaligen Tipps.
-Die ursprüngliche Tipps-Datei wird über das Setup-Journal gesichert und bei
-`remove` wiederhergestellt. Bei einer älteren protokollierten Installation
-aktualisiert das Setup nur diesen Tipps-Baustein.
+Der aktuelle Setup-Installer installiert die USB-Kurzhilfe und die erweiterte
+SD-Statistik aus aktuellen Quellen. Das Setup-Journal hält die ursprünglichen
+Dateien für `remove` fest. Die 14 Dateien im historischen Archiv bilden den
+damaligen Stand ab und dienen dem separaten Restore-Werkzeug als Quelle.
 
 Der Starter installiert die benötigten Anzeige-/Systemwerkzeuge über APT und
 führt das erste Installationsbackup unter `/var/lib/t95-setup/dashboard`.

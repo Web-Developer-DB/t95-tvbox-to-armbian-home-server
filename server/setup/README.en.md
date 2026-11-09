@@ -183,11 +183,10 @@ content, mode, and owner. Repeated installation preserves the initial backup.
 Later edits block removal; save/check those files before deliberately using
 `remove --force`. Old journals are archived on reinstallation.
 
-For an installed dashboard, repeating `install` replaces rotating tips with the
-[USB quick help](../../docs/SSH_DASHBOARD.en.md#-safely-remove-usb-drives).
-Other dashboard files and their original backups are preserved;
-this update does not reinstall packages. The hint shows `usb-eject` commands
-only when the tool is available.
+For an installed dashboard, repeating `install` updates the USB quick help and
+the SD error display while keeping their original backups. The update requires
+no package installation. The hint shows `usb-eject` commands when the tool is
+available. [Update the dashboard](../../docs/SSH_DASHBOARD.en.md#update-the-dashboard)
 
 The shared cache at `/usr/local/lib/t95-setup`, command helpers in
 `/usr/local/bin`, and private backups remain for diagnosis/reinstallation.

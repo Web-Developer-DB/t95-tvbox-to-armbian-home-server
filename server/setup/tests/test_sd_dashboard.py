@@ -26,7 +26,12 @@ class SDDashboardTests(unittest.TestCase):
         card = self.fixture / "mmc7:0001"
         card.mkdir()
         (card / "type").write_text("SD\n")
-        self.command("findmnt", "echo 179:1")
+        self.command("findmnt", '''
+            case " $* " in
+                *" --raw "*) printf '179:1\\n' ;;
+                *) printf '179:1  \\n' ;;
+            esac
+        ''')
         self.command("readlink", '''
             case "$3" in
                 /sys/dev/block/179:1) echo "$T95_FIXTURE/mmcblk0/$T95_ROOT_PARTITION" ;;

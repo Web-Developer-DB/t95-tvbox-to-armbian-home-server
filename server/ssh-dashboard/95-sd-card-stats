@@ -2,7 +2,7 @@
 
 current_sd_host() {
     local root_device disk card card_type
-    root_device=$(findmnt -n -o MAJ:MIN --target /) || return 1
+    root_device=$(findmnt --raw -n -o MAJ:MIN --target /) || return 1
     [[ $root_device =~ ^[0-9]+:[0-9]+$ ]] || return 1
     root_device=$(readlink -e -- "/sys/dev/block/$root_device") || return 1
     disk=$(readlink -e -- /sys/block/mmcblk0) || return 1

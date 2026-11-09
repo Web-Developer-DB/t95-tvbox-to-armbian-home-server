@@ -1,6 +1,7 @@
 """Exercise the login module with controlled sysfs and journal responses."""
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import textwrap
@@ -75,6 +76,10 @@ class SDDashboardTests(unittest.TestCase):
         self.assertIn("Laufwerksübersicht", result.stdout)
         return result.stdout
 
+    def assert_unavailable(self, output, boot):
+        self.assertIn(f"{boot}\x1b[0m\n "
+                      "\x1b[1;33mSD status    \x1b[0m: \x1b[1;33mCheck unavailable\x1b[0m", output)
+
     def test_current_and_previous_use_their_own_host_and_count_once_per_message(self):
         self.journal("current", [
             "mmc7: Timeout waiting for hardware interrupt",
@@ -98,7 +103,7 @@ class SDDashboardTests(unittest.TestCase):
                                   "mmc7: CRC error"])
         output = self.login()
         self.assertIn("CRITICAL: 7 detected (last 2026-11-09T11:00:06+01:00)", output)
-        self.assertIn("CRITICAL: 1 detected (last 2026-11-09T11:00:07+01:00)", output)
+        self.assertIn("\x1b[1;31mCRITICAL: 1 detected (last 2026-11-09T11:00:07+01:00)\x1b[0m", output)
         self.assertIn("WARNING: 1 detected (last 2026-11-09T11:00:00+01:00)", output)
         self.assertEqual(output.count("0 detected"), 1)
         self.assertNotIn("sector 123", output)
@@ -112,16 +117,29 @@ class SDDashboardTests(unittest.TestCase):
         output = self.login()
         self.assertIn("Aktueller Start", output)
         self.assertIn("Voriger Journalstart", output)
-        self.assertEqual(output.count("0 erkannt"), 4)
+        self.assertEqual(output.count("\x1b[0;92m0 erkannt\x1b[0m"), 4)
+        sd_rows = [line for line in output.splitlines() if "SD-I/O/MMC" in line or "SD-ext4" in line]
+        self.assertEqual(len(sd_rows), 4)
+        for row in sd_rows:
+            self.assertTrue(row.startswith(" \x1b[1;33m"))
+            plain = re.sub(r"\x1b\[[0-9;]+m", "", row)
+            self.assertEqual(plain.index(":"), " Configuration:".index(":"))
+
+    def test_warning_color_turns_red_at_three_matches_in_one_boot(self):
+        self.journal("current", ["mmc7: CRC error"] * 2)
+        self.journal("previous", SD_DETECTION + ["mmc3: CRC error"] * 3)
+        output = self.login()
+        self.assertIn("\x1b[1;33mWARNING: 2 detected", output)
+        self.assertIn("\x1b[1;31mCRITICAL: 3 detected", output)
 
     def test_current_requires_root_partition_and_sd_type(self):
         self.journal("current", ["mmcblk0: error -110"])
         self.journal("previous", SD_DETECTION)
         self.env["T95_ROOT_PARTITION"] = "mmcblk01"
-        self.assertIn("Current boot: Check unavailable", self.login())
+        self.assert_unavailable(self.login(), "Current boot")
         self.env["T95_ROOT_PARTITION"] = "mmcblk0p1"
         (self.fixture / "mmc7:0001/type").write_text("MMC\n")
-        self.assertIn("Current boot: Check unavailable", self.login())
+        self.assert_unavailable(self.login(), "Current boot")
 
     def test_historical_mapping_requires_unambiguous_sd_detection(self):
         self.journal("current", ["Kernel initialized"])
@@ -131,18 +149,18 @@ class SDDashboardTests(unittest.TestCase):
                          [*SD_DETECTION, "mmc3: new SDHC card at address 0001"]):
             with self.subTest(previous=previous):
                 self.journal("previous", previous)
-                self.assertIn("Previous journal boot: Check unavailable", self.login())
+                self.assert_unavailable(self.login(), "Previous journal boot")
 
     def test_empty_missing_and_partially_readable_journals_are_unavailable(self):
         self.journal("current", [])
         output = self.login()
-        self.assertIn("Current boot: Check unavailable", output)
-        self.assertIn("Previous journal boot: Check unavailable", output)
+        self.assert_unavailable(output, "Current boot")
+        self.assert_unavailable(output, "Previous journal boot")
         self.assertNotIn("0 detected", output)
         self.journal("current", ["mmcblk0: error -110"])
         self.env["T95_DENY"] = "current"
         output = self.login()
-        self.assertIn("Current boot: Check unavailable", output)
+        self.assert_unavailable(output, "Current boot")
         self.assertNotIn("1 detected", output)
 
     def test_partial_output_on_timeout_is_discarded_and_previous_boot_still_runs(self):
@@ -152,6 +170,6 @@ class SDDashboardTests(unittest.TestCase):
         started = time.monotonic()
         output = self.login()
         self.assertLess(time.monotonic() - started, 3)
-        self.assertIn("Current boot: Check unavailable", output)
+        self.assert_unavailable(output, "Current boot")
         self.assertEqual(output.count("0 detected"), 2)
         self.assertNotIn("CRITICAL", output)

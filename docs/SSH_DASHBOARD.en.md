@@ -93,10 +93,11 @@ refresh an already open window. Continue with normal shell commands after the di
 
 ### Interpret microSD errors
 
-`SD-I/O/MMC` marks events such as timeouts and CRC errors as **WARNING**
-and failed block operations as **CRITICAL**. `SD-ext4` shows critical filesystem
-errors. When there are matches, each category shows the count and latest
-timestamp for that boot. One incident may produce several kernel messages.
+Green means `0 detected`. One or two MMC warnings, such as timeouts or CRC
+errors, appear in yellow. Three or more messages in the same category and boot
+turn the value red. Failed block operations and ext4 errors appear in red from
+the first match. Each value with matches includes the count and latest
+timestamp. One incident may produce several kernel messages.
 The reader, contacts or power supply can also cause errors.
 
 `0 detected` means the kernel journal contained no matching messages for the

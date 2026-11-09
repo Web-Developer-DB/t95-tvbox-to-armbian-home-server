@@ -99,10 +99,11 @@ du nach der Anzeige deine weiteren Befehle eingeben.
 
 ### microSD-Fehler einordnen
 
-`SD-I/O/MMC` meldet unter anderem Timeouts und CRC-Fehler als **WARNUNG**
-und fehlgeschlagene Blockzugriffe als **KRITISCH**. `SD-ext4` zeigt kritische
-Dateisystemfehler. Bei Treffern stehen Anzahl und letzter Zeitstempel je
-Kategorie und Start dabei. Eine Störung kann mehrere Kernelmeldungen erzeugen.
+Grün steht für `0 erkannt`. Ein oder zwei MMC-Warnungen, etwa Timeouts oder
+CRC-Fehler, erscheinen gelb. Ab drei Meldungen derselben Kategorie pro Start
+erscheint der Wert rot. Fehlgeschlagene Blockzugriffe und ext4-Fehler erscheinen
+bereits beim ersten Treffer rot. Bei Treffern stehen Anzahl und letzter
+Zeitstempel dabei. Eine Störung kann mehrere Kernelmeldungen erzeugen.
 Auch der Kartenleser, Kontakte oder die Stromversorgung können Fehler verursachen.
 
 `0 erkannt` bedeutet, dass im ausgewerteten Kerneljournal keine passenden

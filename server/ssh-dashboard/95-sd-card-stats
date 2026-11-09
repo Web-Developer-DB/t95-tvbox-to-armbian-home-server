@@ -126,6 +126,7 @@ case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
     de*)
         current_boot='Aktueller Start'
         previous_boot='Voriger Journalstart'
+        check_label='SD-Status'
         unavailable='Prüfung nicht möglich'
         detected='erkannt'
         warning='WARNUNG'
@@ -135,6 +136,7 @@ case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
     *)
         current_boot='Current boot'
         previous_boot='Previous journal boot'
+        check_label='SD status'
         unavailable='Check unavailable'
         detected='detected'
         warning='WARNING'
@@ -143,28 +145,37 @@ case "${LC_ALL:-${LC_MESSAGES:-${LANG:-C}}}" in
         ;;
 esac
 
+print_sd_row() {
+    # Match the label width and colors of the Armbian commands section.
+    printf ' \e[1;33m%-13s\e[0m: %b%s\e[0m\n' "$1" "$2" "$3"
+}
+
 show_sd_count() {
-    local label=$1 count=$2 timestamp=$3 severity=$4
-    printf '   %-12s : ' "$label"
+    local label=$1 count=$2 timestamp=$3 critical_error=$4 severity color
     if (( count == 0 )); then
-        printf '0 %s\n' "$detected"
-    else
-        printf '%s: %s %s (%s %s)\n' "$severity" "$count" "$detected" "$last" "$timestamp"
+        print_sd_row "$label" '\e[0;92m' "0 $detected"
+        return
     fi
+    if (( critical_error || count >= 3 )); then
+        severity=$critical
+        color='\e[1;31m'
+    else
+        severity=$warning
+        color='\e[1;33m'
+    fi
+    print_sd_row "$label" "$color" "$severity: $count $detected ($last $timestamp)"
 }
 
 show_sd_health() {
-    local summary io_count io_critical io_last ext4_count ext4_last severity
+    local summary io_count io_critical io_last ext4_count ext4_last
+    printf '\n %b%s%b\n' "$GRAY" "$2" "$RESET"
     if summary=$(timeout --kill-after=0.2s 1s /bin/bash "${BASH_SOURCE[0]}" \
         --sd-journal "$1" </dev/null 2>/dev/null); then
         read -r io_count io_critical io_last ext4_count ext4_last <<< "$summary"
-        severity=$warning
-        if (( io_critical )); then severity=$critical; fi
-        printf ' %s\n' "$2"
-        show_sd_count SD-I/O/MMC "$io_count" "$io_last" "$severity"
-        show_sd_count SD-ext4 "$ext4_count" "$ext4_last" "$critical"
+        show_sd_count SD-I/O/MMC "$io_count" "$io_last" "$io_critical"
+        show_sd_count SD-ext4 "$ext4_count" "$ext4_last" 1
     else
-        printf ' %s: %s\n' "$2" "$unavailable"
+        print_sd_row "$check_label" '\e[1;33m' "$unavailable"
     fi
 }
 

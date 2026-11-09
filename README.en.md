@@ -1,63 +1,27 @@
 # T95 TV box → Armbian home server
 
-[Deutsch](README.md) | **English**
+**[Deutsch](README.md)** | English
 
-Turn a T95 with **Allwinner H616 and PCB `H616-T95MAX-AXP313A-V3.0`** into a
-small home server. Armbian boots from microSD; Ethernet connects the box to your network.
+Turn the verified T95 TV box into a small home server. Armbian boots from a
+microSD card and connects the box to your home network using Ethernet. From a
+PC, manage the server over SSH (remote access) and share files using Samba.
 
-**[🚀 Set up a new box](docs/INSTALLATION.en.md)** · **[🧭 Everyday use](docs/DAILY_USE.en.md)** · **[🛟 Solve a problem](docs/TROUBLESHOOTING.en.md)**
+**[🚀 Start installation](docs/INSTALLATION.en.md)** · **[🧭 Daily use](docs/DAILY_USE.en.md)** · **[🛟 Get help](docs/TROUBLESHOOTING.en.md)**
 
-Armbian is a full Linux system based on Debian 13. Project scripts are
-**optional additions for the maintainer's personal use**. Find other applications
-in the **[Armbian software catalog](https://docs.armbian.com/software/)** and
-[Docker guide](https://docs.armbian.com/software/docker/) — for use **after
-base installation and kernel holds**.
+![Overview of the T95 with Armbian on microSD and USB storage connected to a router, with PC access over SSH and Samba](docs/images/t95-network-overview-en.svg)
 
-![Base release: hardware tested](https://img.shields.io/badge/Base_release-hardware_tested-brightgreen)
-![Boot: microSD](https://img.shields.io/badge/Boot-microSD-blue)
+<a id="optional-extensions"></a>
+## 🧩 What can the home server do?
 
-> [!WARNING]
-> **Check the PCB first:** [compare its marking with the original photo](#hardware-photos).
-> “T95” covers different hardware. Only `H616-T95MAX-AXP313A-V3.0` is tested
-> for this image. Stop for a different or unknown board:
-> [identify hardware](docs/HARDWARE_IDENTIFICATION.en.md) and use the [developer path](docs/PORTING.en.md).
+Set up these extensions after the base installation and kernel hold.
 
-> [!CAUTION]
-> **⛔ REQUIRED: HOLD THE KERNEL AND DTB**
->
-> After initial setup, **before installing more software or updating the system**,
-> hold the kernel and DTB (hardware description). **Keep these holds enabled
-> during normal use.** Replacing them can overwrite T95-specific changes —
-> **the box may no longer boot afterward.**
->
-> **[→ Required kernel/DTB protection step](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)**
+| Feature | What you can do | Guide |
+| --- | --- | --- |
+| 📂 File server | Share supported USB drives on your network and eject them safely | [Samba and USB](server/samba-usb/README.en.md) |
+| 📊 SSH dashboard | See disk space, SD writes and logged SD errors at login | [Dashboard](docs/SSH_DASHBOARD.en.md) |
+| 🎧 Bluetooth music player | Play music through connected headphones or a speaker | [Bluetooth player](server/bluetooth/README.en.md) |
 
-<a id="install-the-home-server"></a>
-
-## 🚀 Install the home server
-
-**[→ Begin with installation step 1](docs/INSTALLATION.en.md)**
-
-**What to prepare:**
-
-| You need | Purpose |
-| --- | --- |
-| 📺 Verified T95 and correct power supply | Run Armbian on the supported PCB |
-| 💾 Expendable microSD and USB card reader | Write the system and boot from SD |
-| 🖥️ Linux PC with internet | Prepare SD and connect over SSH |
-| 🌐 Ethernet cable and router | Connect the box to your home network |
-| 📁 At least 6 GB free on the PC | Prepare the image; extra space only for an optional SD backup |
-
-The guide explains Terminal and SSH, the remote connection to your box.
-Windows/WSL2 has a separate section with additional device requirements.
-
-**Hardware → PC → SD → SSH → hold kernel → optional backup → optional file server**
-
-> [!IMPORTANT]
-> **No default password:** create a personal image copy with your own password
-> before writing. The installer guides you through it.
-> **Writing erases the entire selected SD.** Internal Android storage (eMMC)
-> is not written by this route.
+Find more applications with ARM64 support in the [Armbian software catalogue](https://docs.armbian.com/software/).
 
 <a id="hardware-photos"></a>
 
@@ -88,110 +52,80 @@ Click to enlarge originals. EXIF/GPS data was removed and individual stickers ar
 
 </details>
 
-<a id="what-works"></a>
+> [!WARNING]
+> **Only the `H616-T95MAX-AXP313A-V3.0` board is verified for this image.**
+> For a different or unidentified board, stop here and use the
+> [hardware identification guide](docs/HARDWARE_IDENTIFICATION.en.md) and [developer path](docs/PORTING.en.md).
 
-## ✅ What works?
+<a id="install-the-home-server"></a>
+## 🚀 Set up the server
 
-| Function | Status |
-| --- | --- |
-| microSD boot, Ethernet, SSH, shutdown | ✅ Tested |
-| Samba, USB drives, VLC over SMB | ✅ Tested; optional setup |
-| SSH dashboard and Bluetooth music player | ✅ Tested; optional setup |
-| eMMC as a data drive | ✅ Tested; separate preparation |
-| Armbian boot from eMMC | 🚫 Unsupported; use microSD |
-| Wi-Fi, HDMI as a server function, infrared remote | ❔ Not tested |
+**Check the board → prepare a personal microSD → start the box → connect over SSH → protect the kernel and DTB**
 
-Reference: **Armbian 26.8.4 / Debian 13 / kernel `6.18.48-current-sunxi64`**.
-The maintainer confirmed the dashboard/Bluetooth steps work on **2026-10-17**.
-[Test evidence](docs/VALIDATION.en.md) tracks further acceptance and long-term tests.
-Ethernet: 100 Mbit/s, measured at about 11–12 MB/s.
+You need a verified T95 with its power supply, an expendable microSD, a USB card
+reader, an Ethernet cable, and a Linux PC with internet and at least 6 GB free.
+The guide also describes the extra requirements for Windows with WSL2. A full
+SD backup needs additional space.
 
-**New USB implementation:** automated tests pass; exFAT Samba access,
-eject/power-off and reconnection are confirmed on the T95. Other filesystem
-and multiple-device tests remain pending. [Fix status](docs/SAMBA_USB_AUDIT.en.md).
-
-<a id="daily-use"></a>
-
-## 🧭 Daily use
-
-**[→ Open everyday use](docs/DAILY_USE.en.md)** for reconnecting, file access,
-safe USB ejection, Bluetooth, music, rebooting, and shutting down.
-Use [troubleshooting by symptom](docs/TROUBLESHOOTING.en.md) for errors.
-
-<a id="optional-extensions"></a>
-
-## 🧩 Optional extensions
-
-After base installation with kernel holds enabled, choose the features you
-want. A [full SD backup](docs/INSTALLATION.en.md#6-back-up-the-base-system) is optional.
-
-> [!TIP]
-> ### 🔌 USB file server: plug in storage and share files
->
-> **Turn your TV box's USB ports into file storage for your home network.**
->
-> - **Less manual work:** After initial setup, USB sticks, SSDs, and external
->   hard drives with supported filesystems are mounted and shared over SMB
->   automatically. You do not need to mount each drive or create its share yourself.
-> - **Each storage volume accessible separately:** USB shares show the capacity
->   and free space of their own filesystem.
-> - **Tailored to the T95:** Regular Samba packages are combined with the custom
->   project configuration and USB helpers for automatic mounting and safe ejection.
->
-> **[→ Set up USB file sharing](server/samba-usb/README.en.md)** ·
-> [Eject a drive safely](server/samba-usb/README.en.md#safely-eject-usb-storage)
-
-> [!NOTE]
-> ### 📊 SSH dashboard for storage and microSD
->
-> **See what is happening on your box and its drives at every SSH login.**
->
-> - **Track SD writes:** `SD-Writes` shows how much has been written to the SD
->   card since the last boot.
-> - **Spot SD errors:** `SD-I/O/MMC` and `SD-ext4` show logged errors for the current
->   and previous available journal boots. Warnings appear in yellow, critical or
->   repeated events in red.
-> - **Identify USB storage:** The mounted-drive overview includes connected USB
->   storage, with device names and mount paths.
-> - **Spot storage pressure:** Total capacity, free space, and usage are shown
->   together; usage of 90% or more is highlighted in red.
->
-> **[→ Set up the SSH dashboard](docs/SSH_DASHBOARD.en.md)**
->
-> ![SSH dashboard with green SD counters, a yellow MMC warning and a red ext4 error](docs/images/t95-sd-dashboard-example.png)
->
-> *Example with simulated journal messages and drive figures.*
-
-**Other optional paths:**
-
-| Your goal | Guide |
-| --- | --- |
-| Send music to headphones or speakers | [Bluetooth music player](server/bluetooth/README.en.md) |
-| Set up dashboard and player through a menu | [Shared setup](server/setup/README.en.md) |
-| Use internal eMMC for data | [Requirements for experienced users](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
-
-<a id="install-other-applications"></a>
-
-## 📦 Install other applications
-
-Choose **ARM64-compatible** applications that fit the box's CPU,
-**2 GiB RAM**, and free storage. Leave capacity for Armbian and existing services;
-project modules are optional.
+> [!IMPORTANT]
+> Create a personal image copy with your own password before writing.
+> **The selected SD medium is erased completely.** The internal eMMC storage
+> in the box is not written during this step.
 
 > [!CAUTION]
-> **Keep kernel/DTB holds enabled.** Do not enable kernel switching or
-> kernel/firmware/bootloader updates in `armbian-config`. Normal application
-> packages can be updated with the holds in place.
+> **Hold the kernel and DTB after initial setup.** The DTB describes the hardware
+> to the kernel. Apply the holds before updates or further software installation
+> and keep them during normal use. Replacing these components can prevent the
+> adapted box from booting. [Protect the kernel and DTB](docs/INSTALLATION.en.md#5-protect-the-kernel-and-dtb-before-updates)
 
-**On the T95, normal SSH user with `sudo`:**
+**[→ Open the complete installation guide](docs/INSTALLATION.en.md)**
 
-```bash
-sudo armbian-config
-```
+<a id="what-works"></a>
+## ✅ What works?
 
-In [Armbian configuration](https://docs.armbian.com/config/), select **Software**,
-then a category and application. Docker is under **Software → Containers → Docker**.
-See requirements and instructions in the [software catalog](https://docs.armbian.com/software/).
+| Feature | Status |
+| --- | --- |
+| microSD boot, Ethernet, SSH and shutdown | ✅ Tested |
+| Samba, USB drives and VLC over SMB | ✅ Tested; optional setup |
+| SSH dashboard and Bluetooth music player | ✅ Tested; optional setup |
+| eMMC as data storage | ✅ Tested; separate preparation |
+| Armbian boot from eMMC | 🚫 Unsupported; use microSD |
+| Wi-Fi, HDMI as a server function, infrared | ❔ Not tested |
+
+For the new USB management, Samba reading and writing, ejection and reinsertion
+of an exFAT drive were confirmed on the T95. Other filesystems and multiple
+simultaneous drives still need testing. [Validation](docs/SAMBA_USB_AUDIT.en.md)
+
+Reference system: Armbian 26.8.4, Debian 13 and kernel `6.18.48-current-sunxi64`.
+Ethernet runs at 100 Mbit/s, measured at about 11–12 MB/s. [Test evidence](docs/VALIDATION.en.md)
+
+## 📊 The SSH dashboard
+
+At each new login the dashboard shows SD write load and logged SD errors among
+other information. Colors make the status easy to see.
+
+[![Dashboard with green SD counters, a yellow MMC warning and a red ext4 error](docs/images/t95-sd-dashboard-example.png)](docs/images/t95-sd-dashboard-example.png)
+
+*Example with simulated journal messages and drive figures. Click to enlarge.*
+[Set up the dashboard](docs/SSH_DASHBOARD.en.md)
+
+<a id="daily-use"></a>
+## 🧭 Guides and help
+
+| Your goal | Start here |
+| --- | --- |
+| 🚀 Set up a compatible T95 | [Installation](docs/INSTALLATION.en.md) |
+| 📂 Open files and operate the server | [Daily use](docs/DAILY_USE.en.md) |
+| 🔌 Share and safely eject USB drives | [Samba and USB](server/samba-usb/README.en.md) |
+| 🎧 Listen to music over Bluetooth | [Bluetooth player](server/bluetooth/README.en.md) |
+| 🗂️ Back up or restore the system | [SD backup](docs/BACKUP.en.md) |
+| 🛟 Resolve a problem | [Troubleshooting](docs/TROUBLESHOOTING.en.md) |
+| 🧩 Set up dashboard and Bluetooth together | [Shared setup](server/setup/README.en.md) |
+| 💾 Prepare internal eMMC for data | [Technical reference](docs/TECHNICAL_REFERENCE.en.md#emmc-as-an-internal-data-drive) |
+
+<a id="install-other-applications"></a>
+After base setup, choose further applications using `armbian-config`. Keep the
+kernel and DTB holds in place. [Armbian configuration](https://docs.armbian.com/config/)
 
 <details>
 <summary>🛠️ Source versions and developer details</summary>

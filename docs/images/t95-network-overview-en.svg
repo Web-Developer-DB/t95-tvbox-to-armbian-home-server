@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="610" viewBox="0 0 760 610" role="img" aria-labelledby="title desc">
+  <title id="title">YOUR HOME SERVER ON THE NETWORK</title>
+  <desc id="desc">T95 · microSD · Armbian · USB storage · optional · Router · home network · PC or mobile device · SSH · admin  /  Samba · files</desc>
+  <rect width="760" height="610" rx="22" fill="#101c2b"/>
+  <text x="38" y="55" fill="#9fb6ca" font-family="sans-serif" font-size="23" font-weight="700" letter-spacing="1">YOUR HOME SERVER ON THE NETWORK</text>
+  <rect x="38" y="82" width="684" height="172" rx="16" fill="#1b3044" stroke="#416278" stroke-width="2"/>
+  <rect x="68" y="115" width="128" height="90" rx="14" fill="#0c1724" stroke="#6bc9c1" stroke-width="3"/>
+  <circle cx="92" cy="187" r="5" fill="#6bc9c1"/>
+  <text x="132" y="164" fill="#eef8fa" font-family="sans-serif" font-size="28" font-weight="700" text-anchor="middle">T95</text>
+  <text x="232" y="133" fill="#f3f7fa" font-family="sans-serif" font-size="24" font-weight="700">Armbian Home-Server</text>
+  <text x="232" y="171" fill="#a9e1d9" font-family="sans-serif" font-size="21">microSD · Armbian</text>
+  <text x="232" y="210" fill="#c5d7e3" font-family="sans-serif" font-size="21">USB storage · optional</text>
+  <path d="M380 254v39" stroke="#6bc9c1" stroke-width="4"/>
+  <circle cx="380" cy="274" r="5" fill="#6bc9c1"/>
+  <text x="398" y="281" fill="#a9e1d9" font-family="sans-serif" font-size="16">Ethernet</text>
+  <rect x="38" y="293" width="684" height="108" rx="16" fill="#1b3044" stroke="#416278" stroke-width="2"/>
+  <path d="M76 355h94v-26H76z M90 320v-11 M156 320v-11" fill="none" stroke="#6bc9c1" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="91" cy="342" r="3" fill="#6bc9c1"/><circle cx="105" cy="342" r="3" fill="#6bc9c1"/>
+  <text x="232" y="357" fill="#f3f7fa" font-family="sans-serif" font-size="24" font-weight="700">Router · home network</text>
+  <path d="M380 401v39" stroke="#6bc9c1" stroke-width="4"/>
+  <circle cx="380" cy="421" r="5" fill="#6bc9c1"/>
+  <rect x="38" y="440" width="684" height="132" rx="16" fill="#1b3044" stroke="#416278" stroke-width="2"/>
+  <rect x="79" y="465" width="88" height="57" rx="5" fill="none" stroke="#6bc9c1" stroke-width="3"/>
+  <path d="M68 535h110l-9-12H77z" fill="none" stroke="#6bc9c1" stroke-width="3" stroke-linejoin="round"/>
+  <text x="232" y="494" fill="#f3f7fa" font-family="sans-serif" font-size="24" font-weight="700">PC or mobile device</text>
+  <text x="232" y="533" fill="#c5d7e3" font-family="sans-serif" font-size="23">SSH · admin  /  Samba · files</text>
+</svg>

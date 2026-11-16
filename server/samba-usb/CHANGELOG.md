@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-17
+
+- NTFS-Ordner mit kyrillischen Namen waren über Samba nicht erreichbar, wenn
+  `ntfs3` mit ISO-8859-1 eingehängt war. Neuinstallation und `--update` setzen
+  UTF-8 als UDisks-Standard für `ntfs3`. Der Zugriff nach dem erneuten Einhängen
+  mit UTF-8 wurde auf der T95 bestätigt. 80 Modultests bestanden.
+
 ## 2026-10-20
 
 - Allgemeine ext4-/NTFS-Hinweiszeile aus der USB-Statusausgabe entfernt.

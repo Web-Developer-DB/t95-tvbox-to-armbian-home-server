@@ -53,6 +53,15 @@ there too, check cables, power and kernel messages first.
 - Read-only media remain read-only. Status checks access as the actual Samba user.
 - If the device is absent from `lsblk`, the share hook cannot process it yet. This differs from a missing SMB share.
 
+### NTFS directories with Cyrillic names appear empty
+
+If `ls -la` shows underscores and `No such file or directory`, check the
+mount options using `findmnt -t ntfs3 -o TARGET,OPTIONS`. The installer sets
+UTF-8 as the UDisks default for `ntfs3`. Explicit `ntfs3` defaults and
+per-UUID settings take precedence. After
+[updating](../README.en.md#update-an-existing-setup), safely eject and
+reconnect the SSD, then check for `iocharset=utf8`.
+
 ## ⏏️ Eject remains incomplete
 
 Close open files, VLC and terminals working inside the drive. Select its actual

@@ -34,6 +34,23 @@ After daemon reload, enabling and a deliberate udiskie restart, mounted storage
 is reconciled. A stale user-manager group list prevents false setup success;
 the error requests a controlled reboot followed by another setup invocation.
 
+### UTF-8 filenames on NTFS
+
+On the T95, Samba could not open NTFS directories with Cyrillic names. The
+`ntfs3` driver mounted the drive with `iocharset=iso8859-1` and displayed
+characters outside that encoding as underscores. After mounting again with
+`iocharset=utf8`, the directories opened on the T95 and over Samba.
+
+Fresh installs and `--update` add a UTF-8 default for the `ntfs3` driver in
+`/etc/udisks2/mount_options.conf`. The file is included in the installation
+backup. Explicit global `ntfs:ntfs3_defaults` and device-specific settings take
+precedence. UDisks applies the default the next time it mounts the drive.
+
+For an existing setup, use [update mode](../README.en.md#update-an-existing-setup).
+Safely eject and reconnect any already mounted drive. Check for
+`iocharset=utf8` with `findmnt -t ntfs3 -o TARGET,OPTIONS`, then open a
+directory with a Cyrillic name over Samba.
+
 ## 🧩 Shares and state
 
 A short shared lock protects name allocation, publication and state changes.

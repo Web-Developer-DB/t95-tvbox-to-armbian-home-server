@@ -35,6 +35,25 @@ vorhandene Mounts abgeglichen. Ein veralteter Gruppensatz des Benutzermanagers
 verhindert einen falschen Installationserfolg. Die Fehlermeldung verlangt dann
 einen kontrollierten Neustart und einen erneuten Aufruf.
 
+### NTFS-Dateinamen mit UTF-8
+
+Bei einem NTFS-Laufwerk auf der T95 waren Unterordner mit kyrillischen Namen
+über Samba nicht erreichbar. Der Treiber `ntfs3` war mit
+`iocharset=iso8859-1` eingehängt und zeigte die nicht darstellbaren Zeichen
+als Unterstriche an. Nach erneutem Einhängen mit `iocharset=utf8` ließen sich
+die Ordner auf der T95 und über Samba öffnen.
+
+Neuinstallation und `--update` ergänzen den UTF-8-Standard für den
+`ntfs3`-Treiber in `/etc/udisks2/mount_options.conf`. Die Datei ist Teil der
+Installationssicherung. Eine ausdrücklich gesetzte globale
+`ntfs:ntfs3_defaults`-Zeile und gerätespezifische Vorgaben haben Vorrang.
+UDisks übernimmt den Standard beim nächsten Einhängen.
+
+Bei einer bestehenden Einrichtung den [Update-Modus](../README.md#vorhandene-einrichtung-aktualisieren)
+verwenden. Ein bereits eingehängtes Laufwerk sicher auswerfen und wieder
+anschließen. Mit `findmnt -t ntfs3 -o TARGET,OPTIONS` auf `iocharset=utf8`
+prüfen und anschließend einen Ordner mit kyrillischem Namen über Samba öffnen.
+
 ## 🧩 Freigaben und Status
 
 Eine kurze gemeinsame Sperre schützt Namensvergabe, Anlage und Statusänderung.

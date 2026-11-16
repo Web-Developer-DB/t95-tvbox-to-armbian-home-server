@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-17
+
+- NTFS folders with Cyrillic names were inaccessible over Samba when `ntfs3`
+  mounted the drive with ISO-8859-1. Fresh installs and `--update` set UTF-8
+  as the UDisks default for `ntfs3`. Access after mounting with UTF-8 was
+  confirmed on the T95. All 80 module tests passed.
+
 ## 2026-10-20
 
 - Removed the general ext4/NTFS advisory line from USB status output.

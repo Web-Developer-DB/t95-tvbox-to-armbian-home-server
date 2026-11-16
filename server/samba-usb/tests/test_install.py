@@ -164,6 +164,9 @@ class InstallerTests(unittest.TestCase):
         unit = self.user.home / ".config/systemd/user/udiskie.service"
         self.assertIn("--config=%h/.config/udiskie/config.json", unit.read_text())
         self.assertTrue((self.root / "usr/local/lib/t95-usb/t95_usb.py").exists())
+        mount_options = self.system.path(install.UDISKS_MOUNT_OPTIONS)
+        self.assertEqual(mount_options.read_text(),
+                         "[defaults]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n")
         self.assertTrue(any(c == ["userctl", "restart", "udiskie.service"] for c in self.system.calls))
         self.assertTrue(any(c[-1:] == ["reconcile"] for c in self.system.calls))
 
@@ -178,6 +181,20 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(any(c[0] == "pdbedit" or "smbpasswd" in c for c in self.system.calls))
         self.assertFalse(any(c == ["systemctl", "restart", "smbd.service"] for c in self.system.calls))
         self.assertTrue(any(r["path"] == str(yaml) for r in manager.files))
+
+    def test_update_adds_ntfs_utf8_and_preserves_device_override(self):
+        self.existing()
+        mount_options = self.system.path(install.UDISKS_MOUNT_OPTIONS)
+        mount_options.parent.mkdir(mode=0o755)
+        original = ("[defaults]\nexfat_defaults=uid=$UID,gid=$GID\n"
+                    "[/dev/disk/by-uuid/example]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=cp1251\n")
+        mount_options.write_text(original)
+        self.manager(update=True).install()
+        updated = mount_options.read_text()
+        self.assertEqual(updated, original + "\n\n[defaults]\n"
+                         "ntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n")
+        self.manager(update=True).install()
+        self.assertEqual(mount_options.read_text(), updated)
 
     def test_incompatible_update_fails_before_packages_and_preserves_config(self):
         config, _, _ = self.existing()
@@ -204,6 +221,7 @@ class InstallerTests(unittest.TestCase):
         with self.assertRaisesRegex(usb.USBError, "Vorherige Projektdateien"):
             manager.install()
         for path, content in before.items(): self.assertEqual(path.read_bytes(), content)
+        self.assertFalse(self.system.path(install.UDISKS_MOUNT_OPTIONS).exists())
         for key, value in states.items():
             self.assertEqual(value, self.system.states[key])
         self.assertIn('"phase": "rolled-back"', (manager.backup / "state.json").read_text())

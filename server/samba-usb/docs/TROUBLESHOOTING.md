@@ -54,6 +54,15 @@ Kernelmeldungen prüfen.
 - Schreibgeschützte Datenträger bleiben schreibgeschützt. Die Statusanzeige prüft Zugriffsrechte als tatsächlicher Samba-Benutzer.
 - Fehlt das Gerät in `lsblk`, kann der Freigabe-Hook es noch nicht verarbeiten. Das ist von einer fehlenden SMB-Freigabe zu unterscheiden.
 
+### NTFS-Ordner mit kyrillischen Namen erscheinen leer
+
+Wenn `ls -la` Unterstriche und `Datei oder Verzeichnis nicht gefunden` meldet,
+prüfe die Einhängeoptionen mit `findmnt -t ntfs3 -o TARGET,OPTIONS`. Der
+Installer setzt UTF-8 als Standard für `ntfs3` über UDisks. Ausdrückliche
+UDisks-Vorgaben für `ntfs3` und Einstellungen pro UUID haben Vorrang. Nach dem
+[Update](../README.md#vorhandene-einrichtung-aktualisieren) die SSD sicher
+auswerfen und wieder anschließen. Prüfe anschließend auf `iocharset=utf8`.
+
 ## ⏏️ Auswurf bleibt unvollständig
 
 Offene Dateien, VLC und Terminalfenster im USB-Ordner schließen. Den tatsächlichen

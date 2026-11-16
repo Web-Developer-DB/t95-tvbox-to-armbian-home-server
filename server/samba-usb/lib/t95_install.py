@@ -15,6 +15,7 @@ import time
 from t95_usb import System, User, Manager, USBError, atomic_json, plain
 
 SOURCE = Path(__file__).resolve().parents[1]
+UDISKS_MOUNT_OPTIONS = "/etc/udisks2/mount_options.conf"
 PACKAGES = ["samba", "samba-common-bin", "udisks2", "udiskie", "dbus-user-session",
             "polkitd", "exfatprogs", "ntfs-3g", "python3", "python3-dbus", "udev", "util-linux"]
 
@@ -58,7 +59,7 @@ class Installer:
         return [self.target(p) for p in (
             "/usr/local/lib/t95-usb/t95_usb.py", "/usr/local/bin/t95-usb-share", "/usr/local/bin/usb-eject",
             "/etc/polkit-1/rules.d/50-t95-udisks.rules", "/etc/udev/rules.d/99-t95-usb-eject.rules",
-            f"/etc/tmpfiles.d/t95-usb-{self.user.uid}.conf", "/etc/samba/smb.conf")
+            f"/etc/tmpfiles.d/t95-usb-{self.user.uid}.conf", "/etc/samba/smb.conf", UDISKS_MOUNT_OPTIONS)
         ] + [self.user.home / p for p in (
             ".config/udiskie/config.json", ".config/udiskie/config.yml",
             ".config/systemd/user/udiskie.service", ".config/systemd/user/default.target.wants/udiskie.service")]
@@ -197,6 +198,22 @@ class Installer:
                 info = parent.lstat()
                 if not stat.S_ISDIR(info.st_mode) or info.st_uid != self.owner or info.st_mode & 0o022:
                     raise USBError(f"Unsicheres Administrationsverzeichnis: {parent}")
+
+    def configure_ntfs_charset(self):
+        target = self.target(UDISKS_MOUNT_OPTIONS)
+        try:
+            existing = target.read_bytes()
+        except FileNotFoundError:
+            existing = b""
+        # Keep explicit administrator defaults and per-device overrides.
+        groups = re.split(rb"(?m)^[ \t]*\[([^\]\r\n]+)\][ \t]*\r?$", existing)
+        for group, body in zip(groups[1::2], groups[2::2]):
+            if group == b"defaults" and re.search(rb"(?m)^[ \t]*ntfs:ntfs3_defaults[ \t]*=", body):
+                return
+        # GLib merges repeated groups. Appending keeps the original bytes intact.
+        mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else 0o644
+        defaults = b"[defaults]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n"
+        self.put(target, existing + (b"\n\n" if existing else b"") + defaults, mode)
 
     def install_files(self):
         for relative, target, mode in (
@@ -340,6 +357,7 @@ class Installer:
                 self.mkdir(path, mode, user=True)
             self.system.run(["install", "-d", "-o", "root", "-g", "sambashare", "-m", "1770", "/var/lib/samba/usershares"])
             self.install_files()
+            self.configure_ntfs_charset()
             if not self.update:
                 self.mkdir(self.target(str(self.data)), 0o2770, user=True)
                 self.put(self.target("/etc/samba/smb.conf"), self.samba_config())

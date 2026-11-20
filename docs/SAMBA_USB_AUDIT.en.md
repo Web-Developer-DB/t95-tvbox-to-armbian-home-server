@@ -68,6 +68,34 @@ The [udiskie 2.5.7 source](https://github.com/coldfix/udiskie/tree/v2.5.7) docum
 the underlying config selection and device hints. The new per-drive guard still
 needs practical acceptance on the T95.
 
+## Review of the first automount implementation
+
+The earliest version in the repository (`7e72a87`, 2026-09-16) and
+the current UTF-8 revision (`27e8225`) both use udiskie and UDisks to
+mount drives and Samba usershares to publish them. The first version
+installed `ntfs-3g` and left driver selection to UDisks. The repository
+does not establish which driver or charset the box used at the time.
+
+- **Cyrillic filenames.** With `ntfs3` and `iocharset=iso8859-1`, the
+  T95's local directory listing showed underscores in the names of nine
+  movie files. Remounting with `iocharset=utf8` restored readable names
+  locally. The installer sets UTF-8 as the global NTFS3 default for
+  drives plugged in later without a UUID-specific entry.
+- **Publishing more than one drive.** The old hook published the path
+  reported by the mount event. The current hook reconciles multiple drives
+  in a single pass. In an isolated simulation, failure to create the
+  first share aborted the pass. The second, already mounted partition
+  was therefore not published during that pass. This affects Samba share
+  creation.
+- **USB failure of the 1 TB drive.** The kernel log showed a USB reset
+  through `ehci-platform` and a SCSI timeout (`DID_TIME_OUT`). The exact
+  cause is undetermined. The reviewed automount and Samba code contains
+  no setting that accounts for this failure pattern.
+
+The current implementation retains per-drive eject. A possible future
+change is to isolate share creation failures to the affected drive
+while still reporting the error.
+
 <a id="filesystem-boundaries"></a>
 
 ## 💾 Filesystem boundaries

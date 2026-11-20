@@ -71,6 +71,37 @@ Der [udiskie-Quellstand 2.5.7](https://github.com/coldfix/udiskie/tree/v2.5.7)
 bestätigt die zugrunde liegende Auswahl von Konfiguration und Gerätehinweisen.
 Die neue gerätebezogene Sperre muss auf der T95 noch praktisch abgenommen werden.
 
+## Nachprüfung der ersten Automount-Fassung
+
+Die früheste Fassung im Repository (`7e72a87`, 16.09.2026) und der
+heutige UTF-8-Stand (`27e8225`) verwenden beide udiskie und UDisks
+zum Einhängen und Samba-Usershares zum Freigeben. Die erste Fassung
+installierte `ntfs-3g` und überließ UDisks die Treiberwahl. Welcher Treiber
+und welcher Zeichensatz damals auf der Box verwendet wurden, geht aus
+dem Repository nicht hervor.
+
+- **Kyrillische Dateinamen:** Die T95 zeigte die neun Filmdateien unter
+  `ntfs3` mit `iocharset=iso8859-1` schon beim lokalen Listing als
+  Unterstriche an. Nach dem erneuten Einhängen mit `iocharset=utf8` waren
+  ihre Namen lokal lesbar. Der Installer setzt UTF-8 als globalen
+  NTFS3-Standard auch für später angeschlossene Datenträger ohne eigenen
+  UUID-Eintrag.
+- **Freigaben bei mehreren Laufwerken:** Der frühere Hook veröffentlichte
+  beim Mount-Ereignis den vom Ereignis gemeldeten Pfad. Der heutige Hook
+  gleicht mehrere Laufwerke in einem Durchlauf ab. In einer isolierten
+  Simulation brach der Abgleich ab, als die erste Freigabe fehlschlug.
+  Die zweite, bereits eingehängte Partition wurde deshalb in diesem
+  Durchlauf nicht freigegeben. Der Befund betrifft die Samba-Freigabe.
+- **USB-Ausfall des 1-TB-Laufwerks:** Das Kernelprotokoll zeigte einen
+  USB-Reset über `ehci-platform` und einen SCSI-Timeout
+  (`DID_TIME_OUT`). Die genaue Ursache blieb offen. Im geprüften
+  Automount- und Samba-Code fand sich keine Einstellung, die das
+  Fehlerbild erklärt.
+
+Der aktuelle Stand mit gezieltem Auswurf pro Laufwerk bleibt bestehen.
+Eine mögliche spätere Korrektur ist, Fehler beim Anlegen einer Freigabe
+auf das jeweilige Laufwerk zu begrenzen und den Fehler weiterhin zu melden.
+
 <a id="grenzen-nach-dateisystem"></a>
 
 ## 💾 Grenzen nach Dateisystem

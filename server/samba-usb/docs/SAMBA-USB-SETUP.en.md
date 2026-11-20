@@ -42,9 +42,11 @@ characters outside that encoding as underscores. After mounting again with
 `iocharset=utf8`, the directories opened on the T95 and over Samba.
 
 Fresh installs and `--update` add a UTF-8 default for the `ntfs3` driver in
-`/etc/udisks2/mount_options.conf`. The file is included in the installation
-backup. Explicit global `ntfs:ntfs3_defaults` and device-specific settings take
-precedence. UDisks applies the default the next time it mounts the drive.
+`/etc/udisks2/mount_options.conf` under `[defaults]`. It also applies to
+drives connected later that have no UUID-specific entry. The installation
+backup includes this file. Existing global `ntfs:ntfs3_defaults` gain the option if `iocharset`
+is missing. Explicit charset and device-specific settings take precedence.
+UDisks applies the default the next time it mounts the drive.
 
 For an existing setup, use [update mode](../README.en.md#update-an-existing-setup).
 Safely eject and reconnect any already mounted drive. Check for

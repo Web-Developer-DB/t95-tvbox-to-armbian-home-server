@@ -205,15 +205,38 @@ class Installer:
             existing = target.read_bytes()
         except FileNotFoundError:
             existing = b""
-        # Keep explicit administrator defaults and per-device overrides.
-        groups = re.split(rb"(?m)^[ \t]*\[([^\]\r\n]+)\][ \t]*\r?$", existing)
-        for group, body in zip(groups[1::2], groups[2::2]):
-            if group == b"defaults" and re.search(rb"(?m)^[ \t]*ntfs:ntfs3_defaults[ \t]*=", body):
-                return
-        # GLib merges repeated groups. Appending keeps the original bytes intact.
+        # GLib uses the last definition of a key across repeated groups.
+        groups = re.split(rb"(?m)(^[ \t]*\[[^\]\r\n]+\][ \t]*\r?$)", existing)
         mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else 0o644
-        defaults = b"[defaults]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n"
-        self.put(target, existing + (b"\n\n" if existing else b"") + defaults, mode)
+        default_section = None
+        for index in range(len(groups) - 2, 0, -2):
+            if groups[index].strip() != b"[defaults]":
+                continue
+            if default_section is None:
+                default_section = index
+            body = groups[index + 1]
+            matches = list(re.finditer(rb"(?m)^[ \t]*ntfs:ntfs3_defaults[ \t]*=[ \t]*([^\r\n]*)", body))
+            if not matches:
+                continue
+            match = matches[-1]
+            options = match[1].rstrip()
+            if any(option.partition(b"=")[0].strip() == b"iocharset" for option in options.split(b",")):
+                return  # An explicit character set takes precedence.
+            position = match.start(1) + len(options)
+            separator = b"," if options and not options.endswith(b",") else b""
+            groups[index + 1] = body[:position] + separator + b"iocharset=utf8" + body[position:]
+            self.put(target, b"".join(groups), mode)
+            return
+        defaults = b"ntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8"
+        if default_section is not None:
+            header = groups[default_section]
+            newline = b"\r\n" if header.endswith(b"\r") else b"\n"
+            body = groups[default_section + 1]
+            groups[default_section + 1] = b"\n" + defaults + newline + body.removeprefix(b"\n")
+            self.put(target, b"".join(groups), mode)
+        else:
+            self.put(target, existing + (b"\n\n" if existing else b"") +
+                     b"[defaults]\n" + defaults + b"\n", mode)
 
     def install_files(self):
         for relative, target, mode in (
@@ -387,6 +410,7 @@ class Installer:
                 raise USBError(f"Einrichtung fehlgeschlagen: {error}. Rücknahme unvollständig: {rollback}. Sicherung: {self.backup}") from rollback
             raise USBError(f"Einrichtung fehlgeschlagen: {error}. Vorherige Projektdateien/Dienste wiederhergestellt. Pakete/Gruppen/Linger können verbleiben. Sicherung: {self.backup}") from error
         print("Fertig. Bestehende Samba-Konfiguration erhalten." if self.update else "Fertig.", flush=True)
+        print("Bereits eingehängte NTFS3-Laufwerke sicher auswerfen und neu anschließen, damit neue Mount-Optionen greifen.", flush=True)
         print('Status: sudo usb-eject --status\nAuswerfen: sudo usb-eject "Freigabename"', flush=True)
 
 

@@ -185,7 +185,7 @@ class System:
 
     def mounts(self):
         result = self.run(["findmnt", "--json", "--list", "--evaluate", "--nofsroot", "--output",
-                           "TARGET,SOURCE,MAJ:MIN,FSTYPE,FSROOT"])
+                           "TARGET,SOURCE,MAJ:MIN,FSTYPE,FSROOT,FS-OPTIONS"])
         data = json.loads(result.stdout)
         return data["filesystems"]
 
@@ -983,6 +983,14 @@ class Manager:
             for mount in mounts:
                 read, write, traverse = self.system.permissions(self.user, mount["target"])
                 print(f"  {mount['target']} ({mount['fstype']}); Benutzerrechte: lesen={read and traverse}, schreiben={write and traverse}")
+                if mount["fstype"] in {"ntfs3", "exfat"}:
+                    options = (mount.get("fs-options") or "").split(",")
+                    charset = next((option.split("=", 1)[1] for option in options
+                                    if option.startswith("iocharset=")), None)
+                    if charset:
+                        print(f"    Dateinamen: iocharset={charset}")
+                        if charset.lower() not in {"utf8", "utf-8"}:
+                            print("    Dateinamen können unlesbar sein. Mount-Optionen prüfen.")
         for operation in self.runtime.operations():
             current = identities.get(operation['device'])
             same_attachment = current is not None and all(operation.get(k) == v for k, v in current.items())

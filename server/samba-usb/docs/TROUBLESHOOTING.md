@@ -54,14 +54,30 @@ Kernelmeldungen prüfen.
 - Schreibgeschützte Datenträger bleiben schreibgeschützt. Die Statusanzeige prüft Zugriffsrechte als tatsächlicher Samba-Benutzer.
 - Fehlt das Gerät in `lsblk`, kann der Freigabe-Hook es noch nicht verarbeiten. Das ist von einer fehlenden SMB-Freigabe zu unterscheiden.
 
-### NTFS-Ordner mit kyrillischen Namen erscheinen leer
+### Ordner mit kyrillischen Filmdateien erscheinen leer
 
-Wenn `ls -la` Unterstriche und `Datei oder Verzeichnis nicht gefunden` meldet,
-prüfe die Einhängeoptionen mit `findmnt -t ntfs3 -o TARGET,OPTIONS`. Der
-Installer setzt UTF-8 als Standard für `ntfs3` über UDisks. Ausdrückliche
-UDisks-Vorgaben für `ntfs3` und Einstellungen pro UUID haben Vorrang. Nach dem
-[Update](../README.md#vorhandene-einrichtung-aktualisieren) die SSD sicher
-auswerfen und wieder anschließen. Prüfe anschließend auf `iocharset=utf8`.
+Auf der T95 als Samba-Benutzer zuerst die Einhängung und anschließend den
+betroffenen Unterordner lokal prüfen. Beim zweiten Befehl den echten Pfad
+aus der Statusausgabe verwenden.
+
+```bash
+sudo usb-eject --status
+LC_ALL=C.UTF-8 ls -la -- '/media/benutzer/SSD/Filme'
+testparm -s --parameter-name='unix charset'
+```
+
+- Zeigt der Status bei `ntfs3` einen Wert wie `iocharset=iso8859-1`, kommt
+  die falsche Codierung bereits vom Mount. Das
+  [Update](../README.md#vorhandene-einrichtung-aktualisieren) ergänzt fehlendes
+  `iocharset=utf8` in den globalen UDisks-Standardoptionen für `ntfs3`.
+  Ein ausdrücklich gesetzter Zeichensatz, gerätespezifische Vorgaben und
+  Einträge in `/etc/fstab` können andere Optionen vorgeben. Nach einer
+  Korrektur die SSD sicher auswerfen, erneut anschließen und den Status prüfen.
+- Sind die Dateinamen lokal korrekt lesbar, sollte Samba `UTF8` oder `UTF-8`
+  melden. Die Freigabe zusätzlich in einem normalen SMB-Dateimanager öffnen,
+  um einen Filter der Medien-App zu erkennen.
+- Meldet das lokale Listing einen Ein-/Ausgabefehler, die Kernelmeldungen
+  mit `sudo journalctl -k -b -n 80` auf USB-Resets und I/O-Fehler prüfen.
 
 ## ⏏️ Auswurf bleibt unvollständig
 

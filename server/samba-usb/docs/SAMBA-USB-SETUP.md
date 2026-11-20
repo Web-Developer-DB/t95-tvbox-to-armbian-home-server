@@ -44,9 +44,12 @@ als Unterstriche an. Nach erneutem Einhängen mit `iocharset=utf8` ließen sich
 die Ordner auf der T95 und über Samba öffnen.
 
 Neuinstallation und `--update` ergänzen den UTF-8-Standard für den
-`ntfs3`-Treiber in `/etc/udisks2/mount_options.conf`. Die Datei ist Teil der
-Installationssicherung. Eine ausdrücklich gesetzte globale
-`ntfs:ntfs3_defaults`-Zeile und gerätespezifische Vorgaben haben Vorrang.
+`ntfs3`-Treiber in `/etc/udisks2/mount_options.conf` unter `[defaults]`.
+Dadurch gilt er auch für später angeschlossene Laufwerke ohne eigenen
+UUID-Eintrag. Die Datei ist Teil der Installationssicherung.
+Auch eine bestehende globale `ntfs:ntfs3_defaults`-Zeile
+erhält die Option, falls `iocharset` fehlt. Ausdrücklich gesetzte Zeichensätze
+und gerätespezifische Vorgaben haben Vorrang.
 UDisks übernimmt den Standard beim nächsten Einhängen.
 
 Bei einer bestehenden Einrichtung den [Update-Modus](../README.md#vorhandene-einrichtung-aktualisieren)

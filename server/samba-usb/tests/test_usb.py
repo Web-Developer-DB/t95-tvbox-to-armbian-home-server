@@ -735,6 +735,17 @@ class USBTests(unittest.TestCase):
             self.manager.status()
         self.assertIn('diskseq=10; aktuelle Verbindung): failed; busy', output.getvalue())
 
+    def test_status_distinguishes_non_utf8_ntfs3_from_utf8_exfat(self):
+        self.system.add_disk(fs='ntfs3')
+        self.system.mount_list[-1]['fs-options'] = 'rw,uid=1000,iocharset=iso8859-1'
+        self.system.add_disk(name='sdb', seq='11', fs='exfat', label='BACKUP')
+        self.system.mount_list[-1]['fs-options'] = 'rw,iocharset=utf8'
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.manager.status()
+        self.assertIn('Dateinamen: iocharset=iso8859-1', output.getvalue())
+        self.assertIn('Dateinamen: iocharset=utf8', output.getvalue())
+        self.assertEqual(output.getvalue().count('Dateinamen können unlesbar sein'), 1)
+
     def test_status_hides_internal_disks_but_keeps_both_usb_drives(self):
         self.ready()
         self.system.add_disk(name='sdb', seq='11', fs='exfat', label='BACKUP')

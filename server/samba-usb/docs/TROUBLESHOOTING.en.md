@@ -53,14 +53,30 @@ there too, check cables, power and kernel messages first.
 - Read-only media remain read-only. Status checks access as the actual Samba user.
 - If the device is absent from `lsblk`, the share hook cannot process it yet. This differs from a missing SMB share.
 
-### NTFS directories with Cyrillic names appear empty
+### Directories with Cyrillic movie filenames appear empty
 
-If `ls -la` shows underscores and `No such file or directory`, check the
-mount options using `findmnt -t ntfs3 -o TARGET,OPTIONS`. The installer sets
-UTF-8 as the UDisks default for `ntfs3`. Explicit `ntfs3` defaults and
-per-UUID settings take precedence. After
-[updating](../README.en.md#update-an-existing-setup), safely eject and
-reconnect the SSD, then check for `iocharset=utf8`.
+On the T95, use the Samba account to check the mount and list the affected
+directory locally. Replace the example path with the actual path from the
+status output.
+
+```bash
+sudo usb-eject --status
+LC_ALL=C.UTF-8 ls -la -- '/media/user/SSD/Movies'
+testparm -s --parameter-name='unix charset'
+```
+
+- If the status shows `ntfs3` with a value such as `iocharset=iso8859-1`,
+  the mount is already using the wrong encoding. The
+  [update](../README.en.md#update-an-existing-setup) adds missing
+  `iocharset=utf8` to the global UDisks defaults for `ntfs3`. An explicit
+  charset, device-specific settings and `/etc/fstab` entries can specify
+  other options. After correcting the options, safely eject and reconnect
+  the SSD, then check the status again.
+- If the local listing shows the correct filenames, Samba should report
+  `UTF8` or `UTF-8`. Open the share in an ordinary SMB file manager as well
+  to identify media app filtering.
+- If the local listing reports an I/O error, check for USB resets and I/O
+  errors in the kernel log with `sudo journalctl -k -b -n 80`.
 
 ## ⏏️ Eject remains incomplete
 

@@ -190,11 +190,35 @@ class InstallerTests(unittest.TestCase):
                     "[/dev/disk/by-uuid/example]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=cp1251\n")
         mount_options.write_text(original)
         self.manager(update=True).install()
-        updated = mount_options.read_text()
-        self.assertEqual(updated, original + "\n\n[defaults]\n"
-                         "ntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n")
+        expected = ("[defaults]\nntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n"
+                    + original.removeprefix("[defaults]\n"))
+        self.assertEqual(mount_options.read_text(), expected)
         self.manager(update=True).install()
-        self.assertEqual(mount_options.read_text(), updated)
+        self.assertEqual(mount_options.read_text(), expected)
+
+    def test_fresh_install_adds_global_utf8_when_only_another_drive_has_it(self):
+        mount_options = self.system.path(install.UDISKS_MOUNT_OPTIONS)
+        mount_options.parent.mkdir(mode=0o755)
+        original = (b"[/dev/disk/by-uuid/example]\n"
+                    b"ntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n")
+        mount_options.write_bytes(original)
+        self.manager().install()
+        self.assertEqual(mount_options.read_bytes(), original + b"\n\n[defaults]\n"
+                         b"ntfs:ntfs3_defaults=uid=$UID,gid=$GID,iocharset=utf8\n")
+
+    def test_update_adds_charset_to_effective_global_options(self):
+        self.existing()
+        mount_options = self.system.path(install.UDISKS_MOUNT_OPTIONS)
+        mount_options.parent.mkdir(mode=0o755)
+        original = (b"[defaults]\r\nntfs:ntfs3_defaults=iocharset=cp1251\r\n"
+                    b"[defaults]\r\nntfs:ntfs3_defaults = uid=$UID,gid=$GID,dmask=0027\r\n"
+                    b"[/dev/disk/by-uuid/example]\r\nntfs:ntfs3_defaults=iocharset=cp1251\r\n")
+        mount_options.write_bytes(original)
+        self.manager(update=True).install()
+        updated = original.replace(b"dmask=0027", b"dmask=0027,iocharset=utf8")
+        self.assertEqual(mount_options.read_bytes(), updated)
+        self.manager(update=True).install()
+        self.assertEqual(mount_options.read_bytes(), updated)
 
     def test_incompatible_update_fails_before_packages_and_preserves_config(self):
         config, _, _ = self.existing()
